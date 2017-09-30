@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import java.util.ArrayList;
+
 /**
  * Created by FTC on 9/23/2017.
  * updated by Caz
@@ -18,21 +20,26 @@ public class TeleOpMode extends OpMode{
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
-
-
+    private ArrayList baseMotorArray;
     @Override
     public void init() {
-        frontLeft = hardwareMap.dcMotor.get("front Left");
-        frontRight = hardwareMap.dcMotor.get("front Right");
-        backLeft = hardwareMap.dcMotor.get("back Left");
-        backRight = hardwareMap.dcMotor.get("back Right");
+        baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
+        baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
+        baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
+        baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
+        ((DcMotor)baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
+        ((DcMotor)baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
     }
 
     @Override
     public void loop() {
-        frontLeft.setPower(gamepad1.right_stick_y-gamepad1.right_stick_x);
-        frontRight.setPower(gamepad1.right_stick_y+gamepad1.right_stick_x);
-        backLeft.setPower(gamepad1.right_stick_y-gamepad1.right_stick_x);
-        backRight.setPower(gamepad1.right_stick_y+gamepad1.right_stick_x);
+//        I'm keeping this because I don't know if we are using mecanum wheels for sure
+//        ArrayList powerArray = new ArrayList();
+//        powerArray.add(gamepad1.right_stick_y-gamepad1.right_stick_x);
+//        powerArray.add(gamepad1.right_stick_y+gamepad1.right_stick_x);
+//        powerArray.add(gamepad1.right_stick_y-gamepad1.right_stick_x);
+//        powerArray.add(gamepad1.right_stick_y+gamepad1.right_stick_x);
+//        DriveTrain.nonMecanum(baseMotorArray, powerArray);
+        DriveTrain.mecanum(baseMotorArray,Math.atan((gamepad1.left_stick_y/gamepad1.left_stick_x))*180/Math.PI, (double) gamepad1.right_stick_x);
     }
 }
