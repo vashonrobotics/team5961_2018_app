@@ -14,6 +14,15 @@ public class DriveTrain {
 //    baseMotorArray goes in order: frontLeft, frontRight, backLeft, backRight
     public static void nonMecanum(ArrayList baseMotorArray, double power[]) {
         for (int x = 0; x < baseMotorArray.size(); x++) {
+
+            if (power[x] < -1) {
+                power[x] = -1;
+            }
+
+            else if (power[x] > 1) {
+                power[x] = 1;
+            }
+
             ((DcMotor) baseMotorArray.get(x)).setPower((double) power[x]);
         }
 
@@ -22,6 +31,8 @@ public class DriveTrain {
         // angle is in degrees
         // positive turn = turn right
         double radianAngle = angle*Math.PI/180.0;
+
+
         double powerArray[] = {Math.cos(radianAngle)+turn, -1*Math.cos(radianAngle)-turn, -1*Math.cos(radianAngle)+turn, Math.cos(radianAngle)-turn};
 //
 //        float powerArray2[] = {1.0f, 1.0f, 1.0f, 1.0f};

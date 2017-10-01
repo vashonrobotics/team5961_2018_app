@@ -16,6 +16,8 @@ public class AutonomousMode extends LinearOpMode {
     private ArrayList baseMotorArray;
     @Override
     public void runOpMode() throws InterruptedException {
+        double wheelCircumference = 100.0*Math.PI; // circumference in mm
+
         // get wheels from config
         baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
@@ -23,6 +25,16 @@ public class AutonomousMode extends LinearOpMode {
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor)baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor)baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
+        DriveTrain.mecanum(baseMotorArray, 60.0, 0.0);
+
+        sleep(1000);
+//        while (((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < 700.0/wheelCircumference){
+//            sleep(10);
+//        }
+        DriveTrain.nonMecanum(baseMotorArray, new double[]{0.0, 0.0, 0.0, 0.0});
+        // Read pictograph
+
+
 
     }
 
