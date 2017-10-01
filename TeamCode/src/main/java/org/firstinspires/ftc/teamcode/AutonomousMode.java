@@ -10,14 +10,14 @@ import java.util.ArrayList;
  * Created by FTC on 9/23/2017.
  * updated by Caz
  */
-
+// error:"can't find "back left""
 @Autonomous(name = "Vashon 5961 Autonomous", group = "Vashon 5961")
 public class AutonomousMode extends LinearOpMode {
     private ArrayList baseMotorArray;
     @Override
     public void runOpMode() throws InterruptedException {
         double wheelCircumference = 100.0*Math.PI; // circumference in mm
-
+        baseMotorArray = new ArrayList();
         // get wheels from config
         baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
