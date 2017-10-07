@@ -34,9 +34,14 @@ public class DriveTrain {
 
 
         double powerArray[] = {Math.cos(radianAngle)+turn, -1*Math.cos(radianAngle)-turn, -1*Math.cos(radianAngle)+turn, Math.cos(radianAngle)-turn};
-//
+        for (int x = 0; x < powerArray.length; x++){
+            if (powerArray[x] < -1){
+                powerArray[x] = -1;
+            }else if (powerArray[x] > 1){
+                powerArray[x] = 1;
+            }
+        }
 //        float powerArray2[] = {1.0f, 1.0f, 1.0f, 1.0f};
-
 
 
 
