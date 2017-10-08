@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.ArrayList;
-
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 
 /**
@@ -27,28 +27,19 @@ public class DriveTrain {
         }
 
     }
-    public static void mecanum(ArrayList baseMotorArray, Double angle, Double turn){
-        // angle is in degrees
-        // positive turn = turn right
-        double radianAngle = angle*Math.PI/180.0;
+    public static void mecanum(ArrayList baseMotorArray, Double x, Double y, Double turn){
 
-
-        double powerArray[] = {Math.cos(radianAngle)+turn, -1*Math.cos(radianAngle)-turn, -1*Math.cos(radianAngle)+turn, Math.cos(radianAngle)-turn};
-        for (int x = 0; x < powerArray.length; x++){
-            if (powerArray[x] < -1){
-                powerArray[x] = -1;
-            }else if (powerArray[x] > 1){
-                powerArray[x] = 1;
-            }
+        Double power = Math.sqrt(x*x+y*y);
+//        double radianAngle = 0;
+        double radianAngle = Math.atan2(y,x)-Math.PI/4;
+//
+        if (Math.abs(power) + Math.abs(turn) > 1)
+        {
+            power = power/(Math.abs(power) + Math.abs(turn));
+            turn = Math.signum(turn) * (1 - Math.abs(power));
         }
-//        float powerArray2[] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-
-
-//        powerArray.add(Math.cos(radianAngle)+turn);// frontLeft
-//        powerArray.add(-1*Math.cos(radianAngle)-turn);// frontRight
-//        powerArray.add(-1*Math.cos(radianAngle)+turn);// backLeft
-//        powerArray.add(Math.cos(radianAngle)-turn);// backRight
+        double powerArray[] = {Math.cos(radianAngle)*power+turn, Math.cos(radianAngle)*power-turn, Math.sin(radianAngle)*power+turn, Math.sin(radianAngle)*power-turn};
         nonMecanum(baseMotorArray, powerArray);
     }
 

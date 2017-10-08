@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -28,17 +29,19 @@ import java.util.List;
  * Created by FTC on 9/23/2017.
  * updated by Caz
  */
-
+// made for blue side
 @Autonomous(name = "Vashon 5961 Autonomous", group = "Vashon 5961")
 public class AutonomousMode extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private VuforiaLocalizer vuforia;
     OpenGLMatrix lastLocation = null;
     private static final String TAG = "Vuforia Navigation Sample";
+//    ColorSensor colorSensor;
+    double wheelCircumference = 100.0 * Math.PI; // circumference in mm
+    double ticksPerRotation = 1125.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double wheelCircumference = 100.0 * Math.PI; // circumference in mm
 
         // get wheels from config
         baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
@@ -47,17 +50,36 @@ public class AutonomousMode extends LinearOpMode {
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
-        DriveTrain.mecanum(baseMotorArray, 60.0, 0.0);
-
+        // get the color sensor
+//        colorSensor = hardwareMap.colorSensor.get("color");
+        // test
+        mecanumDrive(0.0, 0.5);
+        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition())<ticksPerRotation){
+            sleep(10);
+        }
+        mecanumDrive(0.0,0.0);
+        sleep(10000);
+        //end of test code
+        mecanumDrive(180.0, 0.5);
+        sleep(500);
+        mecanumDrive(90.0,0.5);
+        sleep(500);
+        PictographPos pictographPos = findPictograph();
+        mecanumDrive(300.0, 0.5);
         sleep(1000);
-//        while (((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < 700.0/wheelCircumference){
+        mecanumDrive(30.0,0.75);
+        sleep(2000);
+        mecanumDrive(180.0, 0.75);
+        sleep(750);
+        mecanumDrive(270.0, 0.5);
+//        while (colorSensor.blue() < 100){
 //            sleep(10);
 //        }
-        DriveTrain.nonMecanum(baseMotorArray, new double[]{0.0, 0.0, 0.0, 0.0});
 
         // Read pictograph
-        telemetry.addData("key collumn pos: ", findPictograph());
-        telemetry.update();
+//        telemetry.addData("key collumn pos: ", findPictograph());
+//        telemetry.update();
+//        RobotPos();
     }
     private PictographPos findPictograph(){
         PictographPos keyColumnPos = PictographPos.Unknown;
@@ -91,7 +113,7 @@ public class AutonomousMode extends LinearOpMode {
          * Once you've obtained a license key, copy the string from the Vuforia web site
          * and paste it in to your code onthe next line, between the double quotes.
          */
-        parameters.vuforiaLicenseKey = "ATsODcD/////AAAAAVw2lR...d45oGpdljdOh5LuFB9nDNfckoxb8COxKSFX";
+        parameters.vuforiaLicenseKey = "";
 
         /*
          * We also indicate which camera on the RC that we wish to use.
@@ -203,7 +225,7 @@ public class AutonomousMode extends LinearOpMode {
          * Once you've obtained a license key, copy the string from the Vuforia web site
          * and paste it in to your code onthe next line, between the double quotes.
          */
-        parameters.vuforiaLicenseKey = "ATsODcD/////AAAAAVw2lR...d45oGpdljdOh5LuFB9nDNfckoxb8COxKSFX";
+        parameters.vuforiaLicenseKey = "";
 
         /*
          * We also indicate which camera on the RC that we wish to use.
@@ -410,7 +432,19 @@ public class AutonomousMode extends LinearOpMode {
         return new int[]{1,1};
     }
 
+    private void mecanumDrive(Double angle, Double power){
+        Double radians = angle*Math.PI/180.0;
+        Double x = Math.cos(radians)*power;
+        Double y = Math.sin(radians)*power;
+        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
+    }
 
+    private void mecanumDriveForDistance(Double angle, Double power, Double distance){
+        mecanumDrive(angle, power);
+        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition())<distance/(ticksPerRotation*wheelCircumference)){
+            sleep(10);
+        }
+    }
     private String format(OpenGLMatrix transformationMatrix) {
         return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
