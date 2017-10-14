@@ -19,7 +19,6 @@ public class TeleOpMode extends OpMode{
     private DcMotor frontLeft;
     private DcMotor frontRight;
     private DcMotor backLeft;
-    private DcMotor backRight;
 
     private ArrayList baseMotorArray;
     @Override
