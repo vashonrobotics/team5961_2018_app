@@ -34,13 +34,6 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
-//        I'm keeping this because I don't know if we are using mecanum wheels for sure
-//        double powerArray[] = {};
-//        powerArray.add((double)(gamepad1.right_stick_y-gamepad1.right_stick_x));
-//        powerArray.add((double)(gamepad1.right_stick_y+gamepad1.right_stick_x));
-//        powerArray.add((double)(gamepad1.right_stick_y-gamepad1.right_stick_x));
-//        powerArray.add((double)(gamepad1.right_stick_y+gamepad1.right_stick_x));
-//        DriveTrain.nonMecanum(baseMotorArray, powerArray);
-        DriveTrain.mecanum(baseMotorArray,Math.atan((gamepad1.left_stick_y/gamepad1.left_stick_x))*180/Math.PI, (double) gamepad1.right_stick_x);
+        DriveTrain.mecanum(baseMotorArray, (double) -gamepad1.left_stick_x, (double) gamepad1.left_stick_y, (double)gamepad1.right_stick_x);
     }
 }
