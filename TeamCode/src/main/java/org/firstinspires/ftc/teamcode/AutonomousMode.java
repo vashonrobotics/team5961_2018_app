@@ -56,8 +56,9 @@ public class AutonomousMode extends LinearOpMode {
         DriveTrain.nonMecanum(baseMotorArray, new double[]{0.0, 0.0, 0.0, 0.0});
 
         // Read pictograph
-        telemetry.addData("key collumn pos: ", findPictograph());
+        //telemetry.addData("key collumn pos: ", findPictograph());
         telemetry.update();
+        robotPos();
     }
     private PictographPos findPictograph(){
         PictographPos keyColumnPos = PictographPos.Unknown;
@@ -180,7 +181,7 @@ public class AutonomousMode extends LinearOpMode {
         Left,Right,Center,Unknown;
     }
 
-    private int[] RobotPos() {
+    private int[] robotPos() {
         /*
          * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
          * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
@@ -198,7 +199,7 @@ public class AutonomousMode extends LinearOpMode {
          * web site at https://developer.vuforia.com/license-manager.
          *
          * Vuforia license keys are always 380 characters long, and look as if they contain mostly
-         * random data. As an example, here is a example of a fragment of a valid key:
+         * ran bdom data. As an example, here is a example of a fragment of a valid key:
          *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
          * Once you've obtained a license key, copy the string from the Vuforia web site
          * and paste it in to your code onthe next line, between the double quotes.

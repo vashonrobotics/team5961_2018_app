@@ -20,6 +20,7 @@ public class TeleOpMode extends OpMode{
     private DcMotor frontRight;
     private DcMotor backLeft;
     private DcMotor backRight;
+
     private ArrayList baseMotorArray;
     @Override
     public void init() {
