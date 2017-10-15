@@ -29,7 +29,7 @@ import java.util.List;
  * Created by FTC on 9/23/2017.
  * updated by Caz
  */
-// made for blue side
+// made for red in corner
 @Autonomous(name = "Vashon 5961 Autonomous", group = "Vashon 5961")
 public class AutonomousMode extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
@@ -53,25 +53,9 @@ public class AutonomousMode extends LinearOpMode {
         // get the color sensor
 //        colorSensor = hardwareMap.colorSensor.get("color");
         // test
-        mecanumDrive(0.0, 0.5);
-        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition())<ticksPerRotation){
-            sleep(10);
-        }
-        mecanumDrive(0.0,0.0);
-        sleep(10000);
+        mecanumDriveForDistance(45.0, 0.5, 500.0);
         //end of test code
-        mecanumDrive(180.0, 0.5);
-        sleep(500);
-        mecanumDrive(90.0,0.5);
-        sleep(500);
-        PictographPos pictographPos = findPictograph();
-        mecanumDrive(300.0, 0.5);
-        sleep(1000);
-        mecanumDrive(30.0,0.75);
-        sleep(2000);
-        mecanumDrive(180.0, 0.75);
-        sleep(750);
-        mecanumDrive(270.0, 0.5);
+//        PictographPos pictographPos = findPictograph();
 //        while (colorSensor.blue() < 100){
 //            sleep(10);
 //        }
@@ -432,16 +416,14 @@ public class AutonomousMode extends LinearOpMode {
         return new int[]{1,1};
     }
 
-    private void mecanumDrive(Double angle, Double power){
-        Double radians = angle*Math.PI/180.0;
-        Double x = Math.cos(radians)*power;
-        Double y = Math.sin(radians)*power;
-        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
-    }
 
     private void mecanumDriveForDistance(Double angle, Double power, Double distance){
-        mecanumDrive(angle, power);
-        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition())<distance/(ticksPerRotation*wheelCircumference)){
+        Double radians = (angle * Math.PI) / 180.0;
+        Double x = Math.cos(radians) * power;
+        Double y = Math.sin(radians) * power;
+        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
+        Integer startPos = ((DcMotor)baseMotorArray.get(1)).getCurrentPosition();
+        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition()) < ((int)((distance / wheelCircumference) * ticksPerRotation) + startPos)){
             sleep(10);
         }
     }
