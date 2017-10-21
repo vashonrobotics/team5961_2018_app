@@ -28,41 +28,42 @@ import java.util.List;
  * Created by FTC on 9/23/2017.
  * updated by Caz
  */
-
+// made for red in corner
 @Autonomous(name = "Vashon 5961 Autonomous", group = "Vashon 5961")
 public class AutonomousMode extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private VuforiaLocalizer vuforia;
     OpenGLMatrix lastLocation = null;
     private static final String TAG = "Vuforia Navigation Sample";
+//    ColorSensor colorSensor;
+    double wheelCircumference = 100.0 * Math.PI; // circumference in mm
+    double ticksPerRotation = 1125.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double wheelCircumference = 100.0 * Math.PI; // circumference in mm
 
         // get wheels from config
+
         baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
-        DriveTrain.mecanum(baseMotorArray, 60.0, 0.0);
-
-        sleep(1000);
-//        while (((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < 700.0/wheelCircumference){
-//            sleep(10);
-//        }
-        DriveTrain.nonMecanum(baseMotorArray, new double[]{0.0, 0.0, 0.0, 0.0});
-
+        // test
+        mecanumDriveForDistance(45.0, 0.5, 500.0);
+        //end of test code
+        
         // Read pictograph
-        //telemetry.addData("key collumn pos: ", findPictograph());
-        telemetry.update();
-        robotPos();
-    }
-    private PictographPos findPictograph(){
-        PictographPos keyColumnPos = PictographPos.Unknown;
+        final Class pictographInfo = findPictograph();
 
+//        telemetry.update();
+//        RobotPos();
+    }
+    private Class findPictograph(){
+        KeyPositions keyColumnPos = KeyPositions.Unknown;
+        double tZ = 0.0;
+        double rY = 0.0;
 
         /**
          * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -92,7 +93,7 @@ public class AutonomousMode extends LinearOpMode {
          * Once you've obtained a license key, copy the string from the Vuforia web site
          * and paste it in to your code onthe next line, between the double quotes.
          */
-        parameters.vuforiaLicenseKey = "ATsODcD/////AAAAAVw2lR...d45oGpdljdOh5LuFB9nDNfckoxb8COxKSFX";
+        parameters.vuforiaLicenseKey = "";
 
         /*
          * We also indicate which camera on the RC that we wish to use.
@@ -138,13 +139,13 @@ public class AutonomousMode extends LinearOpMode {
                     case UNKNOWN:
                         break;
                     case LEFT:
-                        keyColumnPos = PictographPos.Left;
+                        keyColumnPos = KeyPositions.Left;
                         break;
                     case CENTER:
-                        keyColumnPos = PictographPos.Center;
+                        keyColumnPos = KeyPositions.Center;
                         break;
                     case RIGHT:
-                        keyColumnPos = PictographPos.Right;
+                        keyColumnPos = KeyPositions.Right;
                 }
                 /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
                  * it is perhaps unlikely that you will actually need to act on this pose information, but
@@ -161,11 +162,11 @@ public class AutonomousMode extends LinearOpMode {
                     // Extract the X, Y, and Z components of the offset of the target relative to the robot
                     double tX = trans.get(0);
                     double tY = trans.get(1);
-                    double tZ = trans.get(2);
+                    tZ = trans.get(2);
 
                     // Extract the rotational components of the target relative to the robot
                     double rX = rot.firstAngle;
-                    double rY = rot.secondAngle;
+                    rY = rot.secondAngle;
                     double rZ = rot.thirdAngle;
                 }
             } else {
@@ -175,13 +176,34 @@ public class AutonomousMode extends LinearOpMode {
 
             telemetry.update();
         }
-        return keyColumnPos;
+        final double finalTZ = tZ;
+        final double finalRY = rY;
+        final KeyPositions finalKeyColumnPos = keyColumnPos;
+        class DecodedPictographInfo {
+            double distance = finalTZ;
+            // this might not be the right axis
+            double rotation = finalRY;
+            KeyPositions keyPosition = finalKeyColumnPos;
+
+            public double getDistance() {
+                return distance;
+            }
+
+            public KeyPositions getKeyPosition() {
+                return keyPosition;
+            }
+
+            public double getRotation() {
+                return rotation;
+            }
+        }
+        return DecodedPictographInfo.class;
     }
-    private enum PictographPos{
+    private enum KeyPositions {
         Left,Right,Center,Unknown;
     }
 
-    private int[] robotPos() {
+    private int[] RobotPos() {
         /*
          * To start up Vuforia, tell it the view that we wish to use for camera monitor (on the RC phone);
          * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
@@ -199,12 +221,12 @@ public class AutonomousMode extends LinearOpMode {
          * web site at https://developer.vuforia.com/license-manager.
          *
          * Vuforia license keys are always 380 characters long, and look as if they contain mostly
-         * ran bdom data. As an example, here is a example of a fragment of a valid key:
+         * random data. As an example, here is a example of a fragment of a valid key:
          *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
          * Once you've obtained a license key, copy the string from the Vuforia web site
          * and paste it in to your code onthe next line, between the double quotes.
          */
-        parameters.vuforiaLicenseKey = "ATsODcD/////AAAAAVw2lR...d45oGpdljdOh5LuFB9nDNfckoxb8COxKSFX";
+        parameters.vuforiaLicenseKey = "";
 
         /*
          * We also indicate which camera on the RC that we wish to use.
@@ -412,6 +434,16 @@ public class AutonomousMode extends LinearOpMode {
     }
 
 
+    private void mecanumDriveForDistance(Double angle, Double power, Double distance){
+        Double radians = (angle * Math.PI) / 180.0;
+        Double x = Math.cos(radians) * power;
+        Double y = Math.sin(radians) * power;
+        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
+        Integer startPos = ((DcMotor)baseMotorArray.get(1)).getCurrentPosition();
+        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition()) < ((int)((distance / wheelCircumference) * ticksPerRotation) + startPos)){
+            sleep(10);
+        }
+    }
     private String format(OpenGLMatrix transformationMatrix) {
         return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
