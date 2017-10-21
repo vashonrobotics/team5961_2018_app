@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -44,30 +43,27 @@ public class AutonomousMode extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // get wheels from config
+
         baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
-        // get the color sensor
-//        colorSensor = hardwareMap.colorSensor.get("color");
         // test
         mecanumDriveForDistance(45.0, 0.5, 500.0);
         //end of test code
-//        PictographPos pictographPos = findPictograph();
-//        while (colorSensor.blue() < 100){
-//            sleep(10);
-//        }
-
+        
         // Read pictograph
-//        telemetry.addData("key collumn pos: ", findPictograph());
+        final Class pictographInfo = findPictograph();
+
 //        telemetry.update();
 //        RobotPos();
     }
-    private PictographPos findPictograph(){
-        PictographPos keyColumnPos = PictographPos.Unknown;
-
+    private Class findPictograph(){
+        KeyPositions keyColumnPos = KeyPositions.Unknown;
+        double tZ = 0.0;
+        double rY = 0.0;
 
         /**
          * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -143,13 +139,13 @@ public class AutonomousMode extends LinearOpMode {
                     case UNKNOWN:
                         break;
                     case LEFT:
-                        keyColumnPos = PictographPos.Left;
+                        keyColumnPos = KeyPositions.Left;
                         break;
                     case CENTER:
-                        keyColumnPos = PictographPos.Center;
+                        keyColumnPos = KeyPositions.Center;
                         break;
                     case RIGHT:
-                        keyColumnPos = PictographPos.Right;
+                        keyColumnPos = KeyPositions.Right;
                 }
                 /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
                  * it is perhaps unlikely that you will actually need to act on this pose information, but
@@ -166,11 +162,11 @@ public class AutonomousMode extends LinearOpMode {
                     // Extract the X, Y, and Z components of the offset of the target relative to the robot
                     double tX = trans.get(0);
                     double tY = trans.get(1);
-                    double tZ = trans.get(2);
+                    tZ = trans.get(2);
 
                     // Extract the rotational components of the target relative to the robot
                     double rX = rot.firstAngle;
-                    double rY = rot.secondAngle;
+                    rY = rot.secondAngle;
                     double rZ = rot.thirdAngle;
                 }
             } else {
@@ -180,9 +176,30 @@ public class AutonomousMode extends LinearOpMode {
 
             telemetry.update();
         }
-        return keyColumnPos;
+        final double finalTZ = tZ;
+        final double finalRY = rY;
+        final KeyPositions finalKeyColumnPos = keyColumnPos;
+        class DecodedPictographInfo {
+            double distance = finalTZ;
+            // this might not be the right axis
+            double rotation = finalRY;
+            KeyPositions keyPosition = finalKeyColumnPos;
+
+            public double getDistance() {
+                return distance;
+            }
+
+            public KeyPositions getKeyPosition() {
+                return keyPosition;
+            }
+
+            public double getRotation() {
+                return rotation;
+            }
+        }
+        return DecodedPictographInfo.class;
     }
-    private enum PictographPos{
+    private enum KeyPositions {
         Left,Right,Center,Unknown;
     }
 
