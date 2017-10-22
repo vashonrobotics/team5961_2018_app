@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -25,11 +24,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 /**
  * Created by FTC on 9/23/2017.
  * updated by Caz
  */
-// made for blue side
+// made for red in corner
 @Autonomous(name = "Vashon 5961 Autonomous", group = "Vashon 5961")
 public class AutonomousMode extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
@@ -44,46 +45,47 @@ public class AutonomousMode extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // get wheels from config
+
         baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
-        // get the color sensor
-//        colorSensor = hardwareMap.colorSensor.get("color");
-        // test
-        mecanumDrive(0.0, 0.5);
-        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition())<ticksPerRotation){
-            sleep(10);
-        }
-        mecanumDrive(0.0,0.0);
-        sleep(10000);
+//        // test
+//        mecanumDriveForDistance(45.0, 0.5, 500.0);
         //end of test code
-        mecanumDrive(180.0, 0.5);
-        sleep(500);
-        mecanumDrive(90.0,0.5);
-        sleep(500);
-        PictographPos pictographPos = findPictograph();
-        mecanumDrive(300.0, 0.5);
-        sleep(1000);
-        mecanumDrive(30.0,0.75);
-        sleep(2000);
-        mecanumDrive(180.0, 0.75);
-        sleep(750);
-        mecanumDrive(270.0, 0.5);
-//        while (colorSensor.blue() < 100){
-//            sleep(10);
-//        }
-
+        
         // Read pictograph
-//        telemetry.addData("key collumn pos: ", findPictograph());
+        DecodedPictographInfo pictographInfo = findPictograph();
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+
+        switch (pictographInfo.keyPosition){
+            case Right:
+                while (findPictograph().distance > -550.0) {
+                    sleep(10);
+
+                }
+            case Center:
+                while (findPictograph().distance > -760.0){
+                    sleep(10);
+                }
+            case Left:
+                while (findPictograph().distance > -945.0){
+                    sleep(10);
+                }
+        }
+        mecanumDriveForDistance(0.0,0.5, 100.0);
+
 //        telemetry.update();
 //        RobotPos();
+        stop();
     }
-    private PictographPos findPictograph(){
-        PictographPos keyColumnPos = PictographPos.Unknown;
 
+    private DecodedPictographInfo findPictograph(){
+        KeyPositions keyColumnPos = KeyPositions.Unknown;
+        double tZ = 0.0;
+        double rY = 0.0;
 
         /**
          * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
@@ -120,7 +122,7 @@ public class AutonomousMode extends LinearOpMode {
          * Here we chose the back (HiRes) camera (for greater range), but
          * for a competition robot, the front camera might be more convenient.
          */
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
         /**
@@ -139,7 +141,6 @@ public class AutonomousMode extends LinearOpMode {
 
         relicTrackables.activate();
 
-        while (opModeIsActive()) {
 
             /**
              * See if any of the instances of {@link relicTemplate} are currently visible.
@@ -159,13 +160,13 @@ public class AutonomousMode extends LinearOpMode {
                     case UNKNOWN:
                         break;
                     case LEFT:
-                        keyColumnPos = PictographPos.Left;
+                        keyColumnPos = KeyPositions.Left;
                         break;
                     case CENTER:
-                        keyColumnPos = PictographPos.Center;
+                        keyColumnPos = KeyPositions.Center;
                         break;
                     case RIGHT:
-                        keyColumnPos = PictographPos.Right;
+                        keyColumnPos = KeyPositions.Right;
                 }
                 /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
                  * it is perhaps unlikely that you will actually need to act on this pose information, but
@@ -182,11 +183,11 @@ public class AutonomousMode extends LinearOpMode {
                     // Extract the X, Y, and Z components of the offset of the target relative to the robot
                     double tX = trans.get(0);
                     double tY = trans.get(1);
-                    double tZ = trans.get(2);
+                    tZ = trans.get(2);
 
                     // Extract the rotational components of the target relative to the robot
                     double rX = rot.firstAngle;
-                    double rY = rot.secondAngle;
+                    rY = rot.secondAngle;
                     double rZ = rot.thirdAngle;
                 }
             } else {
@@ -195,10 +196,14 @@ public class AutonomousMode extends LinearOpMode {
             }
 
             telemetry.update();
-        }
-        return keyColumnPos;
+
+        final double finalTZ = tZ;
+        final double finalRY = rY;
+        final KeyPositions finalKeyColumnPos = keyColumnPos;
+        return new DecodedPictographInfo(tZ,keyColumnPos, rY);
+//        return DecodedPictographInfo.class;
     }
-    private enum PictographPos{
+    private enum KeyPositions {
         Left,Right,Center,Unknown;
     }
 
@@ -432,23 +437,33 @@ public class AutonomousMode extends LinearOpMode {
         return new int[]{1,1};
     }
 
-    private void mecanumDrive(Double angle, Double power){
-        Double radians = angle*Math.PI/180.0;
-        Double x = Math.cos(radians)*power;
-        Double y = Math.sin(radians)*power;
-        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
-    }
 
     private void mecanumDriveForDistance(Double angle, Double power, Double distance){
-        mecanumDrive(angle, power);
-        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition())<distance/(ticksPerRotation*wheelCircumference)){
+        Double radians = (angle * Math.PI) / 180.0;
+        Double x = Math.cos(radians) * power;
+        Double y = Math.sin(radians) * power;
+        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
+        Integer startPos = ((DcMotor)baseMotorArray.get(1)).getCurrentPosition();
+        while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition()) < ((int)((distance / wheelCircumference) * ticksPerRotation) + startPos)){
             sleep(10);
         }
     }
     private String format(OpenGLMatrix transformationMatrix) {
         return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
+    private class DecodedPictographInfo {
+        public final double distance;
+        public final KeyPositions keyPosition;
+        public final double rotation;
+
+        public DecodedPictographInfo(double distanceFromPictograph, KeyPositions keyCollumn, double yRotation) {
+            distance = distanceFromPictograph;
+            keyPosition = keyCollumn;
+            rotation = yRotation;
+        }
 
 
 
+
+    }
 }
