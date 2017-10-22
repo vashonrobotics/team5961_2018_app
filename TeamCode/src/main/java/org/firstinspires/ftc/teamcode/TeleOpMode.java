@@ -23,7 +23,7 @@ public class TeleOpMode extends OpMode{
     private Servo right;
     private DcMotor lift;
     private int closeAngle=90;
-
+    DriveTrain driveTrain;
     private ArrayList baseMotorArray;
     @Override
     public void init() {
@@ -34,24 +34,26 @@ public class TeleOpMode extends OpMode{
         baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor)baseMotorArray.get(0)).setDirection(DcMotor.Direction.REVERSE);
-        ((DcMotor)baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
+        ((DcMotor)baseMotorArray.get(2)).setDirection(DcMotor.Direction.REVERSE);
         // lift motor init
         lift = hardwareMap.dcMotor.get("lift");
         left = hardwareMap.servo.get("left");
         right = hardwareMap.servo.get("right");
         left.setPosition(0);
         right.setPosition(0);
+        driveTrain = new DriveTrain(hardwareMap.dcMotor.get("front Left"),hardwareMap.dcMotor.get("front Right"),hardwareMap.dcMotor.get("back Left"),hardwareMap.dcMotor.get("back Right"));;
 
     }
 
     @Override
     public void loop() {
-        DriveTrain.mecanum(baseMotorArray, (double) -gamepad1.left_stick_x, (double) gamepad1.left_stick_y, (double)gamepad1.right_stick_x);
-        lift.setPower(gamepad2.left_stick_y);
-        if(gamepad2.right_trigger >= .5){
 
-            left.setPosition(closeAngle);
-            right.setPosition(-closeAngle);
+        driveTrain.mecanum( (double) -gamepad1.left_stick_x, (double) gamepad1.left_stick_y, (double)gamepad1.right_stick_x);
+        lift.setPower(gamepad2.left_stick_y);
+        if(gamepad2.right_bumper){
+
+            left.setPosition(-closeAngle);
+            right.setPosition(closeAngle);
 
         }else{
 

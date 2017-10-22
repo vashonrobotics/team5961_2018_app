@@ -50,15 +50,20 @@ public class AutonomousMode extends LinearOpMode {
         baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
-        ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
-        ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
+        ((DcMotor) baseMotorArray.get(0)).setDirection(DcMotor.Direction.REVERSE);
+        ((DcMotor) baseMotorArray.get(2)).setDirection(DcMotor.Direction.REVERSE);
 //        // test
 //        mecanumDriveForDistance(45.0, 0.5, 500.0);
         //end of test code
+        for (int  i = 0; i < baseMotorArray.size(); i++){
+            ((DcMotor)baseMotorArray.get(i)).setPower(1);
+            sleep(1000);
+            ((DcMotor)baseMotorArray.get(i)).setPower(0);
+        }
         
         // Read pictograph
         DecodedPictographInfo pictographInfo = findPictograph();
-        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+//        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
 
         switch (pictographInfo.keyPosition){
             case Right:
@@ -75,7 +80,7 @@ public class AutonomousMode extends LinearOpMode {
                     sleep(10);
                 }
         }
-        mecanumDriveForDistance(0.0,0.5, 100.0);
+//        mecanumDriveForDistance(0.0,0.5, 100.0);
 
 //        telemetry.update();
 //        RobotPos();
@@ -442,7 +447,7 @@ public class AutonomousMode extends LinearOpMode {
         Double radians = (angle * Math.PI) / 180.0;
         Double x = Math.cos(radians) * power;
         Double y = Math.sin(radians) * power;
-        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
+//        DriveTrain.mecanum( -x, y, 0.0);
         Integer startPos = ((DcMotor)baseMotorArray.get(1)).getCurrentPosition();
         while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition()) < ((int)((distance / wheelCircumference) * ticksPerRotation) + startPos)){
             sleep(10);
