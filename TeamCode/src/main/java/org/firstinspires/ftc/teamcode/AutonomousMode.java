@@ -467,7 +467,7 @@ public class AutonomousMode extends LinearOpMode {
         Double radians = (angle * Math.PI) / 180.0;
         Double x = Math.cos(radians) * power;
         Double y = Math.sin(radians) * power;
-        DriveTrain.mecanum(baseMotorArray, -x, y, 0.0);
+        DriveTrain.mecanum(baseMotorArray, x, y, 0.0);
         Integer startPos = ((DcMotor)baseMotorArray.get(1)).getCurrentPosition();
         while (Math.abs(((DcMotor) baseMotorArray.get(1)).getCurrentPosition()) < ((int)((distance / wheelCircumference) * ticksPerRotation) + startPos)){
             sleep(10);
