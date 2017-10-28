@@ -33,10 +33,10 @@ public class TeleOpMode extends OpMode{
         // lift init
         lift = hardwareMap.dcMotor.get("lift");
         // lift grabbers
-        leftServo = hardwareMap.servo.get("leftServo");
-        rightServo = hardwareMap.servo.get("rightServo");
-        leftServo.setPosition(0.0);
-        rightServo.setPosition(0.0);
+        leftServo = hardwareMap.servo.get("left");
+        rightServo = hardwareMap.servo.get("right");
+        leftServo.setPosition(70.0);
+        rightServo.setPosition(130.0);
 
 
 
@@ -45,7 +45,9 @@ public class TeleOpMode extends OpMode{
     @Override
     public void loop() {
         if (gamepad1.right_bumper) {
-            motorSpeedMultiplier = 0.5;
+            motorSpeedMultiplier = 0.7;
+        }else {
+            motorSpeedMultiplier = 1.0;
         }
         DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_x)*motorSpeedMultiplier,
                 ((double) gamepad1.left_stick_y)*motorSpeedMultiplier,
@@ -53,13 +55,13 @@ public class TeleOpMode extends OpMode{
         lift.setPower(gamepad2.left_stick_y/2);
         if(gamepad2.right_trigger >= .5){
 
-            leftServo.setPosition(90.0);
-            rightServo.setPosition(-90.0);
+            leftServo.setPosition(200.0);
+            rightServo.setPosition(0.0);
 
         }else{
 
-            leftServo.setPosition(0.0);
-            rightServo.setPosition(0.0);
+            leftServo.setPosition(70.0);
+            rightServo.setPosition(130.0);
 
         }
 

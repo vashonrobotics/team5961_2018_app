@@ -40,6 +40,8 @@ public class AutonomousMode extends LinearOpMode {
 //    ColorSensor colorSensor;
     double wheelCircumference = 100.0 * Math.PI; // circumference in mm
     double ticksPerRotation = 1125.0;  // number of encoder ticks to make a full rotation (about)
+    VuforiaLocalizer.Parameters parameters;
+    VuforiaTrackable relicTemplate;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -53,11 +55,31 @@ public class AutonomousMode extends LinearOpMode {
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
 
-        // need to set servo pos when working
+        parameters = new VuforiaLocalizer.Parameters();
+        parameters.vuforiaLicenseKey = "";
 
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        relicTemplate = relicTrackables.get(0);
+        relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+
+        telemetry.addData(">", "Press Play to start");
+        telemetry.update();
         waitForStart();
 
-        DriveTrain.mecanum(baseMotorArray, 0.4, 0.0, 0.0);
+        relicTrackables.activate();
+        /*
+         * We also indicate which camera on the RC that we wish to use.
+         * Here we chose the back (HiRes) camera (for greater range), but
+         * for a competition robot, the front camera might be more convenient.
+         */
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        // need to set servo pos when working
+
+
+        waitForStart();
+        mecanumDriveForDistance(90.0, 0.5, 50.0);
+        DriveTrain.mecanum(baseMotorArray, 0.3, 0.0, 100.0);
         // aline robot with pictograph
         while (true) {
             DecodedPictographInfo pictographInfo = findPictograph();
@@ -123,7 +145,7 @@ public class AutonomousMode extends LinearOpMode {
          * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+
 
         // OR...  Do Not Activate the Camera Monitor View, to save power
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -140,15 +162,7 @@ public class AutonomousMode extends LinearOpMode {
          * Once you've obtained a license key, copy the string from the Vuforia web site
          * and paste it in to your code onthe next line, between the double quotes.
          */
-        parameters.vuforiaLicenseKey = "";
 
-        /*
-         * We also indicate which camera on the RC that we wish to use.
-         * Here we chose the back (HiRes) camera (for greater range), but
-         * for a competition robot, the front camera might be more convenient.
-         */
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
         /**
          * Load the data set containing the VuMarks for Relic Recovery. There's only one trackable
@@ -156,15 +170,7 @@ public class AutonomousMode extends LinearOpMode {
          * but differ in their instance id information.
          * @see VuMarkInstanceId
          */
-        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-        VuforiaTrackable relicTemplate = relicTrackables.get(0);
-        relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
 
-        telemetry.addData(">", "Press Play to start");
-        telemetry.update();
-        waitForStart();
-
-        relicTrackables.activate();
 
 
             /**
@@ -174,7 +180,7 @@ public class AutonomousMode extends LinearOpMode {
              * UNKNOWN will be returned by {@link RelicRecoveryVuMark#from(VuforiaTrackable)}.
              */
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+
 
                 /* Found an instance of the template. In the actual game, you will probably
                  * loop until this condition occurs, then move on to act accordingly depending
@@ -183,6 +189,7 @@ public class AutonomousMode extends LinearOpMode {
                 switch (vuMark){
 
                     case UNKNOWN:
+                        keyColumnPos = KeyPositions.Unknown;
                         break;
                     case LEFT:
                         keyColumnPos = KeyPositions.Left;
@@ -192,6 +199,7 @@ public class AutonomousMode extends LinearOpMode {
                         break;
                     case RIGHT:
                         keyColumnPos = KeyPositions.Right;
+
                 }
                 /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
                  * it is perhaps unlikely that you will actually need to act on this pose information, but
@@ -215,10 +223,7 @@ public class AutonomousMode extends LinearOpMode {
                     rY = rot.secondAngle;
                     double rZ = rot.thirdAngle;
                 }
-            } else {
-                telemetry.addData("VuMark", "not visible");
 
-            }
 
             telemetry.update();
 
