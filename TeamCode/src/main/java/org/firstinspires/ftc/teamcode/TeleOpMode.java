@@ -33,7 +33,7 @@ public class TeleOpMode extends OpMode{
         baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
-        ((DcMotor)baseMotorArray.get(0)).setDirection(DcMotor.Direction.REVERSE);
+        ((DcMotor)baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor)baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
         // lift motor init
         lift = hardwareMap.dcMotor.get("lift");
