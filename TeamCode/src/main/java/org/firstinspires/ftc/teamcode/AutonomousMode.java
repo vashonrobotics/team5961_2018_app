@@ -24,6 +24,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 /**
  * Created by FTC on 9/23/2017.
  * updated by Caz
@@ -50,17 +52,37 @@ public class AutonomousMode extends LinearOpMode {
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
-        // test
-        mecanumDriveForDistance(45.0, 0.5, 500.0);
+//        // test
+//        mecanumDriveForDistance(45.0, 0.5, 500.0);
         //end of test code
         
         // Read pictograph
-        final Class pictographInfo = findPictograph();
+        DecodedPictographInfo pictographInfo = findPictograph();
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+
+        switch (pictographInfo.keyPosition){
+            case Right:
+                while (findPictograph().distance > -550.0) {
+                    sleep(10);
+
+                }
+            case Center:
+                while (findPictograph().distance > -760.0){
+                    sleep(10);
+                }
+            case Left:
+                while (findPictograph().distance > -945.0){
+                    sleep(10);
+                }
+        }
+        mecanumDriveForDistance(0.0,0.5, 100.0);
 
 //        telemetry.update();
 //        RobotPos();
+        stop();
     }
-    private Class findPictograph(){
+
+    private DecodedPictographInfo findPictograph(){
         KeyPositions keyColumnPos = KeyPositions.Unknown;
         double tZ = 0.0;
         double rY = 0.0;
@@ -100,7 +122,7 @@ public class AutonomousMode extends LinearOpMode {
          * Here we chose the back (HiRes) camera (for greater range), but
          * for a competition robot, the front camera might be more convenient.
          */
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
         /**
@@ -119,7 +141,6 @@ public class AutonomousMode extends LinearOpMode {
 
         relicTrackables.activate();
 
-        while (opModeIsActive()) {
 
             /**
              * See if any of the instances of {@link relicTemplate} are currently visible.
@@ -175,29 +196,12 @@ public class AutonomousMode extends LinearOpMode {
             }
 
             telemetry.update();
-        }
+
         final double finalTZ = tZ;
         final double finalRY = rY;
         final KeyPositions finalKeyColumnPos = keyColumnPos;
-        class DecodedPictographInfo {
-            double distance = finalTZ;
-            // this might not be the right axis
-            double rotation = finalRY;
-            KeyPositions keyPosition = finalKeyColumnPos;
-
-            public double getDistance() {
-                return distance;
-            }
-
-            public KeyPositions getKeyPosition() {
-                return keyPosition;
-            }
-
-            public double getRotation() {
-                return rotation;
-            }
-        }
-        return DecodedPictographInfo.class;
+        return new DecodedPictographInfo(tZ,keyColumnPos, rY);
+//        return DecodedPictographInfo.class;
     }
     private enum KeyPositions {
         Left,Right,Center,Unknown;
@@ -447,7 +451,19 @@ public class AutonomousMode extends LinearOpMode {
     private String format(OpenGLMatrix transformationMatrix) {
         return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
+    private class DecodedPictographInfo {
+        public final double distance;
+        public final KeyPositions keyPosition;
+        public final double rotation;
+
+        public DecodedPictographInfo(double distanceFromPictograph, KeyPositions keyCollumn, double yRotation) {
+            distance = distanceFromPictograph;
+            keyPosition = keyCollumn;
+            rotation = yRotation;
+        }
 
 
 
+
+    }
 }
