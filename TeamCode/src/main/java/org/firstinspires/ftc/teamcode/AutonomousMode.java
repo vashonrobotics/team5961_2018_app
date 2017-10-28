@@ -39,7 +39,7 @@ public class AutonomousMode extends LinearOpMode {
     private static final String TAG = "Vuforia Navigation Sample";
 //    ColorSensor colorSensor;
     double wheelCircumference = 100.0 * Math.PI; // circumference in mm
-    double ticksPerRotation = 1125.0;
+    double ticksPerRotation = 1125.0;  // number of encoder ticks to make a full rotation (about)
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,30 +52,54 @@ public class AutonomousMode extends LinearOpMode {
         baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
-//        // test
-//        mecanumDriveForDistance(45.0, 0.5, 500.0);
-        //end of test code
-        
+
+        // need to set servo pos when working
+
+        waitForStart();
+
+        DriveTrain.mecanum(baseMotorArray, 0.4, 0.0, 0.0);
+        // aline robot with pictograph
+        while (true) {
+            DecodedPictographInfo pictographInfo = findPictograph();
+            if ((pictographInfo.keyPosition == KeyPositions.Unknown) || (pictographInfo.horizontalOffSet < -30.0)) {
+                sleep(10);
+            }else {
+
+                if (pictographInfo.rotation > 10.0 ) {
+                    DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, -0.2);// might be the wrong direction
+                }else if (pictographInfo.rotation < -10.0) {
+                    DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.2);
+                }else {
+                    break;
+                }
+            }
+        }
         // Read pictograph
-        DecodedPictographInfo pictographInfo = findPictograph();
+        KeyPositions KeyColumnPos = findPictograph().keyPosition;
+
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
 
-        switch (pictographInfo.keyPosition){
+        switch (KeyColumnPos){
             case Right:
                 while (findPictograph().distance > -550.0) {
                     sleep(10);
 
                 }
+                break;
             case Center:
                 while (findPictograph().distance > -760.0){
                     sleep(10);
                 }
+                break;
             case Left:
                 while (findPictograph().distance > -945.0){
                     sleep(10);
                 }
+                break;
         }
         mecanumDriveForDistance(0.0,0.5, 100.0);
+        // need to let go of block
+        sleep(1000);
 
 //        telemetry.update();
 //        RobotPos();
@@ -85,6 +109,7 @@ public class AutonomousMode extends LinearOpMode {
     private DecodedPictographInfo findPictograph(){
         KeyPositions keyColumnPos = KeyPositions.Unknown;
         double tZ = 0.0;
+        double tX = 0.0;
         double rY = 0.0;
 
         /**
@@ -181,7 +206,7 @@ public class AutonomousMode extends LinearOpMode {
                     Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
 
                     // Extract the X, Y, and Z components of the offset of the target relative to the robot
-                    double tX = trans.get(0);
+                    tX = trans.get(0);
                     double tY = trans.get(1);
                     tZ = trans.get(2);
 
@@ -200,7 +225,7 @@ public class AutonomousMode extends LinearOpMode {
         final double finalTZ = tZ;
         final double finalRY = rY;
         final KeyPositions finalKeyColumnPos = keyColumnPos;
-        return new DecodedPictographInfo(tZ,keyColumnPos, rY);
+        return new DecodedPictographInfo(tZ, tX, keyColumnPos, rY);
 //        return DecodedPictographInfo.class;
     }
     private enum KeyPositions {
@@ -453,11 +478,13 @@ public class AutonomousMode extends LinearOpMode {
     }
     private class DecodedPictographInfo {
         public final double distance;
+        public final double horizontalOffSet;
         public final KeyPositions keyPosition;
         public final double rotation;
 
-        public DecodedPictographInfo(double distanceFromPictograph, KeyPositions keyCollumn, double yRotation) {
+        public DecodedPictographInfo(double distanceFromPictograph, double horizontalDistance, KeyPositions keyCollumn, double yRotation) {
             distance = distanceFromPictograph;
+            horizontalOffSet = horizontalDistance;
             keyPosition = keyCollumn;
             rotation = yRotation;
         }

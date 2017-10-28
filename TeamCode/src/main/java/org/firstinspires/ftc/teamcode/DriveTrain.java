@@ -19,7 +19,7 @@ public class DriveTrain {
     public static void mecanum(ArrayList baseMotorArray, Double x, Double y, Double turn){
         double power = Math.sqrt((x * x) + (y * y));
 //        double radianAngle = 0;
-        double radianAngle = Math.atan2(y, x) - Math.PI / 4;
+        double radianAngle = Math.atan2(y, -x) - (Math.PI / 4);
 //
         if (Math.abs(power) + Math.abs(turn) > 1)
         {

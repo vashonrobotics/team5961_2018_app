@@ -46,6 +46,13 @@ public class test extends LinearOpMode {
         sleep(500);
         DriveTrain.mecanum(baseMotorArray,0.0,-1.0,-90.0);
         sleep(500);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
+        // to make sure that the configuration is correct
+        for (int i = 0; i < 4; i++) {
+            ((DcMotor)baseMotorArray.get(i)).setPower(1);
+            sleep(1000);
+            ((DcMotor)baseMotorArray.get(i)).setPower(0);
+        }
         stop();
 
     }
