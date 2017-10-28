@@ -28,10 +28,10 @@ public class DriveTrain {
         }
 
         double motorPower[] = {
-                (Math.cos(radianAngle) * power) + turn,
-                (Math.cos(radianAngle) * power) - turn,
-                (Math.sin(radianAngle) * power) + turn,
-                (Math.sin(radianAngle) * power) - turn
+                (Math.cos(radianAngle) * power) + turn, // frontLeft
+                (Math.sin(radianAngle) * power) - turn, // frontRight
+                (Math.sin(radianAngle) * power) + turn, // backLeft
+                (Math.cos(radianAngle) * power) - turn  // backRight
         };
 
         for (int i = 0; i < baseMotorArray.size(); i++) {
