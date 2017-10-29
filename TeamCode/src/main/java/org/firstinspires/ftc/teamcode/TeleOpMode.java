@@ -35,8 +35,9 @@ public class TeleOpMode extends OpMode{
         // lift grabbers
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
-        leftServo.setPosition(70.0);
-        rightServo.setPosition(130.0);
+        leftServo.setDirection(Servo.Direction.REVERSE);
+        leftServo.setPosition(0.8);
+        rightServo.setPosition(0.5);
 
 
 
@@ -45,7 +46,7 @@ public class TeleOpMode extends OpMode{
     @Override
     public void loop() {
         if (gamepad1.right_bumper) {
-            motorSpeedMultiplier = 0.7;
+            motorSpeedMultiplier = 0.5;
         }else {
             motorSpeedMultiplier = 1.0;
         }
@@ -55,13 +56,13 @@ public class TeleOpMode extends OpMode{
         lift.setPower(gamepad2.left_stick_y/2);
         if(gamepad2.right_trigger >= .5){
 
-            leftServo.setPosition(200.0);
+            leftServo.setPosition(0.0);
             rightServo.setPosition(0.0);
 
         }else{
 
-            leftServo.setPosition(70.0);
-            rightServo.setPosition(130.0);
+            leftServo.setPosition(0.8);
+            rightServo.setPosition(0.5);
 
         }
 

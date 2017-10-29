@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -32,6 +33,7 @@ import java.util.List;
  */
 // made for red in corner
 @Autonomous(name = "Vashon 5961 Autonomous", group = "Vashon 5961")
+@Disabled
 public class AutonomousMode extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private VuforiaLocalizer vuforia;
