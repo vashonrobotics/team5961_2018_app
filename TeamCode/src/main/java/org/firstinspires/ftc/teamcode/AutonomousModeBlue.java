@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -21,10 +22,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
-
 import java.util.ArrayList;
 import java.util.List;
-
 
 
 /**
@@ -32,13 +31,14 @@ import java.util.List;
  * updated by Caz
  */
 // made for red in corner
-@Autonomous(name = "Vashon 5961 Autonomous", group = "Vashon 5961")
-public class AutonomousMode extends LinearOpMode {
+@Autonomous(name = "Vashon 5961 AutonomousBlue", group = "Vashon 5961")
+
+public class AutonomousModeBlue extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private VuforiaLocalizer vuforia;
     OpenGLMatrix lastLocation = null;
     private static final String TAG = "Vuforia Navigation Sample";
-//    ColorSensor colorSensor;
+    //    ColorSensor colorSensor;
     double wheelCircumference = 100.0 * Math.PI; // circumference in mm
     double ticksPerRotation = 1125.0;  // number of encoder ticks to make a full rotation (about)
     VuforiaLocalizer.Parameters parameters;
@@ -65,6 +65,7 @@ public class AutonomousMode extends LinearOpMode {
         leftServo.setPosition(0.0);
         rightServo.setPosition(0.0);
 
+
         parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = "";
@@ -72,7 +73,7 @@ public class AutonomousMode extends LinearOpMode {
 
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
-        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        final VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
         relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
 
@@ -88,69 +89,75 @@ public class AutonomousMode extends LinearOpMode {
 
 
         waitForStart();
-        DriveTrain.mecanum(baseMotorArray, 0.4, 0.0, 0.0);
 
-        // aline robot with pictograph
-        while (true) {
-            sleep(100);
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-            sleep(600);
-            DecodedPictographInfo pictographInfo = findPictograph();
-            if (pictographInfo.keyPosition == KeyPositions.Unknown) {
-
-                sleep(10);
-            }else {
+        final KeyPositions keyColumnPos = moveToFindPictograph2();
 
 
-//
-                    break;
-//
-            }
-            DriveTrain.mecanum(baseMotorArray, 0.5, 0.0, 0.0);
-        }
-        // Read pictograph
-        sleep(400);
-        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-        KeyPositions KeyColumnPos = findPictograph().keyPosition;
-
-        DriveTrain.mecanum(baseMotorArray, 0.0, -0.4, 0.0);
-
-        switch (KeyColumnPos){
-            case Right:
-                while (findPictograph().distance > -520.0) {
-                    sleep(10);
-
-                }
-                break;
-            case Center:
-                while (findPictograph().distance > -760.0){
-                    sleep(10);
-                }
-                break;
-            case Left:
-                while (findPictograph().distance > -920.0){
-                    sleep(10);
-                    telemetry.addData("Dist:",findPictograph().distance);
-                    telemetry.update();
-                }
-                break;
-            case Unknown:
-                sleep(100);
-        }
-        mecanumDriveForDistance(0.0,0.5, 100.0);
-        DriveTrain.mecanum(baseMotorArray,0.0,0.0,1.0);
-        sleep(1800);
-        DriveTrain.mecanum(baseMotorArray, 0.0, -0.5, 0.0);
-        sleep(200);
-//        mecanumDriveForDistance(0.0, -0.4, -300.0);
+        goBackToCryptoBox(keyColumnPos);
+        mecanumDriveForDistance(0.0, -0.5, 100.0);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        mecanumDriveForDistance(0.0, -0.4, 300.0);
 
         // need to let go of block
-        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-
+        sleep(1000);
 
 //        telemetry.update();
 //        RobotPos();
         requestOpModeStop();
+    }
+
+
+
+
+    private KeyPositions moveToFindPictograph() {
+        DriveTrain.mecanum(baseMotorArray,-0.1,0.0,0.0);
+
+        // aline robot with pictograph
+        final long startTime = System.currentTimeMillis();
+        final long maxTime = 1000 + startTime;
+        boolean found = false;
+        while(!found && System.currentTimeMillis() < maxTime)
+
+        {
+            // Read pictograph
+            DecodedPictographInfo pictographInfo = findPictograph();
+            found = pictographInfo.keyPosition != KeyPositions.Unknown;
+            sleep(10);
+        }
+
+        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
+        sleep(1000);
+        final  KeyPositions keyColumnPos = findPictograph().keyPosition;
+        telemetry.addData("key pos: ",keyColumnPos);
+        telemetry.update();
+
+        return keyColumnPos;
+    }
+
+    private KeyPositions moveToFindPictograph2() {
+        DriveTrain.mecanum(baseMotorArray,-0.4,0.0,0.0);
+
+        // aline robot with pictograph
+        final long startTime = System.currentTimeMillis();
+        final long maxTime = 300 + startTime;
+        boolean found = false;
+        while(!found && System.currentTimeMillis() < maxTime)
+
+        {
+            // Read pictograph
+            DecodedPictographInfo pictographInfo = findPictograph();
+            found = pictographInfo.keyPosition != KeyPositions.Unknown;
+            sleep(1);
+        }
+
+        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
+        sleep(1000);
+        final  KeyPositions keyColumnPos = findPictograph().keyPosition;
+        telemetry.addData("key pos: ",keyColumnPos);
+        telemetry.update();
+
+        return keyColumnPos;
     }
 
     private DecodedPictographInfo findPictograph(){
@@ -520,6 +527,32 @@ public class AutonomousMode extends LinearOpMode {
 
 
 
-
+    }
+    void goBackToCryptoBox(KeyPositions keyColumnPos) {
+        switch (keyColumnPos) {
+            case Right:
+                while (findPictograph().distance > -520.0) {
+                    sleep(10);
+                    telemetry.addData("Dist:", findPictograph().distance);
+                    telemetry.update();
+                }
+                break;
+            case Center:
+                while (findPictograph().distance > -760.0) {
+                    sleep(10);
+                    telemetry.addData("Dist:", findPictograph().distance);
+                    telemetry.update();
+                }
+                break;
+            case Left:
+                while (findPictograph().distance > -920.0) {
+                    sleep(10);
+                    telemetry.addData("Dist:", findPictograph().distance);
+                    telemetry.update();
+                }
+                break;
+            case Unknown:
+                sleep(100);
+        }
     }
 }
