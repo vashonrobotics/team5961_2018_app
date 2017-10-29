@@ -77,22 +77,22 @@ public abstract class JustDriveAuto extends LinearOpMode{
 
     void moveToGlyph() {
         if (isCorner) {
-            mecanumDriveForDistance(90.0, 1.0, 880.0);
+            mecanumDriveForDistance(270.0, 1.0, 330.0);
             if (!isRed) {
                 DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-                sleep(1800);
+                sleep(1400);
             }
 
-            mecanumDriveForDistance(0.0, 1.0, 1250.0);
+            mecanumDriveForDistance(0.0, 1.0, 1000.0);
         }
         else {
-            mecanumDriveForDistance(90.0, 1.0, 1250.0);
+            mecanumDriveForDistance(270.0, 1.0, 1000.0);
             if (!isRed) {
                 DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-                sleep(1800);
+                sleep(1400);
             }
 
-            mecanumDriveForDistance(0.0, 1.0, 880.0);
+            mecanumDriveForDistance(0.0, 1.0, 330.0);
         }
     }
 
