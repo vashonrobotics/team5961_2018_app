@@ -90,7 +90,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 
         waitForStart();
 
-        final KeyPositions keyColumnPos = moveToFindPictograph2();
+        final KeyPositions keyColumnPos = moveToFindPictograph();
 
 
         goBackToCryptoBox(keyColumnPos);
@@ -111,12 +111,15 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
     private KeyPositions moveToFindPictograph() {
-        DriveTrain.mecanum(baseMotorArray,-0.1,0.0,0.0);
+        DriveTrain.mecanum(baseMotorArray,-0.5,0.0,0.0);
 
         // aline robot with pictograph
         final long startTime = System.currentTimeMillis();
-        final long maxTime = 1000 + startTime;
+        final long maxTime = 700 + startTime;
         boolean found = false;
+        telemetry.addData("begin loop at: ", System.currentTimeMillis());
+        telemetry.addData("time limit: ", maxTime);
+        telemetry.update();
         while(!found && System.currentTimeMillis() < maxTime)
 
         {
@@ -125,7 +128,8 @@ public class AutonomousModeBlue extends LinearOpMode {
             found = pictographInfo.keyPosition != KeyPositions.Unknown;
             sleep(10);
         }
-
+        telemetry.addData("end loop at: ", System.currentTimeMillis());
+        telemetry.update();
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(1000);
         final  KeyPositions keyColumnPos = findPictograph().keyPosition;
@@ -135,30 +139,6 @@ public class AutonomousModeBlue extends LinearOpMode {
         return keyColumnPos;
     }
 
-    private KeyPositions moveToFindPictograph2() {
-        DriveTrain.mecanum(baseMotorArray,-0.4,0.0,0.0);
-
-        // aline robot with pictograph
-        final long startTime = System.currentTimeMillis();
-        final long maxTime = 300 + startTime;
-        boolean found = false;
-        while(!found && System.currentTimeMillis() < maxTime)
-
-        {
-            // Read pictograph
-            DecodedPictographInfo pictographInfo = findPictograph();
-            found = pictographInfo.keyPosition != KeyPositions.Unknown;
-            sleep(1);
-        }
-
-        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-        sleep(1000);
-        final  KeyPositions keyColumnPos = findPictograph().keyPosition;
-        telemetry.addData("key pos: ",keyColumnPos);
-        telemetry.update();
-
-        return keyColumnPos;
-    }
 
     private DecodedPictographInfo findPictograph(){
         KeyPositions keyColumnPos = KeyPositions.Unknown;
@@ -537,6 +517,8 @@ public class AutonomousModeBlue extends LinearOpMode {
                     telemetry.update();
                 }
                 break;
+            case Unknown:
+
             case Center:
                 while (findPictograph().distance > -760.0) {
                     sleep(10);
@@ -551,8 +533,6 @@ public class AutonomousModeBlue extends LinearOpMode {
                     telemetry.update();
                 }
                 break;
-            case Unknown:
-                sleep(100);
         }
     }
 }
