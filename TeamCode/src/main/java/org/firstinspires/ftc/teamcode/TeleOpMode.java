@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,13 +14,15 @@ import java.util.ArrayList;
  */
 
 @TeleOp(name = "Vashon 5961 teleop", group = "Vashon 5961")
-//@Disabled
+
 public class TeleOpMode extends OpMode{
     private Servo leftServo;
     private Servo rightServo;
     private DcMotor lift;
     private double motorSpeedMultiplier = 1.0;
     private ArrayList baseMotorArray;
+    private int liftStartPos;
+
     @Override
     public void init() {
         // base motor init
@@ -38,22 +41,28 @@ public class TeleOpMode extends OpMode{
         leftServo.setDirection(Servo.Direction.REVERSE);
         leftServo.setPosition(0.8);
         rightServo.setPosition(0.5);
-
+        liftStartPos = lift.getCurrentPosition();
 
 
     }
 
     @Override
     public void loop() {
-        if (gamepad1.right_bumper) {
-            motorSpeedMultiplier = 0.5;
-        }else {
+        if (gamepad1.right_trigger >= 0.5) {
             motorSpeedMultiplier = 1.0;
+        }else {
+            motorSpeedMultiplier = 0.45;
         }
+
         DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_x)*motorSpeedMultiplier,
                 ((double) gamepad1.left_stick_y)*motorSpeedMultiplier,
                 ((double)gamepad1.right_stick_x)*motorSpeedMultiplier);
-        lift.setPower(gamepad2.left_stick_y/2);
+
+        lift.setPower(-gamepad2.left_stick_y/4);
+        if (-gamepad2.left_stick_y > 0 && (((int)(2.25*1250.0) + liftStartPos) >= lift.getCurrentPosition())) {
+            lift.setPower(0);
+        }
+
         if(gamepad2.right_trigger >= .5){
 
             leftServo.setPosition(0.0);
