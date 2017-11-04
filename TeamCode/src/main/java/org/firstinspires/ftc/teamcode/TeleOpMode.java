@@ -55,15 +55,15 @@ public class TeleOpMode extends OpMode{
         }
 
         DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_x)*motorSpeedMultiplier,
-                ((double) gamepad1.left_stick_y)*motorSpeedMultiplier,
+                ((double)gamepad1.left_stick_y)*motorSpeedMultiplier,
                 ((double)gamepad1.right_stick_x)*motorSpeedMultiplier);
 
-        lift.setPower(-gamepad2.left_stick_y/4);
-        if (-gamepad2.left_stick_y > 0 && (((int)(2.25*1250.0) + liftStartPos) >= lift.getCurrentPosition())) {
-            lift.setPower(0);
-        }
+        lift.setPower(-gamepad2.left_stick_y/2);
+//        if (-gamepad2.left_stick_y > 0 && (((int)(2.25*1250.0) + liftStartPos) >=lift.getCurrentPosition())) {
+//            lift.setPower(0);
+//        }
 
-        if(gamepad2.right_trigger >= .5){
+        if(gamepad2.right_trigger <= .5){
 
             leftServo.setPosition(0.0);
             rightServo.setPosition(0.0);
