@@ -53,7 +53,7 @@ public class test extends LinearOpMode {
             sleep(1000);
             ((DcMotor)baseMotorArray.get(i)).setPower(0);
         }
-        stop();
+        requestOpModeStop();
 
     }
 }

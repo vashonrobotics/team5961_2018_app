@@ -49,13 +49,15 @@ public abstract class JustDriveAuto extends LinearOpMode{
         leftServo.setDirection(Servo.Direction.REVERSE);
         leftServo.setPosition(0.8);
         rightServo.setPosition(0.5);
-
         grabGlyph();
         waitForStart();
         moveToGlyph();
         dropGlyph();
+        moveAwayFromGlyph();
 
     }
+
+
 
     private void mecanumDriveForDistance(Double angle, Double power, Double distance){
         Double radians = (angle * Math.PI) / 180.0;
@@ -77,7 +79,6 @@ public abstract class JustDriveAuto extends LinearOpMode{
 
     void moveToGlyph() {
         if (isCorner) {
-            mecanumDriveForDistance(90.0, 1.0, 880.0);
             if (!isRed) {
                 DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
                 sleep(1800);
@@ -86,13 +87,14 @@ public abstract class JustDriveAuto extends LinearOpMode{
             mecanumDriveForDistance(0.0, 1.0, 1250.0);
         }
         else {
-            mecanumDriveForDistance(90.0, 1.0, 1250.0);
+            DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+            sleep(1000);
             if (!isRed) {
                 DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
                 sleep(1800);
             }
 
-            mecanumDriveForDistance(0.0, 1.0, 880.0);
+            mecanumDriveForDistance(0.0, 1.0, 500.0);
         }
     }
 
@@ -103,6 +105,14 @@ public abstract class JustDriveAuto extends LinearOpMode{
 
     }
 
-
+    private void moveAwayFromGlyph() {
+        sleep(300);
+        lift.setPower(1);
+        sleep(600);
+        lift.setPower(0);
+        sleep(100);
+        DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
+        sleep(400);
+    }
 
 }
