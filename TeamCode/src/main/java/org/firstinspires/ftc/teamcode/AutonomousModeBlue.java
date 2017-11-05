@@ -94,13 +94,10 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
         goBackToCryptoBox(keyColumnPos);
-        mecanumDriveForDistance(0.0, -0.5, 100.0);
-        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        mecanumDriveForDistance(0.0, -0.4, 300.0);
-
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.5, 0.0);
         // need to let go of block
         sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
 
 //        telemetry.update();
 //        RobotPos();
@@ -111,11 +108,11 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
     private KeyPositions moveToFindPictograph() {
-        DriveTrain.mecanum(baseMotorArray,-0.5,0.0,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
 
         // aline robot with pictograph
         final long startTime = System.currentTimeMillis();
-        final long maxTime = 700 + startTime;
+        final long maxTime = 300 + startTime;
         boolean found = false;
         telemetry.addData("begin loop at: ", System.currentTimeMillis());
         telemetry.addData("time limit: ", maxTime);
@@ -509,30 +506,38 @@ public class AutonomousModeBlue extends LinearOpMode {
 
     }
     void goBackToCryptoBox(KeyPositions keyColumnPos) {
+        DriveTrain.mecanum(baseMotorArray, 0.7, 0.0, 0.0);
         switch (keyColumnPos) {
             case Right:
-                while (findPictograph().distance > -520.0) {
+                while (findPictograph().distance > -390.0) {
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
                     telemetry.update();
                 }
                 break;
             case Unknown:
+                while (findPictograph().distance > -560.0) {
+                    sleep(10);
+                    telemetry.addData("Dist:", findPictograph().distance);
+                    telemetry.update();
+                }
+                break;
 
             case Center:
-                while (findPictograph().distance > -760.0) {
+                while (findPictograph().distance > -560.0) {
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
                     telemetry.update();
                 }
                 break;
             case Left:
-                while (findPictograph().distance > -920.0) {
+                while (findPictograph().distance > -750.0) {
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
                     telemetry.update();
                 }
                 break;
         }
+        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
     }
 }
