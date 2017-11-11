@@ -93,8 +93,8 @@ public abstract class AutonomousModeBase extends LinearOpMode {
         waitForStart();
 
         final KeyPositions keyColumnPos = moveToFindPictograph();
-
-
+        alineWithPictograph(false);
+        alineWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
         goIntoCryptoBox();
         letGoOfGlyph();
@@ -105,19 +105,47 @@ public abstract class AutonomousModeBase extends LinearOpMode {
         requestOpModeStop();
     }
 
+    private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
+        final long startTime = System.currentTimeMillis();
+        final long maxTime = 1000 + startTime;
+        boolean withinRange = false;
+        if (fixingTurn){
+            if (findPictograph().rotation > 0.0){
+                DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.3);
+            }else {
+                DriveTrain.mecanum(baseMotorArray,0.0,0.0,-0.3);
+            }
+        }else {
+            if (findPictograph().horizontalOffSet > 0.0){
+                DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
+            }else {
+                DriveTrain.mecanum(baseMotorArray,0.0,-0.5,0.0);
+            }
+        }
 
+        while (!withinRange && System.currentTimeMillis() < maxTime){
+            double valueToDecrease;
+            if (fixingTurn){
+                valueToDecrease = findPictograph().rotation;
+            }else {
+                valueToDecrease = findPictograph().horizontalOffSet;
+            }
+            withinRange = Math.abs(valueToDecrease) < 30.0;
+            sleep(10);
+        }
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+    }
 
 
     private KeyPositions moveToFindPictograph() {
         DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
 
-        // aline robot with pictograph
+        // move robot to pictograph
         final long startTime = System.currentTimeMillis();
         final long maxTime = 300 + startTime;
         boolean found = false;
         telemetry.addData("begin loop at: ", System.currentTimeMillis());
         telemetry.addData("time limit: ", maxTime);
-        telemetry.update();
         while(!found && System.currentTimeMillis() < maxTime)
 
         {
@@ -130,7 +158,19 @@ public abstract class AutonomousModeBase extends LinearOpMode {
         telemetry.update();
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(1000);
-        final  KeyPositions keyColumnPos = findPictograph().keyPosition;
+        KeyPositions keyColumnPos = findPictograph().keyPosition;
+        for(int i = -1; i < 2; i += 2) { // search twice more for the pictograph if can't find it
+            if (keyColumnPos == KeyPositions.Unknown) {
+                DriveTrain.mecanum(baseMotorArray, 0.0, 0.6*i, 0.0);
+                sleep(100);
+                if (i > 0){
+                    sleep(100);
+                }
+                DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+                sleep(1000);
+                keyColumnPos = findPictograph().keyPosition;
+            }
+        }
         telemetry.addData("key pos: ",keyColumnPos);
         telemetry.update();
 
