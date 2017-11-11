@@ -14,7 +14,6 @@ import java.util.ArrayList;
  */
 
 @TeleOp(name = "Vashon 5961 teleop", group = "Vashon 5961")
-
 public class TeleOpMode extends OpMode{
     private Servo leftServo;
     private Servo rightServo;

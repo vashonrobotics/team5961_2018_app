@@ -32,7 +32,7 @@ import java.util.List;
  */
 
 public abstract class AutonomousModeBase extends LinearOpMode {
-    private final boolean isRed;
+    private boolean isRed;
     private ArrayList baseMotorArray = new ArrayList();
     private VuforiaLocalizer vuforia;
     OpenGLMatrix lastLocation = null;
@@ -127,10 +127,13 @@ public abstract class AutonomousModeBase extends LinearOpMode {
             double valueToDecrease;
             if (fixingTurn){
                 valueToDecrease = findPictograph().rotation;
+                telemetry.addData("rotation: ",valueToDecrease);
             }else {
                 valueToDecrease = findPictograph().horizontalOffSet;
+                telemetry.addData("horizontal off set: ",valueToDecrease);
             }
-            withinRange = Math.abs(valueToDecrease) < 30.0;
+            telemetry.update();
+            withinRange = Math.abs(valueToDecrease) < 10.0;
             sleep(10);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
@@ -359,11 +362,11 @@ public abstract class AutonomousModeBase extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
     }
     void goIntoCryptoBox() {
-        if (isRed) {
+//        if (isRed) {
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
             sleep(1800);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        }
+//        }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.5, 0.0);
         sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);

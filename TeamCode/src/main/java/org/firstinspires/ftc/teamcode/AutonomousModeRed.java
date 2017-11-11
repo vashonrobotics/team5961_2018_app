@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-
-
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 
 /**
@@ -11,10 +10,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
  */
 // made for red in corner
 @Autonomous(name = "Vashon 5961 AutonomousRed", group = "Vashon 5961")
-// made for red in the corner
+//@Disabled
 class AutonomousModeRed extends AutonomousModeBase {
 
-    public AutonomousModeRed() {
+   public AutonomousModeRed() {
         super(true);
-    }
+   }
 }
