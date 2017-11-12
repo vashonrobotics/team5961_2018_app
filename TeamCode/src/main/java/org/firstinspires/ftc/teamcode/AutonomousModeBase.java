@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -23,16 +20,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 /**
  * Created by FTC on 9/23/2017.
  * updated by Caz
  */
-
-public abstract class AutonomousModeBase extends LinearOpMode {
-    private boolean isRed;
+@Autonomous(name = "Autonomous base", group = "Vashon 5961")
+public class AutonomousModeBase extends LinearOpMode {
+    private boolean isRed = true;
     private ArrayList baseMotorArray = new ArrayList();
     private VuforiaLocalizer vuforia;
     OpenGLMatrix lastLocation = null;
@@ -45,9 +41,9 @@ public abstract class AutonomousModeBase extends LinearOpMode {
     Servo leftServo;
     Servo rightServo;
 
-    public AutonomousModeBase(boolean isRed){
-        this.isRed = isRed;
-    }
+//    public AutonomousModeBase(boolean isRed){
+//        this.isRed = isRed;
+//    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -96,6 +92,8 @@ public abstract class AutonomousModeBase extends LinearOpMode {
         alineWithPictograph(false);
         alineWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
+        TurnAroundAndGoAwayfromCryptoBoxAndBack();
+
         goIntoCryptoBox();
         letGoOfGlyph();
 
@@ -103,6 +101,16 @@ public abstract class AutonomousModeBase extends LinearOpMode {
 //        telemetry.update();
 //        RobotPos();
         requestOpModeStop();
+    }
+
+    private void TurnAroundAndGoAwayfromCryptoBoxAndBack() {
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
+        sleep(1500);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+        sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
     private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
@@ -337,15 +345,16 @@ public abstract class AutonomousModeBase extends LinearOpMode {
                 break;
 
             case Center:
-                while (findPictograph().distance > -560.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -500.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
                         requestOpModeStop();
                     }
                     telemetry.addData("Dist:", findPictograph().distance);
-                    telemetry.update();
+
                 }
+                telemetry.update();
                 break;
             case Left:
                 while (findPictograph().distance > -750.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
@@ -364,10 +373,10 @@ public abstract class AutonomousModeBase extends LinearOpMode {
     void goIntoCryptoBox() {
 //        if (isRed) {
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-            sleep(1800);
+            sleep(1600);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
 //        }
-        DriveTrain.mecanum(baseMotorArray, 0.0, 0.5, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.0, -0.5, 0.0);
         sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }

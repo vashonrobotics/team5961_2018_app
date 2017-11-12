@@ -42,7 +42,7 @@ public class TeleOpMode extends OpMode{
         leftServo.setPosition(0.8);
         rightServo.setPosition(0.8);
         liftStartPos = lift.getCurrentPosition();
-        maxLiftPos = -2600 + liftStartPos;
+        maxLiftPos = -2400 + liftStartPos;
 
 
     }
@@ -63,7 +63,7 @@ public class TeleOpMode extends OpMode{
 
             //  up is negative
         if ((-gamepad2.left_stick_y > 0 && (Math.abs(maxLiftPos) <= Math.abs(lift.getCurrentPosition())))||
-                (-gamepad2.left_stick_y < 0 && (Math.abs(liftStartPos)+10 >= Math.abs(lift.getCurrentPosition())))) {
+                (-gamepad2.left_stick_y < 0 && (Math.abs(liftStartPos+10) >= Math.abs(lift.getCurrentPosition()+10)))) {
             lift.setPower(0);
 
         }else {
