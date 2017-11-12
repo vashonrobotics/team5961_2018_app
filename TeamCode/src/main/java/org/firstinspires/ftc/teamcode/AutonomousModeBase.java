@@ -92,10 +92,11 @@ public class AutonomousModeBase extends LinearOpMode {
         alineWithPictograph(false);
         alineWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
-        TurnAroundAndGoAwayfromCryptoBoxAndBack();
+        TurnAroundAndGoAwayFromCryptoBoxAndBack();
 
         goIntoCryptoBox();
         letGoOfGlyph();
+        moveAwayFromGlyph();
 
 
 //        telemetry.update();
@@ -103,12 +104,18 @@ public class AutonomousModeBase extends LinearOpMode {
         requestOpModeStop();
     }
 
-    private void TurnAroundAndGoAwayfromCryptoBoxAndBack() {
+    private void moveAwayFromGlyph() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+    }
+
+    private void TurnAroundAndGoAwayFromCryptoBoxAndBack() {
+        DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         sleep(1500);
-        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }

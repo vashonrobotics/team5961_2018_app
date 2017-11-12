@@ -94,11 +94,16 @@ public class AutonomousModeBlue extends LinearOpMode {
         goBackToCryptoBox(keyColumnPos);
         goIntoCryptoBox();
         letGoOfGlyph();
-
+        moveAwayFromGlyph();
 
 //        telemetry.update();
 //        RobotPos();
         requestOpModeStop();
+    }
+    private void moveAwayFromGlyph() {
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
     private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
