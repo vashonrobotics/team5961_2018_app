@@ -362,11 +362,22 @@ public class AutonomousModeBlue extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
     }
-    void goIntoCryptoBox() {
-        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
-        sleep(3000);
+    private void goIntoCryptoBox() {
+        GoAroundBalancingStone();
+        DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
+        sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
+
+    private void GoAroundBalancingStone() {
+        DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
+        sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(2000);
+        DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
+        sleep(1000);
+    }
+
     private void letGoOfGlyph() {
         leftServo.setPosition(0.8);
         rightServo.setPosition(0.8);
