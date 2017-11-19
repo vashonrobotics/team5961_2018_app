@@ -89,7 +89,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         waitForStart();
 
         final KeyPositions keyColumnPos = moveToFindPictograph();
-        alineWithPictograph(false);
+//        alineWithPictograph(false);
         alineWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
         goIntoCryptoBox();
@@ -322,7 +322,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
             case Right:
-                while (findPictograph().distance > -390.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -280.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
 
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
@@ -338,7 +338,7 @@ public class AutonomousModeBlue extends LinearOpMode {
                 break;
 
             case Center:
-                while (findPictograph().distance > -500.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -540.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
@@ -349,7 +349,7 @@ public class AutonomousModeBlue extends LinearOpMode {
                 }
                 break;
             case Left:
-                while (findPictograph().distance > -750.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -800.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
@@ -379,7 +379,7 @@ public class AutonomousModeBlue extends LinearOpMode {
     }
 
     private void letGoOfGlyph() {
-        leftServo.setPosition(0.8);
+        leftServo.setPosition(0.9);
         rightServo.setPosition(0.8);
     }
 }
