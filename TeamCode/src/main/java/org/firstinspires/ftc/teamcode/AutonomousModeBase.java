@@ -95,7 +95,7 @@ public class AutonomousModeBase extends LinearOpMode {
 //        alineWithPictograph(false);
         alineWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
-        TurnAroundAndGoAwayFromCryptoBoxAndBack();
+        TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
 
         goIntoCryptoBox();
         letGoOfGlyph();
@@ -120,11 +120,18 @@ public class AutonomousModeBase extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
-    private void TurnAroundAndGoAwayFromCryptoBoxAndBack() {
+    private void TurnAroundAndGoAwayFromCryptoBoxAndBack(KeyPositions KeyPosition) {
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(500);
+        if (KeyPosition == KeyPositions.Center){
+            sleep(200);
+        }
+        if (KeyPosition == KeyPositions.Right){
+            sleep(300);
+        }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
+
         telemetry.addData("StartValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
@@ -140,6 +147,12 @@ public class AutonomousModeBase extends LinearOpMode {
         goTowardCryptoBoxPartWay();
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(500);
+        if (KeyPosition == KeyPositions.Center){
+            sleep(200);
+        }
+        if (KeyPosition == KeyPositions.Right){
+            sleep(300);
+        }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
     }
@@ -375,7 +388,7 @@ public class AutonomousModeBase extends LinearOpMode {
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
             case Right:
-                while (findPictograph().distance > -400.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -280.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
 
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
@@ -391,11 +404,11 @@ public class AutonomousModeBase extends LinearOpMode {
                 break;
 
             case Center:
-                while (findPictograph().distance > -585.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -540.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-                        requestOpModeStop();
+//                        telemetry.addData()
                     }
                     telemetry.addData("Dist:", findPictograph().distance);
 
