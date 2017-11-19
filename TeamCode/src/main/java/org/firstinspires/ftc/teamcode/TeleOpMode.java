@@ -39,7 +39,7 @@ public class TeleOpMode extends OpMode{
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.8);
+        leftServo.setPosition(0.9);
         rightServo.setPosition(0.8);
         liftStartPos = lift.getCurrentPosition();
         maxLiftPos = -2400 + liftStartPos;
@@ -84,7 +84,7 @@ public class TeleOpMode extends OpMode{
 
         }else{
 
-            leftServo.setPosition(0.8);
+            leftServo.setPosition(0.9);
             rightServo.setPosition(0.8);
 
         }

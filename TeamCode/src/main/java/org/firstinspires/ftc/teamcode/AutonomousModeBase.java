@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -64,6 +66,7 @@ public class AutonomousModeBase extends LinearOpMode {
         rightServo.setPosition(0.0);
 
 
+
         parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = "";
@@ -89,7 +92,7 @@ public class AutonomousModeBase extends LinearOpMode {
         waitForStart();
 
         final KeyPositions keyColumnPos = moveToFindPictograph();
-        alineWithPictograph(false);
+//        alineWithPictograph(false);
         alineWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
         TurnAroundAndGoAwayFromCryptoBoxAndBack();
@@ -104,31 +107,67 @@ public class AutonomousModeBase extends LinearOpMode {
         requestOpModeStop();
     }
 
-    private void moveAwayFromGlyph() {
+    private void goTowardCryptoBoxPartWay() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(750);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
+    }
+
+    private void moveAwayFromGlyph() {
+        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
         sleep(200);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
     private void TurnAroundAndGoAwayFromCryptoBoxAndBack() {
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
-        sleep(1000);
-        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-        sleep(1500);
-        DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
-        sleep(1000);
+        sleep(500);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(500);
+        telemetry.addData("StartValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
+        double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
+        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition()< startOfTurn + 3700){
+            sleep(10);
+        }
+
+        //sleep(1490);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        telemetry.addData("EndValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
+        telemetry.update();
+        sleep(1000);
+        goTowardCryptoBoxPartWay();
+        DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
+        sleep(500);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(500);
     }
 
     private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
-        boolean withinRange = false;
+        double valueToDecrease;
+        if (fixingTurn){
+            valueToDecrease = findPictograph().rotation;
+            telemetry.addData("rotation: ",valueToDecrease);
+        }else {
+            valueToDecrease = findPictograph().horizontalOffSet;
+            telemetry.addData("horizontal off set: ",valueToDecrease);
+        }
+
+
+        boolean withinRange = Math.abs(valueToDecrease) < 10.0;
+
         if (fixingTurn){
             if (findPictograph().rotation > 0.0){
-                DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.3);
+                for (int i = 0; i < 4; i += 2){
+                    ((DcMotor)baseMotorArray.get(i)).setPower(0.4);
+                }
             }else {
-                DriveTrain.mecanum(baseMotorArray,0.0,0.0,-0.3);
+                for (int i = 0; i < 4; i += 2){
+                    ((DcMotor)baseMotorArray.get(i)).setPower(0.4);
+                }
             }
         }else {
             if (findPictograph().horizontalOffSet > 0.0){
@@ -139,7 +178,7 @@ public class AutonomousModeBase extends LinearOpMode {
         }
 
         while (!withinRange && System.currentTimeMillis() < maxTime){
-            double valueToDecrease;
+
             if (fixingTurn){
                 valueToDecrease = findPictograph().rotation;
                 telemetry.addData("rotation: ",valueToDecrease);
@@ -332,11 +371,11 @@ public class AutonomousModeBase extends LinearOpMode {
 
     }
     void goBackToCryptoBox(KeyPositions keyColumnPos) {
-        DriveTrain.mecanum(baseMotorArray, 0.7, 0.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.5, 0.0, 0.0);
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
             case Right:
-                while (findPictograph().distance > -390.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -400.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
 
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
@@ -352,7 +391,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 break;
 
             case Center:
-                while (findPictograph().distance > -500.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -585.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
@@ -364,7 +403,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 telemetry.update();
                 break;
             case Left:
-                while (findPictograph().distance > -750.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -800.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
@@ -376,19 +415,16 @@ public class AutonomousModeBase extends LinearOpMode {
                 break;
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
+        sleep(3000);
     }
     void goIntoCryptoBox() {
-//        if (isRed) {
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-            sleep(1600);
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-//        }
-        DriveTrain.mecanum(baseMotorArray, 0.0, -0.5, 0.0);
-        sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
+        sleep(2000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
     private void letGoOfGlyph() {
-        leftServo.setPosition(0.8);
+        leftServo.setPosition(0.9);
         rightServo.setPosition(0.8);
+        sleep(1000);
     }
 }
