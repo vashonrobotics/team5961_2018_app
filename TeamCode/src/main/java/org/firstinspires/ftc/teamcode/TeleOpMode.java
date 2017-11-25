@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -14,7 +17,6 @@ import java.util.ArrayList;
  */
 
 @TeleOp(name = "Vashon 5961 teleop", group = "Vashon 5961")
-
 public class TeleOpMode extends OpMode{
     private Servo leftServo;
     private Servo rightServo;
@@ -22,6 +24,12 @@ public class TeleOpMode extends OpMode{
     private double motorSpeedMultiplier = 1.0;
     private ArrayList baseMotorArray;
     private int liftStartPos;
+    private int maxLiftPos;
+    private ColorSensor jewelColor;
+    private int caz = 1;
+//    private DcMotor relicGrabberExtender;
+//    private Servo RelicGrabber;
+//    private Servo RelicLifter;
 
     @Override
     public void init() {
@@ -39,39 +47,70 @@ public class TeleOpMode extends OpMode{
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.8);
-        rightServo.setPosition(0.5);
         liftStartPos = lift.getCurrentPosition();
+        maxLiftPos = -2400 + liftStartPos;
+        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+        jewelColor.enableLed(false);
+
+
+//        relicGrabberExtender = hardwareMap.dcMotor.get("relicArm");
+//        RelicGrabber = hardwareMap.servo.get("relicGrabber");
+//        RelicLifter = hardwareMap.servo.get("relicLifter");
+
 
 
     }
 
     @Override
     public void loop() {
-        if (gamepad1.right_trigger >= 0.5) {
-            motorSpeedMultiplier = 1.0;
-        }else {
-            motorSpeedMultiplier = 0.45;
-        }
 
+
+
+        telemetry.addData("R: ", jewelColor.red());
+        telemetry.addData("G: ", jewelColor.green());
+        telemetry.addData("B: ", jewelColor.blue());
+        float[] colorInHSV = {};
+//        Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
+//        telemetry.addData("HSV: ", colorInHSV);
+//        telemetry.addData("H: ", colorInHSV[0]);
+
+        if (gamepad1.right_trigger >= 0.5) {
+            motorSpeedMultiplier = 0.4;
+        }else {
+            motorSpeedMultiplier = 1.0;
+        }
+        telemetry.addData("motorModiFire: ",motorSpeedMultiplier);
+        telemetry.update();
         DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_x)*motorSpeedMultiplier,
                 ((double)gamepad1.left_stick_y)*motorSpeedMultiplier,
                 ((double)gamepad1.right_stick_x)*motorSpeedMultiplier);
 
-        lift.setPower(-gamepad2.left_stick_y/2);
-//        if (-gamepad2.left_stick_y > 0 && (((int)(2.25*1250.0) + liftStartPos) >=lift.getCurrentPosition())) {
-//            lift.setPower(0);
-//        }
 
-        if(gamepad2.right_trigger <= .5){
+            //  up is negative
+        if ((-gamepad2.left_stick_y > 0 && (Math.abs(maxLiftPos) <= Math.abs(lift.getCurrentPosition())))||
+                (-gamepad2.left_stick_y < 0 && (Math.abs(liftStartPos+10) >= Math.abs(lift.getCurrentPosition()+10)))) {
+            lift.setPower(0);
 
-            leftServo.setPosition(0.0);
-            rightServo.setPosition(0.0);
+        }else {
+            lift.setPower(gamepad2.left_stick_y*3/4);
+        }
+//        telemetry.addData("lift pos: ", lift.getCurrentPosition());
+//        telemetry.addData("max lift pos: ", maxLiftPos);
+//        telemetry.addData("lift start pos: " , liftStartPos);
+//        telemetry.addData("stick pos: ", gamepad2.left_stick_y);
+//        telemetry.addData("up bound stopped: ", (-gamepad2.left_stick_y > 0 && (Math.abs(maxLiftPos) <= Math.abs(lift.getCurrentPosition()))));
+//        telemetry.addData("low bound stopped: ", (-gamepad2.left_stick_y < 0 && (Math.abs(liftStartPos) >= Math.abs(lift.getCurrentPosition()))));
+//        telemetry.update();
+
+        if(gamepad2.right_trigger >= .5){
+
+            leftServo.setPosition(0.2);
+            rightServo.setPosition(0.2);
 
         }else{
 
-            leftServo.setPosition(0.8);
-            rightServo.setPosition(0.5);
+            leftServo.setPosition(0.9);
+            rightServo.setPosition(0.8);
 
         }
 
