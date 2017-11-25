@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -35,13 +36,14 @@ public class AutonomousModeBase extends LinearOpMode {
     private VuforiaLocalizer vuforia;
     OpenGLMatrix lastLocation = null;
     private static final String TAG = "Vuforia Navigation Sample";
-    //    ColorSensor colorSensor;
+    private ColorSensor jewelColor;
     double wheelCircumference = 100.0 * Math.PI; // circumference in mm
     double ticksPerRotation = 1125.0;  // number of encoder ticks to make a full rotation (about)
     VuforiaLocalizer.Parameters parameters;
     VuforiaTrackable relicTemplate;
     Servo leftServo;
     Servo rightServo;
+    Servo jewelMover;
 
 //    public AutonomousModeBase(boolean isRed){
 //        this.isRed = isRed;
@@ -64,7 +66,8 @@ public class AutonomousModeBase extends LinearOpMode {
         leftServo.setDirection(Servo.Direction.REVERSE);
         leftServo.setPosition(0.0);
         rightServo.setPosition(0.0);
-
+        jewelMover = hardwareMap.servo.get("jewel servo");
+        jewelColor = hardwareMap.colorSensor.get("jewel color");
 
 
         parameters = new VuforiaLocalizer.Parameters();
@@ -106,7 +109,15 @@ public class AutonomousModeBase extends LinearOpMode {
 //        RobotPos();
         requestOpModeStop();
     }
+    private void lookForJewel() {
+        jewelMover.setPosition(1.0);
+        if ((jewelColor.blue() > jewelColor.red()) && jewelColor.green() < 100 && jewelColor.blue() > 200){
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
+        }else if ((jewelColor.blue() < jewelColor.red()) && jewelColor.green() < 100 && jewelColor.red() > 200){
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, -1.0);
+        }
 
+    }
     private void goTowardCryptoBoxPartWay() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
         sleep(750);
@@ -389,13 +400,11 @@ public class AutonomousModeBase extends LinearOpMode {
         switch (keyColumnPos) {
             case Right:
                 while (findPictograph().distance > -280.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
-
+                    if (findPictograph().distance == 0){
+                        telemetry.addData("LostPictographPos: ", findPictograph().distance);
+                    }
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
-                    if (findPictograph().distance == 0){
-                        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-                        requestOpModeStop();
-                    }
                     telemetry.update();
                 }
                 break;
@@ -405,22 +414,20 @@ public class AutonomousModeBase extends LinearOpMode {
 
             case Center:
                 while (findPictograph().distance > -540.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
-                    sleep(10);
                     if (findPictograph().distance == 0){
-                        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-//                        telemetry.addData()
+                        telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
+                    sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
-
+                    telemetry.update();
                 }
-                telemetry.update();
+
                 break;
             case Left:
                 while (findPictograph().distance > -800.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
-                        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-                        requestOpModeStop();
+                        telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
                     telemetry.addData("Dist:", findPictograph().distance);
                     telemetry.update();
@@ -428,7 +435,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 break;
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-        sleep(3000);
+        sleep(200);
     }
     void goIntoCryptoBox() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);

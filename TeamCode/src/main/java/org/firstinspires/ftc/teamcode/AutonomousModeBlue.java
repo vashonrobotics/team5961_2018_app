@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -33,13 +34,14 @@ public class AutonomousModeBlue extends LinearOpMode {
     private VuforiaLocalizer vuforia;
     OpenGLMatrix lastLocation = null;
     private static final String TAG = "Vuforia Navigation Sample";
-    //    ColorSensor colorSensor;
-    double wheelCircumference = 100.0 * Math.PI; // circumference in mm
-    double ticksPerRotation = 1125.0;  // number of encoder ticks to make a full rotation (about)
-    VuforiaLocalizer.Parameters parameters;
-    VuforiaTrackable relicTemplate;
-    Servo leftServo;
-    Servo rightServo;
+    private ColorSensor jewelColor;
+    private double wheelCircumference = 100.0 * Math.PI; // circumference in mm
+    private double ticksPerRotation = 1125.0;  // number of encoder ticks to make a full rotation (about)
+    private VuforiaLocalizer.Parameters parameters;
+    private VuforiaTrackable relicTemplate;
+    private Servo leftServo;
+    private Servo rightServo;
+    private Servo jewelMover;
 
 //    public AutonomousModeBase(boolean isRed){
 //        this.isRed = isRed;
@@ -60,8 +62,10 @@ public class AutonomousModeBlue extends LinearOpMode {
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.0);
-        rightServo.setPosition(0.0);
+        leftServo.setPosition(0.2);
+        rightServo.setPosition(0.2);
+        jewelMover = hardwareMap.servo.get("jewel servo");
+        jewelColor = hardwareMap.colorSensor.get("jewel color");
 
 
         parameters = new VuforiaLocalizer.Parameters();
@@ -83,11 +87,8 @@ public class AutonomousModeBlue extends LinearOpMode {
          */
 
 
-        // need to set servo pos when working
-
-
         waitForStart();
-
+        lookForJewel();
         final KeyPositions keyColumnPos = moveToFindPictograph();
 //        alineWithPictograph(false);
         alineWithPictograph(true);
@@ -100,8 +101,19 @@ public class AutonomousModeBlue extends LinearOpMode {
 //        RobotPos();
         requestOpModeStop();
     }
+
+    private void lookForJewel() {
+        jewelMover.setPosition(1.0);
+        if ((jewelColor.blue() > jewelColor.red()) && jewelColor.green() < 100 && jewelColor.blue() > 200){
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
+        }else if ((jewelColor.blue() < jewelColor.red()) && jewelColor.green() < 100 && jewelColor.red() > 200){
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, -1.0);
+        }
+
+    }
+
     private void moveAwayFromGlyph() {
-        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
         sleep(200);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
@@ -109,12 +121,27 @@ public class AutonomousModeBlue extends LinearOpMode {
     private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
-        boolean withinRange = false;
+        double valueToDecrease;
+        if (fixingTurn){
+            valueToDecrease = findPictograph().rotation;
+            telemetry.addData("rotation: ",valueToDecrease);
+        }else {
+            valueToDecrease = findPictograph().horizontalOffSet;
+            telemetry.addData("horizontal off set: ",valueToDecrease);
+        }
+
+
+        boolean withinRange = Math.abs(valueToDecrease) < 10.0;
+
         if (fixingTurn){
             if (findPictograph().rotation > 0.0){
-                DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.3);
+                for (int i = 0; i < 4; i += 2){
+                    ((DcMotor)baseMotorArray.get(i)).setPower(0.4);
+                }
             }else {
-                DriveTrain.mecanum(baseMotorArray,0.0,0.0,-0.3);
+                for (int i = 0; i < 4; i += 2){
+                    ((DcMotor)baseMotorArray.get(i)).setPower(0.4);
+                }
             }
         }else {
             if (findPictograph().horizontalOffSet > 0.0){
@@ -125,7 +152,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         }
 
         while (!withinRange && System.currentTimeMillis() < maxTime){
-            double valueToDecrease;
+
             if (fixingTurn){
                 valueToDecrease = findPictograph().rotation;
                 telemetry.addData("rotation: ",valueToDecrease);
@@ -318,18 +345,16 @@ public class AutonomousModeBlue extends LinearOpMode {
 
     }
     void goBackToCryptoBox(KeyPositions keyColumnPos) {
-        DriveTrain.mecanum(baseMotorArray, 0.7, 0.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.5, 0.0, 0.0);
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
             case Right:
                 while (findPictograph().distance > -280.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
-
+                    if (findPictograph().distance == 0){
+                        telemetry.addData("LostPictographPos: ", findPictograph().distance);
+                    }
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
-                    if (findPictograph().distance == 0){
-                        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-                        requestOpModeStop();
-                    }
                     telemetry.update();
                 }
                 break;
@@ -341,8 +366,7 @@ public class AutonomousModeBlue extends LinearOpMode {
                 while (findPictograph().distance > -540.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
-                        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-                        requestOpModeStop();
+                        telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
                     telemetry.addData("Dist:", findPictograph().distance);
                     telemetry.update();
@@ -352,8 +376,7 @@ public class AutonomousModeBlue extends LinearOpMode {
                 while (findPictograph().distance > -800.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
-                        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-                        requestOpModeStop();
+                        telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
                     telemetry.addData("Dist:", findPictograph().distance);
                     telemetry.update();
@@ -361,21 +384,28 @@ public class AutonomousModeBlue extends LinearOpMode {
                 break;
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
+        sleep(200);
     }
     private void goIntoCryptoBox() {
         GoAroundBalancingStone();
         DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
-        sleep(1000);
+        sleep(1500);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
     private void GoAroundBalancingStone() {
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(100);
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
         sleep(2000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(100);
         DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
         sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(100);
     }
 
     private void letGoOfGlyph() {
