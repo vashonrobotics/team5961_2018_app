@@ -65,7 +65,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         leftServo.setPosition(0.2);
         rightServo.setPosition(0.2);
         jewelMover = hardwareMap.servo.get("jewel servo");
-        jewelColor = hardwareMap.colorSensor.get("jewel color");
+        jewelColor = hardwareMap.colorSensor.get("jewelColor");
 
 
         parameters = new VuforiaLocalizer.Parameters();
@@ -88,12 +88,14 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
         waitForStart();
-        lookForJewel();
+//        lookForJewel();
         final KeyPositions keyColumnPos = moveToFindPictograph();
+        telemetry.addData("keypos: ", keyColumnPos);
+        telemetry.update();
 //        alineWithPictograph(false);
         alineWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
-        goIntoCryptoBox();
+        goIntoCryptoBox(keyColumnPos);
         letGoOfGlyph();
         moveAwayFromGlyph();
 
@@ -103,16 +105,26 @@ public class AutonomousModeBlue extends LinearOpMode {
     }
 
     private void lookForJewel() {
+        jewelColor.enableLed(true);
         jewelMover.setPosition(1.0);
         if ((jewelColor.blue() > jewelColor.red()) && jewelColor.green() < 100 && jewelColor.blue() > 200){
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         }else if ((jewelColor.blue() < jewelColor.red()) && jewelColor.green() < 100 && jewelColor.red() > 200){
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, -1.0);
         }
+        jewelMover.setPosition(0.2);
 
     }
 
     private void moveAwayFromGlyph() {
+        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(300);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
         DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
         sleep(200);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
@@ -169,7 +181,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
     private KeyPositions moveToFindPictograph() {
-        DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.9,0.0);
 
         // move robot to pictograph
         final long startTime = System.currentTimeMillis();
@@ -345,10 +357,10 @@ public class AutonomousModeBlue extends LinearOpMode {
 
     }
     void goBackToCryptoBox(KeyPositions keyColumnPos) {
-        DriveTrain.mecanum(baseMotorArray, 0.5, 0.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.6, 0.0, 0.0);
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
-            case Right:
+            case Left:
                 while (findPictograph().distance > -280.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
@@ -372,7 +384,7 @@ public class AutonomousModeBlue extends LinearOpMode {
                     telemetry.update();
                 }
                 break;
-            case Left:
+            case Right:
                 while (findPictograph().distance > -800.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
@@ -385,25 +397,29 @@ public class AutonomousModeBlue extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(200);
+        alineWithPictograph(true);
     }
-    private void goIntoCryptoBox() {
-        GoAroundBalancingStone();
+    private void goIntoCryptoBox(KeyPositions keyPosition) {
+        GoAroundBalancingStone(keyPosition);
         DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
-        sleep(1500);
+        sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
-    private void GoAroundBalancingStone() {
-        DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
-        sleep(1000);
+    private void GoAroundBalancingStone(KeyPositions keyPosition) {
+        DriveTrain.mecanum(baseMotorArray, 0.8, 0.0, 0.0);
+        sleep(700);
+        if(keyPosition == KeyPositions.Left){
+            sleep(400);
+        }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(100);
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
-        sleep(2000);
+        sleep(1500);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(100);
-        DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
-        sleep(1000);
+        DriveTrain.mecanum(baseMotorArray, -0.8, 0.0, 0.0);
+        sleep(700);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(100);
     }

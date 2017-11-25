@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -67,7 +69,7 @@ public class AutonomousModeBase extends LinearOpMode {
         leftServo.setPosition(0.0);
         rightServo.setPosition(0.0);
         jewelMover = hardwareMap.servo.get("jewel servo");
-        jewelColor = hardwareMap.colorSensor.get("jewel color");
+        jewelColor = hardwareMap.colorSensor.get("jewelColor");
 
 
         parameters = new VuforiaLocalizer.Parameters();
@@ -111,11 +113,27 @@ public class AutonomousModeBase extends LinearOpMode {
     }
     private void lookForJewel() {
         jewelMover.setPosition(1.0);
-        if ((jewelColor.blue() > jewelColor.red()) && jewelColor.green() < 100 && jewelColor.blue() > 200){
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-        }else if ((jewelColor.blue() < jewelColor.red()) && jewelColor.green() < 100 && jewelColor.red() > 200){
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, -1.0);
+        float avgHue = 0f;
+        for(int i = 0; i < 4; i++) {
+            float[] colorInHSV = {};
+            Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
+
+            float hue = colorInHSV[0];
+            if (hue >= 330){
+                avgHue = (avgHue*i + 30) / (i + 1);
+            }else {
+                avgHue = (avgHue*i + hue) / (i + 1);
+            }
+            sleep(100);
         }
+        if (120 <= avgHue && avgHue <= 250 ){ // blue
+            DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
+        }else if (avgHue <= 30){ // red
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.7, 0.0);
+        }
+        sleep(100);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
 
     }
     private void goTowardCryptoBoxPartWay() {
@@ -134,8 +152,10 @@ public class AutonomousModeBase extends LinearOpMode {
     private void TurnAroundAndGoAwayFromCryptoBoxAndBack(KeyPositions KeyPosition) {
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(500);
-        if (KeyPosition == KeyPositions.Center){
+        if (KeyPosition == KeyPositions.Center || KeyPosition == KeyPositions.Unknown){
             sleep(200);
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+            alineWithPictograph(true);
         }
         if (KeyPosition == KeyPositions.Right){
             sleep(300);
@@ -219,7 +239,7 @@ public class AutonomousModeBase extends LinearOpMode {
 
 
     private KeyPositions moveToFindPictograph() {
-        DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.9,0.0);
 
         // move robot to pictograph
         final long startTime = System.currentTimeMillis();

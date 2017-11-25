@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -22,6 +25,11 @@ public class TeleOpMode extends OpMode{
     private ArrayList baseMotorArray;
     private int liftStartPos;
     private int maxLiftPos;
+    private ColorSensor jewelColor;
+    private int caz = 1;
+//    private DcMotor relicGrabberExtender;
+//    private Servo RelicGrabber;
+//    private Servo RelicLifter;
 
     @Override
     public void init() {
@@ -41,19 +49,38 @@ public class TeleOpMode extends OpMode{
         leftServo.setDirection(Servo.Direction.REVERSE);
         liftStartPos = lift.getCurrentPosition();
         maxLiftPos = -2400 + liftStartPos;
+        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+        jewelColor.enableLed(false);
+
+
+//        relicGrabberExtender = hardwareMap.dcMotor.get("relicArm");
+//        RelicGrabber = hardwareMap.servo.get("relicGrabber");
+//        RelicLifter = hardwareMap.servo.get("relicLifter");
+
 
 
     }
 
     @Override
     public void loop() {
+
+
+
+        telemetry.addData("R: ", jewelColor.red());
+        telemetry.addData("G: ", jewelColor.green());
+        telemetry.addData("B: ", jewelColor.blue());
+        float[] colorInHSV = {};
+//        Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
+//        telemetry.addData("HSV: ", colorInHSV);
+//        telemetry.addData("H: ", colorInHSV[0]);
+
         if (gamepad1.right_trigger >= 0.5) {
             motorSpeedMultiplier = 0.4;
         }else {
             motorSpeedMultiplier = 1.0;
         }
         telemetry.addData("motorModiFire: ",motorSpeedMultiplier);
-
+        telemetry.update();
         DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_x)*motorSpeedMultiplier,
                 ((double)gamepad1.left_stick_y)*motorSpeedMultiplier,
                 ((double)gamepad1.right_stick_x)*motorSpeedMultiplier);
@@ -65,7 +92,7 @@ public class TeleOpMode extends OpMode{
             lift.setPower(0);
 
         }else {
-            lift.setPower(gamepad2.left_stick_y/2);
+            lift.setPower(gamepad2.left_stick_y*3/4);
         }
 //        telemetry.addData("lift pos: ", lift.getCurrentPosition());
 //        telemetry.addData("max lift pos: ", maxLiftPos);
