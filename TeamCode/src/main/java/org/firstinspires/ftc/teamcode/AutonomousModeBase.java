@@ -239,7 +239,7 @@ public class AutonomousModeBase extends LinearOpMode {
 
 
     private KeyPositions moveToFindPictograph() {
-        DriveTrain.mecanum(baseMotorArray,0.0,0.9,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
 
         // move robot to pictograph
         final long startTime = System.currentTimeMillis();
@@ -258,7 +258,7 @@ public class AutonomousModeBase extends LinearOpMode {
         telemetry.addData("end loop at: ", System.currentTimeMillis());
         telemetry.update();
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-        sleep(1000);
+        sleep(2000);
         KeyPositions keyColumnPos = findPictograph().keyPosition;
         for(int i = -1; i < 2; i += 2) { // search twice more for the pictograph if can't find it
             if (keyColumnPos == KeyPositions.Unknown) {
@@ -268,7 +268,7 @@ public class AutonomousModeBase extends LinearOpMode {
                     sleep(100);
                 }
                 DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-                sleep(1000);
+                sleep(2000);
                 keyColumnPos = findPictograph().keyPosition;
             }
         }

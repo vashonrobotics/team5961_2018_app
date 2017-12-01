@@ -181,7 +181,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
     private KeyPositions moveToFindPictograph() {
-        DriveTrain.mecanum(baseMotorArray,0.0,0.9,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
 
         // move robot to pictograph
         final long startTime = System.currentTimeMillis();
@@ -200,7 +200,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         telemetry.addData("end loop at: ", System.currentTimeMillis());
         telemetry.update();
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-        sleep(1000);
+        sleep(2000);
         KeyPositions keyColumnPos = findPictograph().keyPosition;
         for(int i = -1; i < 2; i += 2) { // search twice more for the pictograph if can't find it
             if (keyColumnPos == KeyPositions.Unknown) {
@@ -210,7 +210,7 @@ public class AutonomousModeBlue extends LinearOpMode {
                     sleep(100);
                 }
                 DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-                sleep(1000);
+                sleep(2000);
                 keyColumnPos = findPictograph().keyPosition;
             }
         }
@@ -357,7 +357,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 
     }
     void goBackToCryptoBox(KeyPositions keyColumnPos) {
-        DriveTrain.mecanum(baseMotorArray, 0.6, 0.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.5, 0.0, 0.0);
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
             case Left:
@@ -407,21 +407,34 @@ public class AutonomousModeBlue extends LinearOpMode {
     }
 
     private void GoAroundBalancingStone(KeyPositions keyPosition) {
-        DriveTrain.mecanum(baseMotorArray, 0.8, 0.0, 0.0);
-        sleep(700);
-        if(keyPosition == KeyPositions.Left){
-            sleep(400);
+        DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
+        sleep(500);
+        if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
+            sleep(200);
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+            alineWithPictograph(true);
+        }
+        if (keyPosition == KeyPositions.Left){
+            sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(100);
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
         sleep(1500);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        sleep(100);
-        DriveTrain.mecanum(baseMotorArray, -0.8, 0.0, 0.0);
-        sleep(700);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
+        sleep(500);
+        if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
+            sleep(200);
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+            alineWithPictograph(true);
+        }
+        if (keyPosition == KeyPositions.Left){
+            sleep(300);
+        }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        sleep(100);
+        sleep(200);
     }
 
     private void letGoOfGlyph() {
