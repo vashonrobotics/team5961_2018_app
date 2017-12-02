@@ -66,15 +66,15 @@ public class AutonomousModeBase extends LinearOpMode {
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.0);
-        rightServo.setPosition(0.0);
-        jewelMover = hardwareMap.servo.get("jewel servo");
-        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+        leftServo.setPosition(0.2);
+        rightServo.setPosition(0.2);
+//        jewelMover = hardwareMap.servo.get("jewel servo");
+//        jewelColor = hardwareMap.colorSensor.get("jewelColor");
 
 
         parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = "";
+        parameters.vuforiaLicenseKey = "AcfullL/////AAAAGSOSZA30iEJ6lhWTCbftAasmcUshL/HUebUI6EDhrrnupgA15NCxOkPJDBMD46rE8MlgnGyDIEy3MAYNsykv0eP8Yf/tjV080ZMEAiNBpr2APCddbWLQfBtbN7N1gvCg7ytNJ59sDca1P8g8nsByYb7SXzuTq11DMQfDih3Fz+BR3qW+HBM/4vpa7F4PGkXmbdCF8qFFeD9tkZwjvzgPOiVM0psczS/BMPKwVbsdr3bmVsDYf/0lCfqE1Rzupdtwx9MvtVWxyPvl9EmNExdyLC+NRWW+zTg2bYGVtA/KnWvEXe6m/dLcsUlpdcavc40vAssFruJ+qv2TidEjtLGnKNwkSmUF22GH2Ngk1RiUY1wd";
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
 
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
@@ -144,8 +144,16 @@ public class AutonomousModeBase extends LinearOpMode {
     }
 
     private void moveAwayFromGlyph() {
-        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.7, 0.0);
         sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(300);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+        sleep(300);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
@@ -166,7 +174,8 @@ public class AutonomousModeBase extends LinearOpMode {
         telemetry.addData("StartValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
-        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition()< startOfTurn + 3700){
+        final long minTime = System.currentTimeMillis()+1000;
+        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < startOfTurn + 3700 || (System.currentTimeMillis() < minTime)){
             sleep(10);
         }
 
@@ -419,7 +428,7 @@ public class AutonomousModeBase extends LinearOpMode {
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
             case Right:
-                while (findPictograph().distance > -280.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -280.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
@@ -433,7 +442,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 break;
 
             case Center:
-                while (findPictograph().distance > -540.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -540.0 && startTimeForBackingUp < (1000 + startTimeForBackingUp)) {
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
@@ -444,7 +453,7 @@ public class AutonomousModeBase extends LinearOpMode {
 
                 break;
             case Left:
-                while (findPictograph().distance > -800.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -800.0 && startTimeForBackingUp < (2000 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
@@ -456,6 +465,8 @@ public class AutonomousModeBase extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(200);
+        alineWithPictograph(true);
+        sleep(400);
     }
     void goIntoCryptoBox() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
