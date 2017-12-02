@@ -4,13 +4,11 @@ import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -74,7 +72,7 @@ public class AutonomousModeBase extends LinearOpMode {
 
         parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = "AcfullL/////AAAAGSOSZA30iEJ6lhWTCbftAasmcUshL/HUebUI6EDhrrnupgA15NCxOkPJDBMD46rE8MlgnGyDIEy3MAYNsykv0eP8Yf/tjV080ZMEAiNBpr2APCddbWLQfBtbN7N1gvCg7ytNJ59sDca1P8g8nsByYb7SXzuTq11DMQfDih3Fz+BR3qW+HBM/4vpa7F4PGkXmbdCF8qFFeD9tkZwjvzgPOiVM0psczS/BMPKwVbsdr3bmVsDYf/0lCfqE1Rzupdtwx9MvtVWxyPvl9EmNExdyLC+NRWW+zTg2bYGVtA/KnWvEXe6m/dLcsUlpdcavc40vAssFruJ+qv2TidEjtLGnKNwkSmUF22GH2Ngk1RiUY1wd";
+        parameters.vuforiaLicenseKey = "";
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
 
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
@@ -97,8 +95,8 @@ public class AutonomousModeBase extends LinearOpMode {
         waitForStart();
 
         final KeyPositions keyColumnPos = moveToFindPictograph();
-//        alineWithPictograph(false);
-        alineWithPictograph(true);
+//        alignWithPictograph(false);
+        alignWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
         TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
 
@@ -163,13 +161,13 @@ public class AutonomousModeBase extends LinearOpMode {
         if (KeyPosition == KeyPositions.Center || KeyPosition == KeyPositions.Unknown){
             sleep(200);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-            alineWithPictograph(true);
         }
         if (KeyPosition == KeyPositions.Right){
             sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
+        alignWithPictograph(true);
 
         telemetry.addData("StartValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
@@ -197,7 +195,7 @@ public class AutonomousModeBase extends LinearOpMode {
         sleep(500);
     }
 
-    private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
+    private void alignWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
         double valueToDecrease;
@@ -210,7 +208,7 @@ public class AutonomousModeBase extends LinearOpMode {
         }
 
 
-        boolean withinRange = Math.abs(valueToDecrease) < 10.0;
+        boolean withinRange = Math.abs(valueToDecrease) < 5.0;
 
         if (fixingTurn){
             if (findPictograph().rotation > 0.0){
@@ -240,10 +238,11 @@ public class AutonomousModeBase extends LinearOpMode {
                 telemetry.addData("horizontal off set: ",valueToDecrease);
             }
             telemetry.update();
-            withinRange = Math.abs(valueToDecrease) < 10.0;
+            withinRange = Math.abs(valueToDecrease) < 5.0;
             sleep(10);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
     }
 
 
@@ -386,9 +385,6 @@ public class AutonomousModeBase extends LinearOpMode {
 
             telemetry.update();
 
-        final double finalTZ = tZ;
-        final double finalRY = rY;
-        final KeyPositions finalKeyColumnPos = keyColumnPos;
         return new DecodedPictographInfo(tZ, tX, keyColumnPos, rY);
     }
     private enum KeyPositions {
@@ -465,12 +461,11 @@ public class AutonomousModeBase extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(200);
-        alineWithPictograph(true);
-        sleep(400);
+        alignWithPictograph(true);
     }
-    void goIntoCryptoBox() {
+    private void goIntoCryptoBox() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
-        sleep(2000);
+        sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
     private void letGoOfGlyph() {

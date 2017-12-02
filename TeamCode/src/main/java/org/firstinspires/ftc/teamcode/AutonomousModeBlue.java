@@ -70,7 +70,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 
         parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = "AcfullL/////AAAAGSOSZA30iEJ6lhWTCbftAasmcUshL/HUebUI6EDhrrnupgA15NCxOkPJDBMD46rE8MlgnGyDIEy3MAYNsykv0eP8Yf/tjV080ZMEAiNBpr2APCddbWLQfBtbN7N1gvCg7ytNJ59sDca1P8g8nsByYb7SXzuTq11DMQfDih3Fz+BR3qW+HBM/4vpa7F4PGkXmbdCF8qFFeD9tkZwjvzgPOiVM0psczS/BMPKwVbsdr3bmVsDYf/0lCfqE1Rzupdtwx9MvtVWxyPvl9EmNExdyLC+NRWW+zTg2bYGVtA/KnWvEXe6m/dLcsUlpdcavc40vAssFruJ+qv2TidEjtLGnKNwkSmUF22GH2Ngk1RiUY1wd";
+        parameters.vuforiaLicenseKey = "";
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
 
         this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
@@ -92,8 +92,8 @@ public class AutonomousModeBlue extends LinearOpMode {
         final KeyPositions keyColumnPos = moveToFindPictograph();
         telemetry.addData("keypos: ", keyColumnPos);
         telemetry.update();
-//        alineWithPictograph(false);
-        alineWithPictograph(true);
+//        alignWithPictograph(false);
+        alignWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
         goIntoCryptoBox(keyColumnPos);
         letGoOfGlyph();
@@ -130,7 +130,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
-    private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
+    private void alignWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
         double valueToDecrease;
@@ -143,7 +143,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         }
 
 
-        boolean withinRange = Math.abs(valueToDecrease) < 10.0;
+        boolean withinRange = Math.abs(valueToDecrease) < 5.0;
 
         if (fixingTurn){
             if (findPictograph().rotation > 0.0){
@@ -173,10 +173,11 @@ public class AutonomousModeBlue extends LinearOpMode {
                 telemetry.addData("horizontal off set: ",valueToDecrease);
             }
             telemetry.update();
-            withinRange = Math.abs(valueToDecrease) < 10.0;
+            withinRange = Math.abs(valueToDecrease) < 5.0;
             sleep(10);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(300);
     }
 
 
@@ -319,9 +320,6 @@ public class AutonomousModeBlue extends LinearOpMode {
 
             telemetry.update();
 
-        final double finalTZ = tZ;
-        final double finalRY = rY;
-        final KeyPositions finalKeyColumnPos = keyColumnPos;
         return new DecodedPictographInfo(tZ, tX, keyColumnPos, rY);
     }
     private enum KeyPositions {
@@ -397,8 +395,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(200);
-        alineWithPictograph(true);
-        sleep(400);
+        alignWithPictograph(true);
     }
     private void goIntoCryptoBox(KeyPositions keyPosition) {
         GoAroundBalancingStone(keyPosition);
@@ -413,7 +410,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
             sleep(200);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-            alineWithPictograph(true);
+            alignWithPictograph(true);
             sleep(400);
         }
         if (keyPosition == KeyPositions.Left){
