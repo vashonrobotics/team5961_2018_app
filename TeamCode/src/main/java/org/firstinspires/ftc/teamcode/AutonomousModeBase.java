@@ -4,13 +4,11 @@ import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -66,10 +64,10 @@ public class AutonomousModeBase extends LinearOpMode {
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.0);
-        rightServo.setPosition(0.0);
-        jewelMover = hardwareMap.servo.get("jewel servo");
-        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+        leftServo.setPosition(0.2);
+        rightServo.setPosition(0.2);
+//        jewelMover = hardwareMap.servo.get("jewel servo");
+//        jewelColor = hardwareMap.colorSensor.get("jewelColor");
 
 
         parameters = new VuforiaLocalizer.Parameters();
@@ -97,8 +95,8 @@ public class AutonomousModeBase extends LinearOpMode {
         waitForStart();
 
         final KeyPositions keyColumnPos = moveToFindPictograph();
-//        alineWithPictograph(false);
-        alineWithPictograph(true);
+//        alignWithPictograph(false);
+        alignWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
         TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
 
@@ -144,8 +142,16 @@ public class AutonomousModeBase extends LinearOpMode {
     }
 
     private void moveAwayFromGlyph() {
-        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.7, 0.0);
         sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
+        sleep(300);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0.0, 1.0, 0.0);
+        sleep(300);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
@@ -155,18 +161,19 @@ public class AutonomousModeBase extends LinearOpMode {
         if (KeyPosition == KeyPositions.Center || KeyPosition == KeyPositions.Unknown){
             sleep(200);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-            alineWithPictograph(true);
         }
         if (KeyPosition == KeyPositions.Right){
             sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
+        alignWithPictograph(true);
 
         telemetry.addData("StartValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
-        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition()< startOfTurn + 3700){
+        final long minTime = System.currentTimeMillis()+1000;
+        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < startOfTurn + 3700 || (System.currentTimeMillis() < minTime)){
             sleep(10);
         }
 
@@ -188,7 +195,7 @@ public class AutonomousModeBase extends LinearOpMode {
         sleep(500);
     }
 
-    private void alineWithPictograph(boolean fixingTurn) {// needs to be tested
+    private void alignWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
         double valueToDecrease;
@@ -201,7 +208,7 @@ public class AutonomousModeBase extends LinearOpMode {
         }
 
 
-        boolean withinRange = Math.abs(valueToDecrease) < 10.0;
+        boolean withinRange = Math.abs(valueToDecrease) < 5.0;
 
         if (fixingTurn){
             if (findPictograph().rotation > 0.0){
@@ -231,15 +238,16 @@ public class AutonomousModeBase extends LinearOpMode {
                 telemetry.addData("horizontal off set: ",valueToDecrease);
             }
             telemetry.update();
-            withinRange = Math.abs(valueToDecrease) < 10.0;
+            withinRange = Math.abs(valueToDecrease) < 5.0;
             sleep(10);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleep(200);
     }
 
 
     private KeyPositions moveToFindPictograph() {
-        DriveTrain.mecanum(baseMotorArray,0.0,0.9,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.5,0.0);
 
         // move robot to pictograph
         final long startTime = System.currentTimeMillis();
@@ -258,7 +266,7 @@ public class AutonomousModeBase extends LinearOpMode {
         telemetry.addData("end loop at: ", System.currentTimeMillis());
         telemetry.update();
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-        sleep(1000);
+        sleep(2000);
         KeyPositions keyColumnPos = findPictograph().keyPosition;
         for(int i = -1; i < 2; i += 2) { // search twice more for the pictograph if can't find it
             if (keyColumnPos == KeyPositions.Unknown) {
@@ -268,7 +276,7 @@ public class AutonomousModeBase extends LinearOpMode {
                     sleep(100);
                 }
                 DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-                sleep(1000);
+                sleep(2000);
                 keyColumnPos = findPictograph().keyPosition;
             }
         }
@@ -377,9 +385,6 @@ public class AutonomousModeBase extends LinearOpMode {
 
             telemetry.update();
 
-        final double finalTZ = tZ;
-        final double finalRY = rY;
-        final KeyPositions finalKeyColumnPos = keyColumnPos;
         return new DecodedPictographInfo(tZ, tX, keyColumnPos, rY);
     }
     private enum KeyPositions {
@@ -419,7 +424,7 @@ public class AutonomousModeBase extends LinearOpMode {
         long startTimeForBackingUp = System.currentTimeMillis();
         switch (keyColumnPos) {
             case Right:
-                while (findPictograph().distance > -280.0 && startTimeForBackingUp < (600 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -280.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
@@ -433,7 +438,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 break;
 
             case Center:
-                while (findPictograph().distance > -540.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -540.0 && startTimeForBackingUp < (1000 + startTimeForBackingUp)) {
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
                     }
@@ -444,7 +449,7 @@ public class AutonomousModeBase extends LinearOpMode {
 
                 break;
             case Left:
-                while (findPictograph().distance > -800.0 && startTimeForBackingUp < (900 + startTimeForBackingUp)) {
+                while (findPictograph().distance > -800.0 && startTimeForBackingUp < (2000 + startTimeForBackingUp)) {
                     sleep(10);
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
@@ -456,10 +461,11 @@ public class AutonomousModeBase extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(200);
+        alignWithPictograph(true);
     }
-    void goIntoCryptoBox() {
+    private void goIntoCryptoBox() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
-        sleep(2000);
+        sleep(1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
     private void letGoOfGlyph() {
