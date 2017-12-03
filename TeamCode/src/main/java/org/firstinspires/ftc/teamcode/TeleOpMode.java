@@ -53,8 +53,8 @@ public class TeleOpMode extends OpMode{
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-//        jewelColor = hardwareMap.colorSensor.get("jewelColor");
-//        jewelColor.enableLed(false);
+        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+        jewelColor.enableLed(true);
 
 
 //        relicGrabberExtender = hardwareMap.dcMotor.get("relicArm");
@@ -69,14 +69,11 @@ public class TeleOpMode extends OpMode{
     public void loop() {
 
 
-//
-//        telemetry.addData("R: ", jewelColor.red());
-//        telemetry.addData("G: ", jewelColor.green());
-//        telemetry.addData("B: ", jewelColor.blue());
-//        float[] colorInHSV = {};
-//        Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
-//        telemetry.addData("HSV: ", colorInHSV);
-//        telemetry.addData("H: ", colorInHSV[0]);
+
+        float[] colorInHSV = {0f, 0f, 0f};
+        Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
+        telemetry.addData("HSV: ", colorInHSV);
+        telemetry.addData("H: ", colorInHSV[0]);
 
         if (gamepad1.right_trigger >= 0.5) {
             motorSpeedMultiplier = 0.5;
@@ -84,7 +81,7 @@ public class TeleOpMode extends OpMode{
             motorSpeedMultiplier = 1.0;
         }
 //        telemetry.addData("motorModiFire: ",motorSpeedMultiplier);
-//        telemetry.update();
+        telemetry.update();
         if (gamepad1.left_trigger >= 0.5) {
             DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_y) * motorSpeedMultiplier,
                     ((double) gamepad1.left_stick_x) * motorSpeedMultiplier,
@@ -120,8 +117,8 @@ public class TeleOpMode extends OpMode{
 
         }else{
 
-            leftServo.setPosition(0.9);
-            rightServo.setPosition(0.8);
+            leftServo.setPosition(1.0);
+            rightServo.setPosition(0.9);
 
         }
 
