@@ -94,15 +94,16 @@ public class AutonomousModeBase extends LinearOpMode {
 
         waitForStart();
 
-        final KeyPositions keyColumnPos = moveToFindPictograph();
+//        final KeyPositions keyColumnPos = moveToFindPictograph();
 //        alignWithPictograph(false);
-        alignWithPictograph(true);
-        goBackToCryptoBox(keyColumnPos);
-        TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
-
-        goIntoCryptoBox();
-        letGoOfGlyph();
-        moveAwayFromGlyph();
+//        alignWithPictograph(true);
+        alignWithPictograph2(true);
+//        goBackToCryptoBox(keyColumnPos);
+//       TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
+//
+//        goIntoCryptoBox();
+//        letGoOfGlyph();
+//        moveAwayFromGlyph();
 
 
 //        telemetry.update();
@@ -195,6 +196,7 @@ public class AutonomousModeBase extends LinearOpMode {
         sleep(500);
     }
 
+
     private void alignWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
@@ -243,6 +245,40 @@ public class AutonomousModeBase extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(200);
+    }
+    private void alignWithPictograph2(boolean fixingTurn) {
+        sleep(300);
+        if (findPictograph().rotation != 0) {
+            int rotation = (int) findPictograph().rotation;
+            for (int i = 0; i < 4; i++) {
+
+
+                int distanceForTurn = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition() + (3700 / (180 / (rotation)));
+
+                ((DcMotor) baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                if (distanceForTurn < 0 ) {
+                    if (i % 2 == 0){
+                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+                    } else{
+
+                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+                    }
+                } else{
+                    if (i % 2 == 0){
+                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+                    } else{
+
+                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+                    }
+                }
+                ((DcMotor) baseMotorArray.get(i)).setTargetPosition(distanceForTurn);
+
+                telemetry.addData("Distance to Turn:", distanceForTurn);
+                telemetry.update();
+            }
+            sleep(3000);
+        }
     }
 
 
