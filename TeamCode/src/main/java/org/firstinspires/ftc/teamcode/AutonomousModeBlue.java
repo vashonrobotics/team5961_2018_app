@@ -88,6 +88,8 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
         waitForStart();
+        alignWithPictograph2(true);
+        sleep(100);
 //        lookForJewel();
         final KeyPositions keyColumnPos = moveToFindPictograph();
         telemetry.addData("keypos: ", keyColumnPos);
@@ -129,7 +131,39 @@ public class AutonomousModeBlue extends LinearOpMode {
         sleep(300);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
+    void alignWithPictograph2(boolean fixingTurn){
+        sleep(300);
+        if (findPictograph().rotation != 0) {
+            for (int i = 0; i < 4; i++) {
 
+
+                int distanceForTurn = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition() + (3700 / (180 / ((int) findPictograph().rotation)));
+
+                ((DcMotor) baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                if (distanceForTurn < 0 ) {
+                    if (i % 2 == 0){
+                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+                    } else{
+
+                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+                    }
+                } else{
+                    if (i % 2 == 0){
+                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+                    } else{
+
+                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+                    }
+                }
+                ((DcMotor) baseMotorArray.get(i)).setTargetPosition(distanceForTurn);
+
+                telemetry.addData("Distance to Turn:", distanceForTurn);
+                telemetry.update();
+            }
+            sleep(3000);
+        }
+    }
     private void alignWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
