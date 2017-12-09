@@ -148,20 +148,21 @@ public class AutonomousModeBlue extends LinearOpMode {
                 }
                 if (distanceForTurn < 0 ) {
                     directionOfTurn *= -1;
-                    if (i % 2 == 0){
-                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
-                    } else{
-
-                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
-                    }
-                } else{
-                    if (i % 2 == 0){
-                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
-                    } else{
-
-                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
-                    }
-                }
+//                    if (i % 2 == 0){
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+//                    } else{
+//
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+//                    }
+                } //else{
+//                    if (i % 2 == 0){
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+//                    } else{
+//
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+//                    }
+//                }
+                ((DcMotor) baseMotorArray.get(i)).setPower(0.7*directionOfTurn);
                 ((DcMotor) baseMotorArray.get(i)).setTargetPosition(distanceForTurn);
 
                 telemetry.addData("Distance to Turn:", distanceForTurn);
