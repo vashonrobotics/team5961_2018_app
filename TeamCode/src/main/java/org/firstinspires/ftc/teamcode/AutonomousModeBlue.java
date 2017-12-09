@@ -133,15 +133,21 @@ public class AutonomousModeBlue extends LinearOpMode {
     }
     void alignWithPictograph2(boolean fixingTurn){
         sleep(300);
-        if (findPictograph().rotation != 0) {
+        double rotation = findPictograph().rotation;
+        if (rotation != 0) {
             for (int i = 0; i < 4; i++) {
 
 
-                int distanceForTurn = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition() + (3700 / (180 / ((int) findPictograph().rotation)));
+                int distanceForTurn = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition() + (int)(3700 / (180 / rotation)); // 3700 = number of ticks in a 180 degree turn
 
+                int directionOfTurn = 1;
                 ((DcMotor) baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+                if (i % 2 == 0){
+                    directionOfTurn *= -1;
+                }
                 if (distanceForTurn < 0 ) {
+                    directionOfTurn *= -1;
                     if (i % 2 == 0){
                         ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
                     } else{
