@@ -44,6 +44,7 @@ public class AutonomousModeBase extends LinearOpMode {
     Servo leftServo;
     Servo rightServo;
     Servo jewelMover;
+    Servo jewelExtender;
 
 //    public AutonomousModeBase(boolean isRed){
 //        this.isRed = isRed;
@@ -64,10 +65,11 @@ public class AutonomousModeBase extends LinearOpMode {
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.2);
-        rightServo.setPosition(0.2);
-//        jewelMover = hardwareMap.servo.get("jewel servo");
-//        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+        leftServo.setPosition(0.6);
+        rightServo.setPosition(0.6);
+//        jewelMover = hardwareMap.servo.get("jewelMover");
+//        jewelExtender = hardwareMap.servo.get("jewelExtender");
+////        jewelColor = hardwareMap.colorSensor.get("jewelColor");
 
 
         parameters = new VuforiaLocalizer.Parameters();
@@ -94,16 +96,18 @@ public class AutonomousModeBase extends LinearOpMode {
 
         waitForStart();
 
+//        lookForJewel();
 //        final KeyPositions keyColumnPos = moveToFindPictograph();
 //        alignWithPictograph(false);
 //        alignWithPictograph(true);
         alignWithPictograph2(true);
+sleep(10000);
 //        goBackToCryptoBox(keyColumnPos);
 //       TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
-//
-//        goIntoCryptoBox();
-//        letGoOfGlyph();
-//        moveAwayFromGlyph();
+
+        goIntoCryptoBox();
+        letGoOfGlyph();
+        moveAwayFromGlyph();
 
 
 //        telemetry.update();
@@ -111,27 +115,29 @@ public class AutonomousModeBase extends LinearOpMode {
         requestOpModeStop();
     }
     private void lookForJewel() {
-        jewelMover.setPosition(1.0);
+
         float avgHue = 0f;
+        int numberOfReds = 0;
+        int numberOfBlues = 0;
         for(int i = 0; i < 4; i++) {
             float[] colorInHSV = {};
             Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
 
             float hue = colorInHSV[0];
-            if (hue >= 330){
-                avgHue = (avgHue*i + 30) / (i + 1);
-            }else {
-                avgHue = (avgHue*i + hue) / (i + 1);
+            if ((hue >= 330) && (hue != 0)) {
+                numberOfReds++;
+            } else if (120 <= hue && hue <= 250) {
+                numberOfBlues++;
             }
             sleep(100);
         }
-        if (120 <= avgHue && avgHue <= 250 ){ // blue
-            DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);
-        }else if (avgHue <= 30){ // red
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.7, 0.0);
+        if (numberOfBlues >= 2 && numberOfReds <= 2) { // blue
+            jewelMover.setPosition(1.0);
+        } else if (numberOfReds >= 2 && numberOfBlues <= 2) { // red
+            jewelMover.setPosition(0.0);
         }
-        sleep(100);
-        DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+
+
         sleep(200);
 
     }
@@ -157,6 +163,7 @@ public class AutonomousModeBase extends LinearOpMode {
     }
 
     private void TurnAroundAndGoAwayFromCryptoBoxAndBack(KeyPositions KeyPosition) {
+        telemetry.addData("motor pos1", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(500);
         if (KeyPosition == KeyPositions.Center || KeyPosition == KeyPositions.Unknown){
@@ -168,8 +175,8 @@ public class AutonomousModeBase extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
-        alignWithPictograph(true);
-
+        telemetry.addData("motor pos2", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
+        alignWithPictograph2(true);
         telemetry.addData("StartValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
@@ -183,7 +190,9 @@ public class AutonomousModeBase extends LinearOpMode {
         telemetry.addData("EndValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         telemetry.update();
         sleep(1000);
+        telemetry.addData("motor pos3", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         goTowardCryptoBoxPartWay();
+        telemetry.addData("motor pos4", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(500);
         if (KeyPosition == KeyPositions.Center){
@@ -194,6 +203,8 @@ public class AutonomousModeBase extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
+        telemetry.addData("motor pos5", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
+        sleep(30000);
     }
 
 
@@ -248,36 +259,63 @@ public class AutonomousModeBase extends LinearOpMode {
     }
     private void alignWithPictograph2(boolean fixingTurn) {
         sleep(300);
-        if (findPictograph().rotation != 0) {
-            int rotation = (int) findPictograph().rotation;
+        double rotation = findPictograph().rotation;
+        if (rotation != 0) {
             for (int i = 0; i < 4; i++) {
 
 
-                int distanceForTurn = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition() + (3700 / (180 / (rotation)));
-
-                ((DcMotor) baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                if (distanceForTurn < 0 ) {
-                    if (i % 2 == 0){
-                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
-                    } else{
-
-                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
-                    }
-                } else{
-                    if (i % 2 == 0){
-                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
-                    } else{
-
-                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
-                    }
+                int directionOfTurn = 1;
+                if (i % 2 == 0) {
+                    directionOfTurn *= -1;
                 }
-                ((DcMotor) baseMotorArray.get(i)).setTargetPosition(distanceForTurn);
+                DcMotor motor = ((DcMotor) baseMotorArray.get(i));
+                int distanceForTurn = ((int)(3000 / (180 / rotation)))*directionOfTurn; // 3700 = number of ticks in a 180 degree turn
+
+//
+                motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+//                if (i % 2 == 0){
+//                    directionOfTurn *= -1;
+//                    telemetry.addData("direction ", directionOfTurn);
+//                }
+//                if (distanceForTurn > 0 ) {
+//                    directionOfTurn *= -1;
+//                    if (i % 2 == 0){
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+//                    } else{
+//
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+//                    }
+//                } //else{
+//                    if (i % 2 == 0){
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
+//                    } else{
+//
+//                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
+//                    }
+//                }
+                motor.setTargetPosition(motor.getCurrentPosition() + distanceForTurn);
+                motor.setPower(1);
+
 
                 telemetry.addData("Distance to Turn:", distanceForTurn);
-                telemetry.update();
+                telemetry.addData("motor powers", motor);
+
             }
-            sleep(3000);
+            // if this doesn't work
+
+//            while(distanceToTurn > ((DcMotor)baseMotorArray.get(0)).getCurrentPosition() ) {
+//                sleep(10);
+//            }
+
+
+            sleep(500);
+            telemetry.update();
+            for (int i = 0; i < 4; i++) {
+                ((DcMotor)baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                ((DcMotor)baseMotorArray.get(i)).setPower(0);
+            }
+            sleep(500);
         }
     }
 
@@ -463,6 +501,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 while (findPictograph().distance > -280.0 && startTimeForBackingUp < (700 + startTimeForBackingUp)) {
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
+
                     }
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
@@ -477,6 +516,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 while (findPictograph().distance > -540.0 && startTimeForBackingUp < (1000 + startTimeForBackingUp)) {
                     if (findPictograph().distance == 0){
                         telemetry.addData("LostPictographPos: ", findPictograph().distance);
+                        sleep(2000);
                     }
                     sleep(10);
                     telemetry.addData("Dist:", findPictograph().distance);
@@ -496,8 +536,7 @@ public class AutonomousModeBase extends LinearOpMode {
                 break;
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
-        sleep(200);
-        alignWithPictograph(true);
+        sleep(400);
     }
     private void goIntoCryptoBox() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -0.7, 0.0);

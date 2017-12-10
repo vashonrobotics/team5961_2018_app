@@ -59,11 +59,11 @@ public class AutonomousModeBlue extends LinearOpMode {
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
 
-        leftServo = hardwareMap.servo.get("left");
-        rightServo = hardwareMap.servo.get("right");
-        leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.2);
-        rightServo.setPosition(0.2);
+////        leftServo = hardwareMap.servo.get("left");
+////        rightServo = hardwareMap.servo.get("right");
+//        leftServo.setDirection(Servo.Direction.REVERSE);
+//        leftServo.setPosition(0.2);
+//        rightServo.setPosition(0.2);
 //        jewelMover = hardwareMap.servo.get("jewel servo");
 //        jewelColor = hardwareMap.colorSensor.get("jewelColor");
 
@@ -88,14 +88,14 @@ public class AutonomousModeBlue extends LinearOpMode {
 
 
         waitForStart();
-        alignWithPictograph2(true);
-        sleep(100);
+//        alignWithPictograph2(true);
+//        sleep(1000);
 //        lookForJewel();
         final KeyPositions keyColumnPos = moveToFindPictograph();
         telemetry.addData("keypos: ", keyColumnPos);
         telemetry.update();
 //        alignWithPictograph(false);
-        alignWithPictograph(true);
+//        alignWithPictograph(true);
         goBackToCryptoBox(keyColumnPos);
         goIntoCryptoBox(keyColumnPos);
         letGoOfGlyph();
@@ -131,30 +131,36 @@ public class AutonomousModeBlue extends LinearOpMode {
         sleep(300);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
-    void alignWithPictograph2(boolean fixingTurn){
+    private void alignWithPictograph2(boolean fixingTurn){
         sleep(300);
         double rotation = findPictograph().rotation;
         if (rotation != 0) {
             for (int i = 0; i < 4; i++) {
 
 
-                int distanceForTurn = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition() + (int)(3700 / (180 / rotation)); // 3700 = number of ticks in a 180 degree turn
-
                 int directionOfTurn = 1;
-                ((DcMotor) baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                if (i % 2 == 0){
+                if (i % 2 == 0) {
                     directionOfTurn *= -1;
                 }
-                if (distanceForTurn < 0 ) {
-                    directionOfTurn *= -1;
+                DcMotor motor = ((DcMotor) baseMotorArray.get(i));
+                int distanceForTurn = ((int)(3700 / (180 / rotation)))*directionOfTurn; // 3700 = number of ticks in a 180 degree turn
+
+//
+                motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+//                if (i % 2 == 0){
+//                    directionOfTurn *= -1;
+//                    telemetry.addData("direction ", directionOfTurn);
+//                }
+//                if (distanceForTurn > 0 ) {
+//                    directionOfTurn *= -1;
 //                    if (i % 2 == 0){
 //                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
 //                    } else{
 //
 //                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
 //                    }
-                } //else{
+//                } //else{
 //                    if (i % 2 == 0){
 //                        ((DcMotor) baseMotorArray.get(i)).setPower(0.7);
 //                    } else{
@@ -162,13 +168,28 @@ public class AutonomousModeBlue extends LinearOpMode {
 //                        ((DcMotor) baseMotorArray.get(i)).setPower(-0.7);
 //                    }
 //                }
-                ((DcMotor) baseMotorArray.get(i)).setPower(0.7*directionOfTurn);
-                ((DcMotor) baseMotorArray.get(i)).setTargetPosition(distanceForTurn);
+                motor.setTargetPosition(motor.getCurrentPosition() + distanceForTurn);
+                motor.setPower(1);
+
 
                 telemetry.addData("Distance to Turn:", distanceForTurn);
-                telemetry.update();
+                telemetry.addData("motor powers", motor);
+
             }
-            sleep(3000);
+            // if this doesn't work
+
+//            while(distanceToTurn > ((DcMotor)baseMotorArray.get(0)).getCurrentPosition() ) {
+//                sleep(10);
+//            }
+
+
+            sleep(500);
+            telemetry.update();
+            for (int i = 0; i < 4; i++) {
+                ((DcMotor)baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                ((DcMotor)baseMotorArray.get(i)).setPower(0);
+            }
+            sleep(500);
         }
     }
     private void alignWithPictograph(boolean fixingTurn) {// needs to be tested
@@ -446,6 +467,7 @@ public class AutonomousModeBlue extends LinearOpMode {
     }
 
     private void GoAroundBalancingStone(KeyPositions keyPosition) {
+        telemetry.addData("motor pos1", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
         sleep(500);
         if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
@@ -459,9 +481,11 @@ public class AutonomousModeBlue extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(100);
+        telemetry.addData("motor pos2", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
         sleep(1200);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        telemetry.addData("motor pos3", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         sleep(200);
         DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
         sleep(500);
@@ -473,11 +497,15 @@ public class AutonomousModeBlue extends LinearOpMode {
             sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        telemetry.addData("motor pos4", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         sleep(200);
+        telemetry.update();
+        sleep(30000);
     }
 
     private void letGoOfGlyph() {
         leftServo.setPosition(0.9);
         rightServo.setPosition(0.8);
+        sleep(500);
     }
 }

@@ -24,13 +24,15 @@ public class TeleOpMode extends OpMode{
     private double motorSpeedMultiplier = 1.0;
     private ArrayList baseMotorArray;
     private int liftStartPos;
-    private int maxLiftDiffPos;
+    private int maxLiftDiff;
     private ColorSensor jewelColor;
 //    private int caz = 1;
     private DcMotor relicGrabberExtender;
-    private Servo RelicGrabber;
-    private Servo RelicLifter;
+    private Servo relicGrabber;
+    private Servo relicLifter;
     private Boolean setMode = false;
+    private double relicLifterPos = 0.0;
+    private int maxRelicArmPos = 5000; // needs to be tested
 
     @Override
     public void init() {
@@ -48,18 +50,23 @@ public class TeleOpMode extends OpMode{
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftStartPos = lift.getCurrentPosition();
-        maxLiftDiffPos = 2050;
+        maxLiftDiff = 2050;
+
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-        jewelColor = hardwareMap.colorSensor.get("jewelColor");
-        jewelColor.enableLed(true);
+//        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+//        jewelColor.enableLed(true);
 
 
-//        relicGrabberExtender = hardwareMap.dcMotor.get("relicArm");
-//        RelicGrabber = hardwareMap.servo.get("relicGrabber");
-//        RelicLifter = hardwareMap.servo.get("relicLifter");
+        relicGrabberExtender = hardwareMap.dcMotor.get("relicArm");
+        relicGrabberExtender.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        relicGrabberExtender.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        relicGrabber = hardwareMap.servo.get("relicGrabber");
+        relicLifter = hardwareMap.servo.get("relicLifter");
 
 
 
@@ -69,11 +76,10 @@ public class TeleOpMode extends OpMode{
     public void loop() {
 
 
-
-        float[] colorInHSV = {0f, 0f, 0f};
-        Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
-        telemetry.addData("HSV: ", colorInHSV);
-        telemetry.addData("H: ", colorInHSV[0]);
+//        float[] colorInHSV = {0f, 0f, 0f};
+//        Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
+//        telemetry.addData("HSV: ", colorInHSV);
+//        telemetry.addData("H: ", colorInHSV[0]);
 
         if (gamepad1.right_trigger >= 0.5) {
             motorSpeedMultiplier = 0.5;
@@ -81,7 +87,7 @@ public class TeleOpMode extends OpMode{
             motorSpeedMultiplier = 1.0;
         }
 //        telemetry.addData("motorModiFire: ",motorSpeedMultiplier);
-        telemetry.update();
+
         if (gamepad1.left_trigger >= 0.5) {
             DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_y) * motorSpeedMultiplier,
                     ((double) gamepad1.left_stick_x) * motorSpeedMultiplier,
@@ -94,12 +100,28 @@ public class TeleOpMode extends OpMode{
 
 
             //  up is negative
-        if ((-gamepad2.left_stick_y > 0 && (maxLiftDiffPos <= Math.abs(lift.getCurrentPosition()-liftStartPos)))) {
+        if ((-gamepad2.left_stick_y > 0 && (maxLiftDiff <= Math.abs(lift.getCurrentPosition()-liftStartPos)))
+                ) {
             lift.setPower(0);
 
         }else {
             lift.setPower(gamepad2.left_stick_y*3/4);
         }
+        if((gamepad2.right_stick_x < 0 && (maxRelicArmPos <= Math.abs(relicGrabberExtender.getCurrentPosition())))) {
+            relicGrabberExtender.setPower(0);
+        }else {
+            relicGrabberExtender.setPower(gamepad2.right_stick_x);
+        }
+        telemetry.addData("relicArmPos: ", relicGrabberExtender.getCurrentPosition());
+        if(gamepad2.left_trigger >= 0.5){
+            relicGrabber.setPosition(1);
+        }else {
+            relicGrabber.setPosition(0);
+        }
+
+        relicLifterPos += gamepad2.right_stick_y/10;
+        relicLifter.setPosition(relicLifterPos);
+
 //        telemetry.addData("lift pos: ", lift.getCurrentPosition());
 //        telemetry.addData("max lift pos: ", maxLiftPos);
 //        telemetry.addData("lift start pos: " , liftStartPos);
@@ -121,6 +143,6 @@ public class TeleOpMode extends OpMode{
             rightServo.setPosition(0.9);
 
         }
-
+        telemetry.update();
     }
 }
