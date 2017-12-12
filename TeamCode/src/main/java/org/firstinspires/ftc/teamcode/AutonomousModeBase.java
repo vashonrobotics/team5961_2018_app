@@ -269,7 +269,7 @@ sleep(10000);
                     directionOfTurn *= -1;
                 }
                 DcMotor motor = ((DcMotor) baseMotorArray.get(i));
-                int distanceForTurn = ((int)(3000 / (180 / rotation)))*directionOfTurn; // 3700 = number of ticks in a 180 degree turn
+                int distanceForTurn = ((int)(4050 / (180 / rotation)))*directionOfTurn; // 4050 is a new value that I think will be closer to 180 degrees.
 
 //
                 motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
