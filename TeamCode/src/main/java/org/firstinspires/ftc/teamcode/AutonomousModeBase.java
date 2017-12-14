@@ -115,8 +115,6 @@ sleep(10000);
         requestOpModeStop();
     }
     private void lookForJewel() {
-
-        float avgHue = 0f;
         int numberOfReds = 0;
         int numberOfBlues = 0;
         for(int i = 0; i < 4; i++) {
@@ -143,7 +141,8 @@ sleep(10000);
     }
     private void goTowardCryptoBoxPartWay() {
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
-        sleep(750);
+//        sleep(750);
+        sleepUntilEncodersChangeToACertainValue(2900, 1000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(200);
     }
@@ -165,7 +164,8 @@ sleep(10000);
     private void TurnAroundAndGoAwayFromCryptoBoxAndBack(KeyPositions KeyPosition) {
         telemetry.addData("motor pos1", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
-        sleep(500);
+//        sleep(500);
+        sleepUntilEncodersChangeToACertainValue(1933, 700);
         if (KeyPosition == KeyPositions.Center || KeyPosition == KeyPositions.Unknown){
             sleep(200);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
@@ -181,10 +181,13 @@ sleep(10000);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         final long minTime = System.currentTimeMillis()+1000;
-        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < startOfTurn + 3700 || (System.currentTimeMillis() < minTime)){
+//        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < startOfTurn + 3700 || (System.currentTimeMillis() < minTime)){
+//            sleep(10);
+//        }
+        sleepUntilEncodersChangeToACertainValue(3700, 1700);
+        while(System.currentTimeMillis() < minTime) {
             sleep(10);
         }
-
         //sleep(1490);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         telemetry.addData("EndValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
@@ -194,7 +197,8 @@ sleep(10000);
         goTowardCryptoBoxPartWay();
         telemetry.addData("motor pos4", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
-        sleep(500);
+//        sleep(500);
+        sleepUntilEncodersChangeToACertainValue(1933, 700);
         if (KeyPosition == KeyPositions.Center){
             sleep(200);
         }
@@ -269,7 +273,7 @@ sleep(10000);
                     directionOfTurn *= -1;
                 }
                 DcMotor motor = ((DcMotor) baseMotorArray.get(i));
-                int distanceForTurn = ((int)(4050 / (180 / rotation)))*directionOfTurn; // 4050 is a new value that I think will be closer to 180 degrees.
+                int distanceForTurn = ((int)(3700 / (180 / rotation)))*directionOfTurn;
 
 //
                 motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -441,7 +445,7 @@ sleep(10000);
 
                 /* We further illustrate how to decompose the pose into useful rotational and
                  * translational components */
-                if (pose != null) {
+                if (pose != null && keyColumnPos != KeyPositions.Unknown) {
                     VectorF trans = pose.getTranslation();
                     Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
 
@@ -547,5 +551,34 @@ sleep(10000);
         leftServo.setPosition(0.9);
         rightServo.setPosition(0.8);
         sleep(1000);
+    }
+    private void sleepUntilEncodersChangeToACertainValue(int value, long maxSleepTime) {
+        int[] startPositions = {0,0,0,0};
+        for (int i = 0; i < 4; i++) {
+            startPositions[i] = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition();
+        }
+//        int[] changePerMotor = {0,0,0,0};
+        boolean isReady = false;
+        long maxTime = System.currentTimeMillis() + maxSleepTime;
+        while(!isReady && System.currentTimeMillis() < maxTime) {
+            sleep(10);
+            boolean isPartiallyReady = false;
+            for (int i = 0; i < 4; i++) {
+                int changePerMotor = Math.abs(((DcMotor) baseMotorArray.get(i)).getCurrentPosition() - startPositions[i]);
+                if (Math.abs(changePerMotor - value) <= 100) {
+                    if (!isPartiallyReady) {
+                        isPartiallyReady = true;
+                    } else {
+                        isReady = true;
+                    }
+                }
+            }
+        }
+        if (System.currentTimeMillis() >= maxTime){
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+            telemetry.addData("quit because it took to long: ",System.currentTimeMillis() >= maxTime);
+            telemetry.update();
+            sleep(10000);
+        }
     }
 }

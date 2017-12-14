@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -107,14 +109,28 @@ public class AutonomousModeBlue extends LinearOpMode {
     }
 
     private void lookForJewel() {
-        jewelColor.enableLed(true);
-        jewelMover.setPosition(1.0);
-        if ((jewelColor.blue() > jewelColor.red()) && jewelColor.green() < 100 && jewelColor.blue() > 200){
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
-        }else if ((jewelColor.blue() < jewelColor.red()) && jewelColor.green() < 100 && jewelColor.red() > 200){
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, -1.0);
+        int numberOfReds = 0;
+        int numberOfBlues = 0;
+        for(int i = 0; i < 4; i++) {
+            float[] colorInHSV = {};
+            Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
+
+            float hue = colorInHSV[0];
+            if ((hue >= 330) && (hue != 0)) {
+                numberOfReds++;
+            } else if (120 <= hue && hue <= 250) {
+                numberOfBlues++;
+            }
+            sleep(100);
         }
-        jewelMover.setPosition(0.2);
+        if (numberOfBlues >= 2 && numberOfReds <= 2) { // blue
+            jewelMover.setPosition(1.0);
+        } else if (numberOfReds >= 2 && numberOfBlues <= 2) { // red
+            jewelMover.setPosition(0.0);
+        }
+
+
+        sleep(200);
 
     }
 
@@ -364,7 +380,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 
                 /* We further illustrate how to decompose the pose into useful rotational and
                  * translational components */
-                if (pose != null) {
+                if (pose != null && keyColumnPos != KeyPositions.Unknown) {
                     VectorF trans = pose.getTranslation();
                     Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
 
@@ -467,9 +483,15 @@ public class AutonomousModeBlue extends LinearOpMode {
     }
 
     private void GoAroundBalancingStone(KeyPositions keyPosition) {
+//        Distances: -3563
+//                -1630
+//                -4033
+//        ~5500
+//        Ended on corner of balancing stone
         telemetry.addData("motor pos1", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
-        sleep(500);
+//        sleep(500);
+        sleepUntilEncodersChangeToACertainValue(1933, 700); // might be for center or left side
         if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
             sleep(200);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
@@ -483,12 +505,14 @@ public class AutonomousModeBlue extends LinearOpMode {
         sleep(100);
         telemetry.addData("motor pos2", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
-        sleep(1200);
+//        sleep(1200);
+        sleepUntilEncodersChangeToACertainValue(3400, 1500); // value is a guess
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         telemetry.addData("motor pos3", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         sleep(200);
         DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
-        sleep(500);
+//        sleep(500);
+        sleepUntilEncodersChangeToACertainValue(1933, 700);
         if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
             sleep(200);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
@@ -507,5 +531,34 @@ public class AutonomousModeBlue extends LinearOpMode {
         leftServo.setPosition(0.9);
         rightServo.setPosition(0.8);
         sleep(500);
+    }
+    private void sleepUntilEncodersChangeToACertainValue(int value, long maxSleepTime) {
+        int[] startPositions = {0,0,0,0};
+        for (int i = 0; i < 4; i++) {
+            startPositions[i] = ((DcMotor) baseMotorArray.get(i)).getCurrentPosition();
+        }
+//        int[] changePerMotor = {0,0,0,0};
+        boolean isReady = false;
+        long maxTime = System.currentTimeMillis() + maxSleepTime;
+        while(!isReady && System.currentTimeMillis() < maxTime) {
+            sleep(10);
+            boolean isPartiallyReady = false;
+            for (int i = 0; i < 4; i++) {
+                int changePerMotor = Math.abs(((DcMotor) baseMotorArray.get(i)).getCurrentPosition() - startPositions[i]);
+                if (Math.abs(changePerMotor - value) <= 100) {
+                    if (!isPartiallyReady) {
+                        isPartiallyReady = true;
+                    } else {
+                        isReady = true;
+                    }
+                }
+            }
+        }
+        if (System.currentTimeMillis() >= maxTime){
+            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+            telemetry.addData("quit because it took to long: ",System.currentTimeMillis() >= maxTime);
+            telemetry.update();
+            sleep(10000);
+        }
     }
 }
