@@ -65,8 +65,8 @@ public class AutonomousModeBase extends LinearOpMode {
         leftServo = hardwareMap.servo.get("left");
         rightServo = hardwareMap.servo.get("right");
         leftServo.setDirection(Servo.Direction.REVERSE);
-        leftServo.setPosition(0.6);
-        rightServo.setPosition(0.6);
+        leftServo.setPosition(0.8);
+        rightServo.setPosition(0.8);
 //        jewelMover = hardwareMap.servo.get("jewelMover");
 //        jewelExtender = hardwareMap.servo.get("jewelExtender");
 ////        jewelColor = hardwareMap.colorSensor.get("jewelColor");
@@ -97,13 +97,13 @@ public class AutonomousModeBase extends LinearOpMode {
         waitForStart();
 
 //        lookForJewel();
-//        final KeyPositions keyColumnPos = moveToFindPictograph();
+        final KeyPositions keyColumnPos = moveToFindPictograph();
 //        alignWithPictograph(false);
 //        alignWithPictograph(true);
         alignWithPictograph2(true);
-sleep(10000);
-//        goBackToCryptoBox(keyColumnPos);
-//       TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
+//sleep(10000);
+        goBackToCryptoBox(keyColumnPos);
+       TurnAroundAndGoAwayFromCryptoBoxAndBack(keyColumnPos);
 
         goIntoCryptoBox();
         letGoOfGlyph();
@@ -165,7 +165,7 @@ sleep(10000);
         telemetry.addData("motor pos1", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
 //        sleep(500);
-        sleepUntilEncodersChangeToACertainValue(1933, 700);
+        sleepUntilEncodersChangeToACertainValue(1933, 1000);
         if (KeyPosition == KeyPositions.Center || KeyPosition == KeyPositions.Unknown){
             sleep(200);
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
@@ -175,30 +175,24 @@ sleep(10000);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
-        telemetry.addData("motor pos2", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         alignWithPictograph2(true);
-        telemetry.addData("StartValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         final long minTime = System.currentTimeMillis()+1000;
 //        while(((DcMotor)baseMotorArray.get(0)).getCurrentPosition() < startOfTurn + 3700 || (System.currentTimeMillis() < minTime)){
 //            sleep(10);
 //        }
-        sleepUntilEncodersChangeToACertainValue(3700, 1700);
+        sleepUntilEncodersChangeToACertainValue(3700, 1800);
         while(System.currentTimeMillis() < minTime) {
             sleep(10);
         }
         //sleep(1490);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        telemetry.addData("EndValue: ", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
-        telemetry.update();
         sleep(1000);
-        telemetry.addData("motor pos3", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         goTowardCryptoBoxPartWay();
-        telemetry.addData("motor pos4", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
 //        sleep(500);
-        sleepUntilEncodersChangeToACertainValue(1933, 700);
+        sleepUntilEncodersChangeToACertainValue(1933, 1000);
         if (KeyPosition == KeyPositions.Center){
             sleep(200);
         }
@@ -207,8 +201,6 @@ sleep(10000);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
-        telemetry.addData("motor pos5", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
-        sleep(30000);
     }
 
 
@@ -550,7 +542,7 @@ sleep(10000);
     private void letGoOfGlyph() {
         leftServo.setPosition(0.9);
         rightServo.setPosition(0.8);
-        sleep(1000);
+        sleep(500);
     }
     private void sleepUntilEncodersChangeToACertainValue(int value, long maxSleepTime) {
         int[] startPositions = {0,0,0,0};

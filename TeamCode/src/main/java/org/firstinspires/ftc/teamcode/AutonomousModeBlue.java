@@ -61,13 +61,13 @@ public class AutonomousModeBlue extends LinearOpMode {
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
 
-////        leftServo = hardwareMap.servo.get("left");
-////        rightServo = hardwareMap.servo.get("right");
-//        leftServo.setDirection(Servo.Direction.REVERSE);
-//        leftServo.setPosition(0.2);
-//        rightServo.setPosition(0.2);
-//        jewelMover = hardwareMap.servo.get("jewel servo");
+        leftServo = hardwareMap.servo.get("left");
+        rightServo = hardwareMap.servo.get("right");
+        leftServo.setDirection(Servo.Direction.REVERSE);
+        leftServo.setPosition(0.8);
+        rightServo.setPosition(0.8);
 //        jewelColor = hardwareMap.colorSensor.get("jewelColor");
+//        jewelMover = hardwareMap.servo.get("jewel servo");
 
 
         parameters = new VuforiaLocalizer.Parameters();
@@ -108,32 +108,6 @@ public class AutonomousModeBlue extends LinearOpMode {
         requestOpModeStop();
     }
 
-    private void lookForJewel() {
-        int numberOfReds = 0;
-        int numberOfBlues = 0;
-        for(int i = 0; i < 4; i++) {
-            float[] colorInHSV = {};
-            Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
-
-            float hue = colorInHSV[0];
-            if ((hue >= 330) && (hue != 0)) {
-                numberOfReds++;
-            } else if (120 <= hue && hue <= 250) {
-                numberOfBlues++;
-            }
-            sleep(100);
-        }
-        if (numberOfBlues >= 2 && numberOfReds <= 2) { // blue
-            jewelMover.setPosition(1.0);
-        } else if (numberOfReds >= 2 && numberOfBlues <= 2) { // red
-            jewelMover.setPosition(0.0);
-        }
-
-
-        sleep(200);
-
-    }
-
     private void moveAwayFromGlyph() {
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.7, 0.0);
         sleep(200);
@@ -147,6 +121,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         sleep(300);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
+
     private void alignWithPictograph2(boolean fixingTurn){
         sleep(300);
         double rotation = findPictograph().rotation;
@@ -199,7 +174,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 //            }
 
 
-            sleep(500);
+            sleep(1000);
             telemetry.update();
             for (int i = 0; i < 4; i++) {
                 ((DcMotor)baseMotorArray.get(i)).setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -208,6 +183,31 @@ public class AutonomousModeBlue extends LinearOpMode {
             sleep(500);
         }
     }
+//    private void lookForJewel() {
+//        int numberOfReds = 0;
+//        int numberOfBlues = 0;
+//        for(int i = 0; i < 4; i++) {
+//            float[] colorInHSV = {};
+//            Color.RGBToHSV(jewelColor.red(), jewelColor.green(), jewelColor.blue(), colorInHSV);
+//
+//            float hue = colorInHSV[0];
+//            if ((hue >= 330) && (hue != 0)) {
+//                numberOfReds++;
+//            } else if (120 <= hue && hue <= 250) {
+//                numberOfBlues++;
+//            }
+//            sleep(100);
+//        }
+//        if (numberOfBlues >= 2 && numberOfReds <= 2) { // blue
+//            jewelMover.setPosition(1.0);
+//        } else if (numberOfReds >= 2 && numberOfBlues <= 2) { // red
+//            jewelMover.setPosition(0.0);
+//        }
+//
+//
+//        sleep(200);
+//
+//    }
     private void alignWithPictograph(boolean fixingTurn) {// needs to be tested
         final long startTime = System.currentTimeMillis();
         final long maxTime = 1000 + startTime;
@@ -506,7 +506,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         telemetry.addData("motor pos2", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
 //        sleep(1200);
-        sleepUntilEncodersChangeToACertainValue(3400, 1500); // value is a guess
+        sleepUntilEncodersChangeToACertainValue(3400, 2000); // value is a guess
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         telemetry.addData("motor pos3", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         sleep(200);
@@ -524,7 +524,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         telemetry.addData("motor pos4", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         sleep(200);
         telemetry.update();
-        sleep(30000);
+        sleep(300);
     }
 
     private void letGoOfGlyph() {
@@ -558,7 +558,7 @@ public class AutonomousModeBlue extends LinearOpMode {
             DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
             telemetry.addData("quit because it took to long: ",System.currentTimeMillis() >= maxTime);
             telemetry.update();
-            sleep(10000);
+            sleep(1000);
         }
     }
 }
