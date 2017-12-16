@@ -175,7 +175,7 @@ public class AutonomousModeBase extends LinearOpMode {
 //            sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        sleep(500);
+        sleep(2000);
         alignWithPictograph2(true);
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 1.0);
         double startOfTurn = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();

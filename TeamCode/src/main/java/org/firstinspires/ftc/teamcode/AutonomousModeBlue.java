@@ -474,7 +474,7 @@ public class AutonomousModeBlue extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
         sleep(200);
-        alignWithPictograph(true);
+//        alignWithPictograph(true);
     }
     private void goIntoCryptoBox(KeyPositions keyPosition) {
         GoAroundBalancingStone(keyPosition);
@@ -503,7 +503,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 //            sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        sleep(300);
+        sleep(2000);
         alignWithPictograph2(true);
         sleep(200);
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
