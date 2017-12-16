@@ -161,17 +161,18 @@ public class AutonomousModeBase extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
     }
 
-    private void TurnAroundAndGoAwayFromCryptoBoxAndBack(KeyPositions KeyPosition) {
-        telemetry.addData("motor pos1", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
+    private void TurnAroundAndGoAwayFromCryptoBoxAndBack(KeyPositions keyPosition) {
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
 //        sleep(500);
-        sleepUntilEncodersChangeToACertainValue(1933, 1000);
-        if (KeyPosition == KeyPositions.Center || KeyPosition == KeyPositions.Unknown){
-            sleep(200);
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+        sleepUntilEncodersChangeToACertainValue(1533, 1000);
+        if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
+            //sleep(200);
+            sleepUntilEncodersChangeToACertainValue(533, 400);
+
         }
-        if (KeyPosition == KeyPositions.Right){
-            sleep(300);
+        if (keyPosition == KeyPositions.Left){
+            sleepUntilEncodersChangeToACertainValue(733, 500);
+//            sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);
@@ -192,12 +193,15 @@ public class AutonomousModeBase extends LinearOpMode {
         goTowardCryptoBoxPartWay();
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
 //        sleep(500);
-        sleepUntilEncodersChangeToACertainValue(1933, 1000);
-        if (KeyPosition == KeyPositions.Center){
-            sleep(200);
+        sleepUntilEncodersChangeToACertainValue(1533, 1000);
+        if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
+            //sleep(200);
+            sleepUntilEncodersChangeToACertainValue(533, 400);
+
         }
-        if (KeyPosition == KeyPositions.Right){
-            sleep(300);
+        if (keyPosition == KeyPositions.Left){
+            sleepUntilEncodersChangeToACertainValue(733, 500);
+//            sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
         sleep(500);

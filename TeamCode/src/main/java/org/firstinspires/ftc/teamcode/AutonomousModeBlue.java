@@ -94,6 +94,7 @@ public class AutonomousModeBlue extends LinearOpMode {
 //        sleep(1000);
 //        lookForJewel();
         final KeyPositions keyColumnPos = moveToFindPictograph();
+        alignWithPictograph2(true);
         telemetry.addData("keypos: ", keyColumnPos);
         telemetry.update();
 //        alignWithPictograph(false);
@@ -491,39 +492,37 @@ public class AutonomousModeBlue extends LinearOpMode {
         telemetry.addData("motor pos1", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         DriveTrain.mecanum(baseMotorArray, 1.0, 0.0, 0.0);
 //        sleep(500);
-        sleepUntilEncodersChangeToACertainValue(1933, 700); // might be for center or left side
+        sleepUntilEncodersChangeToACertainValue(1533, 1000); // might be for center or left side
         if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
-            sleep(200);
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-            alignWithPictograph(true);
-            sleep(400);
+            //sleep(200);
+            sleepUntilEncodersChangeToACertainValue(533, 400);
+
         }
         if (keyPosition == KeyPositions.Left){
-            sleep(300);
+            sleepUntilEncodersChangeToACertainValue(733, 500);
+//            sleep(300);
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        sleep(100);
-        telemetry.addData("motor pos2", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
+        sleep(300);
+        alignWithPictograph2(true);
+        sleep(200);
         DriveTrain.mecanum(baseMotorArray, 0.0, -1.0, 0.0);
 //        sleep(1200);
-        sleepUntilEncodersChangeToACertainValue(3400, 2000); // value is a guess
+        sleepUntilEncodersChangeToACertainValue(3200, 2000); // value is a guess
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        telemetry.addData("motor pos3", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
         sleep(200);
         DriveTrain.mecanum(baseMotorArray, -1.0, 0.0, 0.0);
 //        sleep(500);
-        sleepUntilEncodersChangeToACertainValue(1933, 700);
+        sleepUntilEncodersChangeToACertainValue(1533, 1000);
         if (keyPosition == KeyPositions.Center || keyPosition == KeyPositions.Unknown){
-            sleep(200);
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+            sleepUntilEncodersChangeToACertainValue(533, 400);
         }
         if (keyPosition == KeyPositions.Left){
-            sleep(300);
+//            sleep(300)
+            sleepUntilEncodersChangeToACertainValue(733, 500);;
+
         }
         DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-        telemetry.addData("motor pos4", ((DcMotor)baseMotorArray.get(0)).getCurrentPosition());
-        sleep(200);
-        telemetry.update();
         sleep(300);
     }
 
@@ -554,11 +553,11 @@ public class AutonomousModeBlue extends LinearOpMode {
                 }
             }
         }
-        if (System.currentTimeMillis() >= maxTime){
-            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
-            telemetry.addData("quit because it took to long: ",System.currentTimeMillis() >= maxTime);
-            telemetry.update();
-            sleep(1000);
-        }
+//        if (System.currentTimeMillis() >= maxTime){
+//            DriveTrain.mecanum(baseMotorArray, 0.0, 0.0, 0.0);
+//            telemetry.addData("quit because it took to long: ",System.currentTimeMillis() >= maxTime);
+//            telemetry.update();
+//            sleep(100);
+//        }
     }
 }
