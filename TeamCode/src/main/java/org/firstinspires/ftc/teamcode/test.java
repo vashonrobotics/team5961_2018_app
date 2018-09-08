@@ -34,19 +34,19 @@ public class test extends LinearOpMode {
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
 
-        DriveTrain.mecanum(baseMotorArray,-1.0,0.0,0.0);
+        DriveTrain.mecanum(baseMotorArray,-1.0,0.0,0.0, false);
         sleep(1000);
-        DriveTrain.mecanum(baseMotorArray,0.0,-1.0,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,-1.0,0.0, false);
         sleep(1000);
-        DriveTrain.mecanum(baseMotorArray,1.0,0.0,0.0);
+        DriveTrain.mecanum(baseMotorArray,1.0,0.0,0.0, false);
         sleep(1000);
-        DriveTrain.mecanum(baseMotorArray,0.0,1.0,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,1.0,0.0, false);
         sleep(1000);
-        DriveTrain.mecanum(baseMotorArray,0.0,1.0,90.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,1.0,90.0, false);
         sleep(500);
-        DriveTrain.mecanum(baseMotorArray,0.0,-1.0,-90.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,-1.0,-90.0, false);
         sleep(500);
-        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0);
+        DriveTrain.mecanum(baseMotorArray,0.0,0.0,0.0, false);
         // to make sure that the configuration is correct
         for (int i = 0; i < 4; i++) {
             ((DcMotor)baseMotorArray.get(i)).setPower(1);

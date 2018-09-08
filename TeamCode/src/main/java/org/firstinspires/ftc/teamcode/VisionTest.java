@@ -86,7 +86,7 @@ public class VisionTest extends LinearOpMode  {
             if (numNotFound > 3){
                 velX = 0;
                 velY = 0;
-                DriveTrain.mecanum(baseMotorArrray, 0,0,0);
+                DriveTrain.mecanum(baseMotorArrray, 0,0,0, false);
                 telemetry.addLine("stop");
                 sleep(500);
             }
@@ -102,9 +102,9 @@ public class VisionTest extends LinearOpMode  {
 ////                    telemetry.addData("shape is: ", blobDetector.getContourTypes().get(index));
 //                }
 
-            DriveTrain.mecanum(baseMotorArrray,velX*2, velY*2,0);
+            DriveTrain.mecanum(baseMotorArrray,velX*2, velY*2,0, false);
             sleep(100);
-            DriveTrain.mecanum(baseMotorArrray,0, 0,0);
+            DriveTrain.mecanum(baseMotorArrray,0, 0,0, false);
 
 //            velY = 0;
             telemetry.addLine("done Processing");

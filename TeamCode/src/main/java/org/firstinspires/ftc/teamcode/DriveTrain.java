@@ -16,11 +16,8 @@ public class DriveTrain {
     public static void nonMecanum(ArrayList baseMotorArray, double power[]) {
     }
 
-    public static void mecanum(ArrayList baseMotorArray, double x, double y, double turn){
-        double power = Math.sqrt((x * x) + (y * y));
-        if (power < 0.2){
-            power = 0;
-        }
+    public static void mecanum(ArrayList baseMotorArray, double x, double y, double turn, boolean frontIsInTheDirectionOfTheWheels){
+        double power = maxUnit(Math.sqrt((x * x) + (y * y)));
 //        double radianAngle = 0;
         double radianAngle = Math.atan2(y, -x) - (Math.PI * 3 / 4);
 //
@@ -32,8 +29,8 @@ public class DriveTrain {
 
         double motorPower[] = {
                 (Math.cos(radianAngle) * power) + turn, // frontLeft
-                (Math.sin(radianAngle) * power) + turn, // frontRight// this needs to be fixed if front direction = wheel direction switch this sign and the one below
-                (Math.sin(radianAngle) * power) - turn, // backLeft
+                (Math.sin(radianAngle) * power) - turn*(frontIsInTheDirectionOfTheWheels ? 1:-1), // frontRight
+                (Math.sin(radianAngle) * power) + turn*(frontIsInTheDirectionOfTheWheels ? 1:-1), // backLeft
                 (Math.cos(radianAngle) * power) - turn  // backRight
         };
 

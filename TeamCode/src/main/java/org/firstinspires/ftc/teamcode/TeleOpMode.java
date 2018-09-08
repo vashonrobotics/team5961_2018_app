@@ -105,11 +105,11 @@ public class TeleOpMode extends OpMode{
         if (gamepad1.left_trigger >= 0.5) {
             DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_y) * motorSpeedMultiplier,
                     ((double) gamepad1.left_stick_x) * motorSpeedMultiplier,
-                    ((double) gamepad1.right_stick_x) * motorSpeedMultiplier);
+                    ((double) gamepad1.right_stick_x) * motorSpeedMultiplier, true);
         }else {
             DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_x) * motorSpeedMultiplier,
                     ((double) gamepad1.left_stick_y) * motorSpeedMultiplier,
-                    ((double) gamepad1.right_stick_x) * motorSpeedMultiplier);
+                    ((double) gamepad1.right_stick_x) * motorSpeedMultiplier, true);
         }
 
 
