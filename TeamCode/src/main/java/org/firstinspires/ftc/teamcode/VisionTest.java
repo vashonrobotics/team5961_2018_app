@@ -9,8 +9,6 @@ import org.firstinspires.ftc.robotcontroller.internal.BlobDetector;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 /**
@@ -19,8 +17,11 @@ import java.util.List;
 @Autonomous(group = "5961", name = "Vision Test")
 public class VisionTest extends LinearOpMode  {
     private ArrayList<DcMotor> baseMotorArrray = new ArrayList<>();
-    double velX = 0;
-    double velY = 0;
+    private double velX = 0;
+    private double velY = 0;
+    private Idea<double[]> posIdea = new Idea<>(new double[]{-1,-1}, new double[]{-1,-1});
+    private Idea<Double> sizeIdea = new Idea<>(-1.0, -1.0);
+    private int NUM_FRAMES_CONSIDERED = 5;
 
     @Override
     public void runOpMode() {
@@ -37,31 +38,31 @@ public class VisionTest extends LinearOpMode  {
 //            for (int i = 0; i < 10; i++) {
             FtcRobotControllerActivity.shouldProcessImage = true;
             while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
-                sleep(5);
+                sleep(1);
             }
 //                telemetry.addLine("started processing");
 //                telemetry.update();
             ArrayList<double[]> ballPositions = new ArrayList<>();
             int numTooClose = 0;
             int numNotFound = 0;
-            for (int i = 0; i < 5; i++){
-                double[] ballPos = blobDetector.getBestCandidatePosition();
-                ballPositions.add(ballPos);
-                if (ballPos[2] > 10000 && ballPos[2] > 0.1) {
+            double ballX = 0;
+            double ballY = 0;
+            double ballSize = 0;
+            for (int i = 0; i < NUM_FRAMES_CONSIDERED; i++){
+                double[] ballInfo = blobDetector.getBestCandidatePosition();
+                ballX += ballInfo[0];
+                ballY += ballInfo[1];
+                ballSize += ballInfo[2];
+                if (ballInfo[2] > 10000 && ballInfo[2] > 0.1) {
                     numTooClose++;
                 }
-                if (ballPos[2]<0.1){
+                if (ballInfo[2]<0.1){
                     numNotFound++;
                 }
             }
-            double  ballX = 0;
-            double ballY = 0;
-            for (double[] ballInfo: ballPositions){
-                ballX += ballInfo[0];
-                ballY += ballInfo[1];
-            }
-            ballX = ballX/(ballPositions.size()-numNotFound);
-            ballY = ballY/(ballPositions.size()-numNotFound);
+            ballX = ballX/(NUM_FRAMES_CONSIDERED-numNotFound);
+            ballY = ballY/(NUM_FRAMES_CONSIDERED-numNotFound);
+            ballSize = ballSize/(NUM_FRAMES_CONSIDERED-numNotFound);
             previousBallPositions.add(new double[]{ballX, ballY});
             telemetry.addData("position " + ballX + " ",ballY);
             telemetry.addData("horizontal power", -(ballX-288/2)*0.003);
@@ -78,7 +79,7 @@ public class VisionTest extends LinearOpMode  {
                 velY = 0;
                 telemetry.addLine("too close");
                 for (double[] ballPos: previousBallPositions) {
-                    telemetry.addData("all ball poses: ", ballPos[1]);
+                    telemetry.addData("all ball Ys: ", ballPos[1]);
                 }
                 telemetry.update();
                 sleep(5000);
@@ -101,10 +102,24 @@ public class VisionTest extends LinearOpMode  {
 //                    telemetry.addData("position is: " + blobDetector.getContourCenters().get(index)[0], blobDetector.getContourCenters().get(index)[1]);
 ////                    telemetry.addData("shape is: ", blobDetector.getContourTypes().get(index));
 //                }
+            if (makesSense(ballX, ballY, ballSize)){
+                DriveTrain.mecanum(baseMotorArrray,velX*2, velY*2,0, false);
+                sleep(100);
+                DriveTrain.mecanum(baseMotorArrray,0, 0,0, false);
 
-            DriveTrain.mecanum(baseMotorArrray,velX*2, velY*2,0, false);
-            sleep(100);
-            DriveTrain.mecanum(baseMotorArrray,0, 0,0, false);
+                if (posIdea.value[0] < 0 && posIdea.value[1] < 0) { // if first time
+                   posIdea.trajectoryDirection = new double[]{0,0};
+                   sizeIdea.trajectoryDirection = 0.0;
+                } else {
+                    sizeIdea.trajectoryDirection = ballSize - sizeIdea.value;
+                    posIdea.trajectoryDirection = new double[]{ballX - posIdea.value[0], ballY - posIdea.value[1]};
+                }
+                posIdea.value = new double[] {ballX, ballY};
+                sizeIdea.value = ballSize;
+            }else{
+                sleep(300);
+            }
+
 
 //            velY = 0;
             telemetry.addLine("done Processing");
@@ -150,5 +165,31 @@ public class VisionTest extends LinearOpMode  {
 //            telemetry.update();
 ////            sleep(5000);
 //        }
+    }
+
+    private boolean makesSense(double ballX, double ballY, double ballSize) {
+        if (posIdea.value[0] < 0 && posIdea.value[1] < 0){// if it's the first frame just allow it
+            return true;
+        }
+        double estimatedX = posIdea.value[0] + posIdea.trajectoryDirection[0];
+        double estimatedY = posIdea.value[1] + posIdea.trajectoryDirection[1];
+
+        double estimatedAngle = Math.tan(estimatedX/estimatedY);
+        double actualAngle = Math.tan(ballX/ballY);
+        double diffY = ballY - estimatedY;
+        double diffX = ballX - estimatedX;
+
+        double diffAngle = Math.tan(diffX/diffY);
+        boolean sizeIsReasonable = sizeIdea.value < ballSize;
+        if (sizeIdea.trajectoryDirection > 0){
+            sizeIsReasonable = !sizeIsReasonable;
+        } else if (sizeIdea.trajectoryDirection > -0.1 && sizeIdea.trajectoryDirection < 0.-1){
+            sizeIsReasonable = false; // needs to be true if it is an and below
+        }
+        if (Math.abs(diffY) < 30 || sizeIsReasonable){ // maybe should be and
+            return true;
+        }else {
+            return false;
+        }
     }
 }
