@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+<QCARConfig> <!--this may be broken-->
   <Tracking>
     <ImageTarget name="BluePerimeter" size="254.000000 183.280029" />
     <ImageTarget name="RedPerimeter" size="254.000000 181.783096" />
@@ -7,3 +7,4 @@
     <ImageTarget name="BackPerimeter" size="254.000000 199.508209" />
   </Tracking>
 </QCARConfig>
+    <?xml version="1.0" encoding="UTF-8"?>
