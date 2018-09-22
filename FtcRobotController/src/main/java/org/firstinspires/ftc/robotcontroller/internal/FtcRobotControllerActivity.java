@@ -254,12 +254,12 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
         case LoaderCallbackInterface.SUCCESS: {
           Log.i(TAG, "OpenCV loaded successfully");
           mOpenCvCameraView.enableView();
-          try {
-            initializeOpenCVDependencies();
-          } catch (IOException e) {
-            e.printStackTrace();
-            Log.d("ERROR", "Can't load image");
-          }
+//          try {
+//            initializeOpenCVDependencies();
+//          } catch (IOException e) {
+//            e.printStackTrace();
+//            Log.d("ERROR", "Can't load image");
+//          }
         }
         break;
         default: {
@@ -276,69 +276,27 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       }
     }
 
-  public void initializeOpenCVDependencies() throws IOException{
-    mOpenCvCameraView.enableView();
-    detector = FeatureDetector.create(FeatureDetector.ORB);
-//    ORB orb = new ORB(features);
-//    detector = FastFeatureDetector.create(FastFeatureDetector.THRESHOLD, FastFeatureDetector.NONMAX_SUPPRESSION, FastFeatureDetector.)
-    descriptor = DescriptorExtractor.create(DescriptorExtractor.ORB);
-    matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
-    img1 = new Mat();
-    AssetManager assetManager = getAssets();
-    InputStream istr = assetManager.open("ball.jpg");
-    Bitmap bitmap = BitmapFactory.decodeStream(istr);
-    Utils.bitmapToMat(bitmap, img1);
-    Imgproc.cvtColor(img1, img1, Imgproc.COLOR_RGB2GRAY);
-    img1.convertTo(img1, 0); //converting the image to match with the type of the cameras image
-    descriptors1 = new Mat();
-    keypoints1 = new MatOfKeyPoint();
-    detector.detect(img1, keypoints1);
-    descriptor.compute(img1, keypoints1, descriptors1);
-//    Imgproc.Canny(img1, img1, THRESHOLD, THRESHOLD*2);
-    Mat testImages = new Mat(0, 4, 5);
-
-//    for (int i = -1; i < 16; i++){
-//      Mat testImage = new Mat();
-//      InputStream inputStream = assetManager.open("IMG ("+i+").jpg");
-//      Bitmap input_bitmap = BitmapFactory.decodeStream(inputStream);
-//      Utils.bitmapToMat(input_bitmap, testImage);
-//      Imgproc.resize(testImage, testImage, new Size(img1.cols(), img1.rows()));
-//      double[] testData = getMatcherData(testImage);
-//      Mat testDataAsMat = new Mat(1,4,5);
-//      for (int dataPointIdx = 0; dataPointIdx < testData.length; dataPointIdx++){
-//        float testDataPoint = (float) testData[dataPointIdx];
-//        testDataAsMat.put(0,dataPointIdx, testDataPoint);
-//      }
-//      testImages.push_back(testDataAsMat);
-//    }
-//    img1 = img1.t();
-
-
-//    Log.d("Source image type", String.valueOf(img1.type()));
-//    Imgproc.blur(img1, img1, new Size(5, 5), new Point(0,0));
-//    Log.d("Source image type2", String.valueOf(img1.type()));
-//    Imgproc.Canny(img1, img1, THRESHOLD, THRESHOLD*2);
-//    List<MatOfPoint> contoursOfImg1 = null;
-//    Imgproc.findContours(img1, contoursOfImg1, );
-
-//    svm = SVM.create();
-//    svm.setType(SVM.C_SVC);
-//    svm.setC(0.1);
-//    svm.setKernel(SVM.LINEAR);
-//    Log.d("ROWS of TestIms", String.valueOf(testImages.rows()));
-//    svm.setTermCriteria(new TermCriteria(TermCriteria.MAX_ITER, 1000, 0.01));
-//    Mat labels = Mat.zeros(testImages.rows()-4, 1, CvType.CV_32SC(1));
-//    labels.push_back(Mat.ones(4,1,CvType.CV_32SC(1)));
-//    Log.d("trainSize", String.valueOf(testImages.cols()));
-//    Log.d("trainSize pt2", String.valueOf(testImages.rows()));
-//    Log.d("labels size ", String.valueOf(labels.cols()));
-//    Log.d("labels size ", String.valueOf(labels.rows()));
-//    svm.train(testImages, Ml.ROW_SAMPLE, labels);
-//    Log.e("Prediction", String.valueOf(svm.predict(testImages.row(13))));
-//    Log.e("answer", "should be a one");
-//    Log.e("STATUS", "learning complete");
-//    svm.save("svmdata.xml");
-  }
+//  public void initializeOpenCVDependencies() throws IOException{
+//    mOpenCvCameraView.enableView();
+//    detector = FeatureDetector.create(FeatureDetector.ORB);
+////    ORB orb = new ORB(features);
+////    detector = FastFeatureDetector.create(FastFeatureDetector.THRESHOLD, FastFeatureDetector.NONMAX_SUPPRESSION, FastFeatureDetector.)
+//    descriptor = DescriptorExtractor.create(DescriptorExtractor.ORB);
+//    matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+//    img1 = new Mat();
+//    AssetManager assetManager = getAssets();
+////    InputStream istr = assetManager.open("ball.jpg");
+//    Bitmap bitmap = BitmapFactory.decodeStream(istr);
+//    Utils.bitmapToMat(bitmap, img1);
+//    Imgproc.cvtColor(img1, img1, Imgproc.COLOR_RGB2GRAY);
+//    img1.convertTo(img1, 0); //converting the image to match with the type of the cameras image
+//    descriptors1 = new Mat();
+//    keypoints1 = new MatOfKeyPoint();
+//    detector.detect(img1, keypoints1);
+//    descriptor.compute(img1, keypoints1, descriptors1);
+////    Imgproc.Canny(img1, img1, THRESHOLD, THRESHOLD*2);
+//    Mat testImages = new Mat(0, 4, 5);
+//  }
 
   public double[] getMatcherData(Mat inputFrame){
     Imgproc.cvtColor(inputFrame, inputFrame, Imgproc.COLOR_RGB2GRAY);
@@ -581,25 +539,20 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 //    for (int i = 0; i < contours.size(); i++) {
 //      Imgproc.drawContours(inputFrame, contours, i, new Scalar(255, 255, 255), -1);
 //    }
-    Mat reds = new Mat();
+    Mat colorToFilter = new Mat();
     Mat blues = new Mat();
     Mat greens = new Mat();
     Mat redsPart1 = new Mat();
     Mat redsPart2 = new Mat();
-    Core.inRange(hsvInputFrame, new Scalar(170, 100, 100), new Scalar(180, 255, 255), redsPart1);
-    Core.inRange(hsvInputFrame, new Scalar(1,100,100), new Scalar(7, 255, 255), redsPart2);
-    Core.add(redsPart1, redsPart2, reds);
-//    Core.inRange(hsvInputFrame, new Scalar(90, 50, 50), new Scalar(150, 255, 255), blues);
-//    Core.inRange(hsvInputFrame, new Scalar(30,50,0), new Scalar(90,255,255), greens);
-//
-//    Imgproc.bilateralFilter(reds, reds, 5, 5, 5);
+//    Core.inRange(hsvInputFrame, new Scalar(9, 50,50), new Scalar(38, 255,255), colorToFilter);
+    Core.inRange(hsvInputFrame, new Scalar(0,0,150), new Scalar(180, 60, 255), colorToFilter);
     Mat kernal = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2,2));
 
-    Imgproc.blur(reds, reds, new Size(10,10));
-    Imgproc.erode(reds, reds, kernal);
-    Imgproc.dilate(reds,reds,kernal);
+    Imgproc.blur(colorToFilter, colorToFilter, new Size(10,10));
+    Imgproc.erode(colorToFilter, colorToFilter, kernal);
+    Imgproc.dilate(colorToFilter,colorToFilter,kernal);
     imageData = new Pair<>(new ArrayList<MatOfPoint>(contours), hsvInputFrame);
-    Imgproc.findContours(reds, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+    Imgproc.findContours(colorToFilter, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
 //
 
@@ -608,11 +561,11 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     for (int i=0; i < contours.size();i++){
       System.out.println("contour" + i);
       Rect rect = Imgproc.boundingRect(contours.get(i));
-      Imgproc.rectangle(reds, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(255,255,255));
-      Imgproc.drawContours(reds, contours, i, new Scalar(255,255,255), 6);
+      Imgproc.rectangle(colorToFilter, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(255,255,255));
+      Imgproc.drawContours(colorToFilter, contours, i, new Scalar(255,255,255), 6);
     }
-    Imgproc.resize(reds, reds, inputFrame.t().size());
-    return reds;
+    Imgproc.resize(colorToFilter, colorToFilter, inputFrame.t().size());
+    return colorToFilter;
   }
 
   @Override

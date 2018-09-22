@@ -24,26 +24,27 @@ import java.util.Comparator;
 import java.util.List;
 
 public class BlobDetector {
-    public BlobDetector() {}
+    Scalar minColorRange;
+    Scalar maxColorRange;
+    public BlobDetector(Scalar minColorRange, Scalar maxColorRange) {
+        this.minColorRange = minColorRange;
+        this.maxColorRange = maxColorRange;
+    }
     public double[] getBestCandidatePosition() {
         ArrayList<MatOfPoint> contours = FtcRobotControllerActivity.imageData.fst;
         Mat hsvFrame = FtcRobotControllerActivity.imageData.snd;
         Core.rotate(hsvFrame, hsvFrame, Core.ROTATE_90_CLOCKWISE);
 
-        Mat reds = new Mat();
-        Mat blues = new Mat();
+        Mat pixelsOfOneColor = new Mat();
 
-        Mat redsPart1 = new Mat();
-        Mat redsPart2 = new Mat();
-        Core.inRange(hsvFrame, new Scalar(170, 100, 100), new Scalar(180, 255, 255), redsPart1);
-        Core.inRange(hsvFrame, new Scalar(1,100,100), new Scalar(7, 255, 255), redsPart2);
-        Core.add(redsPart1, redsPart2, reds);
-        Core.inRange(hsvFrame, new Scalar(90, 50, 50), new Scalar(150, 255, 255), blues);
+
+        Core.inRange(hsvFrame,minColorRange, maxColorRange, pixelsOfOneColor);
+//        Core.inRange(hsvFrame, new Scalar(90, 50, 50), new Scalar(150, 255, 255), blues);
         Mat kernal = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2,2));
-        Imgproc.blur(reds, reds, new Size(10,10));
-        Imgproc.erode(reds, reds, kernal);
-        Imgproc.dilate(reds,reds,kernal);
-        Imgproc.findContours(reds, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.blur(pixelsOfOneColor, pixelsOfOneColor, new Size(10,10));
+        Imgproc.erode(pixelsOfOneColor, pixelsOfOneColor, kernal);
+        Imgproc.dilate(pixelsOfOneColor,pixelsOfOneColor,kernal);
+        Imgproc.findContours(pixelsOfOneColor, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         Collections.sort(contours, new Comparator<MatOfPoint>() {
             @Override
@@ -60,23 +61,25 @@ public class BlobDetector {
             MatOfPoint contour = contours.get(i);
             Rect rect = Imgproc.boundingRect(contour);
             Mat contourFrame = hsvFrame.clone().submat(rect);
-            double percentRed = 0;
+            double percentColor = 0;
             int numTimesIterated = 0;
             for (int row = 0; row < contourFrame.rows(); row++){
                 for (int col=0; col < contourFrame.cols(); col++){
                     double[] pixel = contourFrame.get(row,col);
-                    percentRed += pixel[0] > 170 || pixel[0] < 7 ? 1:0;
+                    percentColor += pixel[0] > minColorRange.val[0] && pixel[0] < maxColorRange.val[0] ? 1:0;
                     numTimesIterated++;
                 }
             }
-            percentRed = percentRed / numTimesIterated;
-            //Imgproc.contourArea(contour) > 40 && percentRed > 0.5
+            percentColor = percentColor / numTimesIterated;
+            //Imgproc.contourArea(contour) > 40 && percentColor > 0.5
             // ~33500 pixels at ~50cm
             // ~9000 pixels at ~100cm
             // 5000 pixels at 150cm
             //
-            if  (percentRed > 0.5){
-                contourCenters.add(new double[]{rect.y+rect.height/2, rect.x+rect.width/2, rect.height*rect.width}); // rotation means that we need to switch x and y
+            double xPos = rect.y+rect.height/2; // because rotated
+            double yPos = rect.x+rect.width/2;
+            if  (percentColor > 0.5 && yPos < hsvFrame.rows()/2){
+                contourCenters.add(new double[]{xPos, yPos, rect.height*rect.width});
                 canidatesForBall.add(contour);
             }
         }

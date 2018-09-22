@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcontroller.internal.BlobDetector;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
 
@@ -32,13 +33,13 @@ public class VisionTest extends LinearOpMode  {
         baseMotorArrray.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
         baseMotorArrray.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
         // STUFF FOR BLOB DETECTION
-        BlobDetector blobDetector = new BlobDetector();
+        BlobDetector blobDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
         ArrayList<double[]> previousBallPositions = new ArrayList<>();
         while (true) {
 //            for (int i = 0; i < 10; i++) {
             FtcRobotControllerActivity.shouldProcessImage = true;
             while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
-                sleep(1);
+                sleep(5);
             }
 //                telemetry.addLine("started processing");
 //                telemetry.update();
