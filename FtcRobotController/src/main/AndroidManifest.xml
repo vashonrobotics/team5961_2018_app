@@ -2,8 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
           package="com.qualcomm.ftcrobotcontroller"
-          android:versionCode="27"
-          android:versionName="3.7">
+          android:versionCode="29"
+          android:versionName="4.1">
+<!--=======-->
+          <!--android:versionCode="29"-->
+          <!--android:versionName="4.1">-->
+<!--&gt;>>>>>> 58d723a1d11a1c03ffb3a30f4a38c3601eac61d8-->
 
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -47,6 +51,11 @@
       <meta-data
         android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
         android:resource="@xml/device_filter" />
+
+      <meta-data
+          android:name="org.firstinspires.main.entry"
+          android:value="true"
+          />
     </activity>
 
     <!-- The robot controller service in which most of the robot functionality is managed -->

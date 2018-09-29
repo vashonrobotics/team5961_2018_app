@@ -46,7 +46,25 @@ For technical questions regarding the SDK, please visit the FTC Technology forum
 # Release Information
 **************************************************************************************
 
+<<<<<<< HEAD
 Version 3.7 (built on 18.03.12)
+=======
+Version 4.1 (released on 18.09.24)
+
+Changes include:
+ * Fix to prevent crash when deprecated configuration annotations are used.
+ * Change to allow FTC Robot Controller APK to be auto-updated using FIRST Global Control Hub update scripts.
+ * Removed samples for non supported / non legal hardware.
+ * Improvements to Telemetry.addData block with "text" socket.
+ * Updated Blocks sample op mode list to include Rover Ruckus Vuforia example.
+ * Update SDK library version number.
+     
+**************************************************************************************
+# Release Information
+**************************************************************************************
+
+Version 4.0 (released on 18.09.12)
+>>>>>>> 58d723a1d11a1c03ffb3a30f4a38c3601eac61d8
 
 Changes include:
  * Interim fix to allow FTC apps to run on Android Nougat (7.x) devices.

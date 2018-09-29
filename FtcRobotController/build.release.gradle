@@ -4,6 +4,9 @@ dependencies {
     implementation (name:'RobotCore-release', ext: 'aar')
     implementation (name:'Hardware-release', ext: 'aar')
     implementation (name:'FtcCommon-release', ext: 'aar')
+//<<<<<<< HEAD
     implementation (name:'Analytics-release', ext:'aar')
+//=======
+//>>>>>>> 58d723a1d11a1c03ffb3a30f4a38c3601eac61d8
     implementation (name:'WirelessP2p-release', ext:'aar')
 }
