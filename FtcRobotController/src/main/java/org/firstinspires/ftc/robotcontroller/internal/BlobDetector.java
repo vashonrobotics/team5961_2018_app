@@ -25,11 +25,11 @@ import java.util.Comparator;
 import java.util.List;
 
 public class BlobDetector {
-    Scalar minColorRange;
-    Scalar maxColorRange;
-    Scalar minColorBorderRange;
-    Scalar maxColorBorderRange;
-    int borderThickness;
+    private Scalar minColorRange;
+    private Scalar maxColorRange;
+    private Scalar minColorBorderRange;
+    private Scalar maxColorBorderRange;
+    private int borderThickness;
     public BlobDetector(Scalar minColorRange, Scalar maxColorRange, Scalar minColorBorderRange,
                         Scalar maxColorBorderRange, int borderThickness) {
         this.minColorRange = minColorRange;
@@ -38,7 +38,7 @@ public class BlobDetector {
         this.maxColorBorderRange = maxColorBorderRange;
         this.borderThickness = borderThickness;
     }
-    public double[] getBestCandidateData() {
+    public ArrayList<double[]> getCandidatesData() {
         ArrayList<MatOfPoint> contours = FtcRobotControllerActivity.imageData.fst;
         Mat hsvFrame = FtcRobotControllerActivity.imageData.snd;
         Core.rotate(hsvFrame, hsvFrame, Core.ROTATE_90_CLOCKWISE);
@@ -82,8 +82,7 @@ public class BlobDetector {
                 numIter++;
             }
             Mat contourFrame = hsvFrame.clone().submat(rect);
-            Mat borderFrame = new Mat();
-            borderFrame = hsvFrame.clone().submat(borderRect);
+            Mat borderFrame = hsvFrame.clone().submat(borderRect);
             double percentColor = 0;
             int numTimesIterated = 0;
             // find percent color of contour
@@ -130,16 +129,18 @@ public class BlobDetector {
             //
             double xPos = rect.y+rect.height/2; // because rotated
             double yPos = rect.x+rect.width/2;
-            if  (percentColor > 0.5 && yPos < hsvFrame.rows()/3 && percentBorderColor > 0.5){
+            double MIN_ASPECT_RATIO = 0.8;
+            if  (percentColor > 0.5 && yPos < hsvFrame.rows()/3 && percentBorderColor > 0.5
+                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){
                 contourData.add(new double[]{xPos, yPos, rect.height*rect.width});
                 canidatesForBall.add(contour);
             }
         }
         try {
-            return contourData.get(contourData.size() - 1);
+            return contourData;
         } catch (IndexOutOfBoundsException e){
             Log.d("", "Didn't find any candidates");
-            return new double[]{0.0,0.0,0.0};
+            return contourData;
         }
     }
 
