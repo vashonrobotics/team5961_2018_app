@@ -33,7 +33,7 @@ public class VisionTest extends LinearOpMode  {
         baseMotorArrray.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
         baseMotorArrray.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
         // STUFF FOR BLOB DETECTION
-        BlobDetector blobDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
+        BlobDetector blobDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255), new Scalar(0,0,70), new Scalar(180, 60, 160), 10);
         ArrayList<double[]> previousBallPositions = new ArrayList<>();
         while (true) {
 //            for (int i = 0; i < 10; i++) {
@@ -50,7 +50,7 @@ public class VisionTest extends LinearOpMode  {
             double ballY = 0;
             double ballSize = 0;
             for (int i = 0; i < NUM_FRAMES_CONSIDERED; i++){
-                double[] ballInfo = blobDetector.getBestCandidatePosition();
+                double[] ballInfo = blobDetector.getBestCandidateData();
                 ballX += ballInfo[0];
                 ballY += ballInfo[1];
                 ballSize += ballInfo[2];
