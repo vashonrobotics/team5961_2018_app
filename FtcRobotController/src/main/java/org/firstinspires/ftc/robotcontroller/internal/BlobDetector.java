@@ -2,6 +2,7 @@ package org.firstinspires.ftc.robotcontroller.internal;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.util.Range;
 import com.sun.tools.javac.util.Pair;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
@@ -39,7 +40,7 @@ public class BlobDetector {
         this.borderThickness = borderThickness;
     }
     public ArrayList<double[]> getCandidatesData() {
-        ArrayList<MatOfPoint> contours = FtcRobotControllerActivity.imageData.fst;
+        ArrayList<MatOfPoint> contours = new ArrayList<>();
         Mat hsvFrame = FtcRobotControllerActivity.imageData.snd;
         Core.rotate(hsvFrame, hsvFrame, Core.ROTATE_90_CLOCKWISE);
 
@@ -71,27 +72,47 @@ public class BlobDetector {
         for (int i = 0; i < contours.size(); i++) {
             MatOfPoint contour = contours.get(i);
             Rect rect = Imgproc.boundingRect(contour);
+//            rect.width = Range.clip(rect.width, 0, hsvFrame.cols()-rect.x);
+//            rect.height = Range.clip(rect.height, 0, hsvFrame.rows()-rect.y);
             Rect borderRect = new Rect(rect.x-borderThickness, rect.y-borderThickness,// upper left hand coords
                     rect.width+borderThickness*2, rect.height+borderThickness*2);
             int numIter = 0;
-            while ((borderRect.x < 0 || borderRect.x + rect.width >= hsvFrame.cols()-1 ||
-                    borderRect.y < 0 || borderRect.y + rect.height >= hsvFrame.rows()-1) && numIter < 100){
+            while ((borderRect.x < 0 || borderRect.x + borderRect.width > hsvFrame.cols() ||
+                    borderRect.y < 0 || borderRect.y + borderRect.height > hsvFrame.rows()) && numIter < 5){
                 borderThickness -= 1;
                 borderRect = new Rect(rect.x-borderThickness, rect.y-borderThickness,// upper left hand coords
                         rect.width+borderThickness*2, rect.height+borderThickness*2);
                 numIter++;
             }
+            Log.d("RECT info x", String.valueOf(rect.x));
+            Log.d("RECT y", String.valueOf(rect.y));
+            Log.d("RECT height", String.valueOf(rect.height));
+            Log.d("RECT width", String.valueOf(rect.width));
+            Log.d("RECT border", String.valueOf(borderThickness));
+
+            Log.d("BorderRECT info x", String.valueOf(borderRect.x));
+            Log.d("RECT y", String.valueOf(borderRect.y));
+            Log.d("RECT height", String.valueOf(borderRect.height));
+            Log.d("RECT width", String.valueOf(borderRect.width));
+            Log.d("RECT border", String.valueOf(borderThickness));
+            Log.d("REct",rect.toString() + "border rect" + borderRect.toString());
+            Log.d("Cols", String.valueOf(hsvFrame.cols()));
+            Log.d("Rows", String.valueOf(hsvFrame.rows()));
+
+//            borderRect.width = Range.clip(rect.width, 0, hsvFrame.cols()-rect.x);
+//            borderRect.height= Range.clip(rect.height, 0, hsvFrame.rows()-rect.y);
             Mat contourFrame = hsvFrame.clone().submat(rect);
             Mat borderFrame = hsvFrame.clone().submat(borderRect);
+
             double percentColor = 0;
             int numTimesIterated = 0;
             // find percent color of contour
             for (int row = 0; row < contourFrame.rows(); row++){
                 for (int col=0; col < contourFrame.cols(); col++){
                     double[] pixel = contourFrame.get(row,col);
-                    if (pixel[0] > minColorRange.val[0] && pixel[0] < maxColorRange.val[0] &&
-                            pixel[1] > minColorRange.val[1] && pixel[1] < maxColorRange.val[1] &&
-                            pixel[2] > minColorRange.val[2] && pixel[2] < maxColorRange.val[2]) {
+                    if (pixel[0] > minColorRange.val[0]){ //&& pixel[0] < maxColorRange.val[0] &&
+                            //pixel[1] > minColorRange.val[1] && pixel[1] < maxColorRange.val[1] &&
+                           // pixel[2] > minColorRange.val[2] && pixel[2] < maxColorRange.val[2]) {
                         percentColor += 1;
                     }
                     numTimesIterated++;
@@ -105,12 +126,12 @@ public class BlobDetector {
                 for (int col=0; col < borderFrame.cols(); col++) {
                     double[] pixel = borderFrame.get(row, col);
                     // if it's on the border
-                    if ((row <= borderThickness || col <= borderThickness ||
-                            row >= borderFrame.rows() - borderThickness || col >= borderFrame.cols() - borderThickness)) {
+                    if ((row < borderThickness || col < borderThickness ||
+                            row > borderFrame.rows() - borderThickness || col > borderFrame.cols() - borderThickness)) {
                         // if it's the right color
-                        if (pixel[0] > minColorBorderRange.val[0] && pixel[0] < maxColorBorderRange.val[0] &&
-                                pixel[1] > minColorBorderRange.val[1] && pixel[1] < maxColorBorderRange.val[1] &&
-                                pixel[2] > minColorBorderRange.val[2] && pixel[2] < maxColorBorderRange.val[2]) {
+                        if (pixel[0] > minColorBorderRange.val[0] && pixel[0] < maxColorBorderRange.val[0]){// &&
+                                //pixel[1] > minColorBorderRange.val[1] && pixel[1] < maxColorBorderRange.val[1] &&
+                                //pixel[2] > minColorBorderRange.val[2] && pixel[2] < maxColorBorderRange.val[2]) {
                             percentBorderColor += 1;
                         }
                         numTimesBorderIterated++;
@@ -120,7 +141,10 @@ public class BlobDetector {
             if (numTimesBorderIterated > 0) {
                 percentBorderColor = percentBorderColor / numTimesBorderIterated;
             }else {
-                percentBorderColor = 1.0;
+                percentBorderColor = 0.0;
+            }
+            if (borderThickness < 1){
+                percentBorderColor = 0.0;
             }
             //Imgproc.contourArea(contour) > 40 && percentColor > 0.5
             // ~33500 pixels at ~50cm
@@ -129,9 +153,11 @@ public class BlobDetector {
             //
             double xPos = rect.y+rect.height/2; // because rotated
             double yPos = rect.x+rect.width/2;
-            double MIN_ASPECT_RATIO = 0.8;
-            if  (percentColor > 0.5 && yPos < hsvFrame.rows()/3 && percentBorderColor > 0.5
-                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){
+            double MIN_ASPECT_RATIO = 0.6;
+            Log.d("PercentColor ",String.valueOf(percentColor));
+            Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
+            if  (percentColor > 0.6 && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
+//                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){
                 contourData.add(new double[]{xPos, yPos, rect.height*rect.width});
                 canidatesForBall.add(contour);
             }

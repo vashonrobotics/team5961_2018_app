@@ -545,13 +545,15 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     Mat redsPart1 = new Mat();
     Mat redsPart2 = new Mat();
 //    Core.inRange(hsvInputFrame, new Scalar(9, 50,50), new Scalar(38, 255,255), colorToFilter);
-    Core.inRange(hsvInputFrame, new Scalar(0,0,150), new Scalar(180, 60, 255), colorToFilter);
+
+    Core.inRange(hsvInputFrame, new Scalar(9, 100,50), new Scalar(38, 255,255), colorToFilter);
     Mat kernal = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2,2));
 
     Imgproc.blur(colorToFilter, colorToFilter, new Size(10,10));
     Imgproc.erode(colorToFilter, colorToFilter, kernal);
     Imgproc.dilate(colorToFilter,colorToFilter,kernal);
     imageData = new Pair<>(new ArrayList<MatOfPoint>(contours), hsvInputFrame);
+
     Imgproc.findContours(colorToFilter, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
 //
@@ -565,6 +567,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       Imgproc.drawContours(colorToFilter, contours, i, new Scalar(255,255,255), 6);
     }
     Imgproc.resize(colorToFilter, colorToFilter, inputFrame.t().size());
+
     return colorToFilter;
   }
 

@@ -28,7 +28,6 @@ public class TeleOpMode extends OpMode{
     private ColorSensor jewelColor;
     private Servo jewelMover;
     private Servo jewelExtender;
-//    private int caz = 1;
 //    private DcMotor relicGrabberExtender;
 //    private Servo relicGrabber;
 //    private Servo relicLifter;
@@ -40,21 +39,21 @@ public class TeleOpMode extends OpMode{
     public void init() {
         // base motor init
         baseMotorArray = new ArrayList();
-        baseMotorArray.add(hardwareMap.dcMotor.get("front Left"));
-        baseMotorArray.add(hardwareMap.dcMotor.get("front Right"));
-        baseMotorArray.add(hardwareMap.dcMotor.get("back Left"));
-        baseMotorArray.add(hardwareMap.dcMotor.get("back Right"));
+        baseMotorArray.add(hardwareMap.dcMotor.get("motorLF"));
+        baseMotorArray.add(hardwareMap.dcMotor.get("motorRF"));
+        baseMotorArray.add(hardwareMap.dcMotor.get("motorLB"));
+        baseMotorArray.add(hardwareMap.dcMotor.get("motorRB"));
         ((DcMotor)baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor)baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
         // lift init
-        lift = hardwareMap.dcMotor.get("lift");
+//        lift = hardwareMap.dcMotor.get("lift");
         // lift grabbers
-        leftServo = hardwareMap.servo.get("left");
-        rightServo = hardwareMap.servo.get("right");
-        leftServo.setDirection(Servo.Direction.REVERSE);
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftStartPos = lift.getCurrentPosition();
+//        leftServo = hardwareMap.servo.get("left");
+//        rightServo = hardwareMap.servo.get("right");
+//        leftServo.setDirection(Servo.Direction.REVERSE);
+//        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        liftStartPos = lift.getCurrentPosition();
         maxLiftDiff = 2050;
 
         for(int i = 0; i < 4; i++){
@@ -116,10 +115,10 @@ public class TeleOpMode extends OpMode{
             //  up is negative
         if ((-gamepad2.left_stick_y > 0 && (maxLiftDiff <= Math.abs(lift.getCurrentPosition()-liftStartPos)))
                 || (-gamepad2.left_stick_y < 0 && (Math.abs(lift.getCurrentPosition()) <= 10))) {
-            lift.setPower(0);
+//            lift.setPower(0);
 
         }else {
-            lift.setPower(gamepad2.left_stick_y*3/4);
+//            lift.setPower(gamepad2.left_stick_y*3/4);
         }
 //        if((gamepad2.right_stick_x < 0 && (maxRelicArmPos <= Math.abs(relicGrabberExtender.getCurrentPosition())))) {
 //            relicGrabberExtender.setPower(0);
@@ -148,13 +147,13 @@ public class TeleOpMode extends OpMode{
 
         if(gamepad2.right_trigger >= .5){
 
-            leftServo.setPosition(0.7);
-            rightServo.setPosition(0.7);
+//            leftServo.setPosition(0.7);
+//            rightServo.setPosition(0.7);
 
         }else{
 
-            leftServo.setPosition(1.0);
-            rightServo.setPosition(0.9);
+//            leftServo.setPosition(1.0);
+//            rightServo.setPosition(0.9);
 
         }
 //        telemetry.update();

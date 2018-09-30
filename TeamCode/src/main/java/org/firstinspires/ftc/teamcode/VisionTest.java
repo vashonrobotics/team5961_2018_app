@@ -29,17 +29,17 @@ public class VisionTest extends LinearOpMode  {
 
     @Override
     public void runOpMode() {
-        baseMotorArrray.add(hardwareMap.dcMotor.get("motorLF"));
-        baseMotorArrray.add(hardwareMap.dcMotor.get("motorRF"));
-        baseMotorArrray.add(hardwareMap.dcMotor.get("motorLB"));
-        baseMotorArrray.add(hardwareMap.dcMotor.get("motorRB"));
-        baseMotorArrray.get(0).setDirection(DcMotorSimple.Direction.REVERSE);
-        baseMotorArrray.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
+//        baseMotorArrray.add(hardwareMap.dcMotor.get("motorLF"));
+//        baseMotorArrray.add(hardwareMap.dcMotor.get("motorRF"));
+//        baseMotorArrray.add(hardwareMap.dcMotor.get("motorLB"));
+//        baseMotorArrray.add(hardwareMap.dcMotor.get("motorRB"));
+//        baseMotorArrray.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
+//        baseMotorArrray.get(3).setDirection(DcMotorSimple.Direction.REVERSE);
         // STUFF FOR BLOB DETECTION
-        BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255), new Scalar(0,0,70), new Scalar(180, 60, 160), 5);
-        BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 25,255), new Scalar(0,0,70), new Scalar(180, 60, 160), 5);
+        BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255),  new Scalar(0,0,90), new Scalar(180, 20, 180), 5);
+        BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(38, 255,255),  new Scalar(0,0,90), new Scalar(180, 20, 180), 5);
         ArrayList<double[]> previousGoldPositions = new ArrayList<>();
-        while (opModeIsActive()) {
+        while (true) {
 //            for (int i = 0; i < 10; i++) {
             FtcRobotControllerActivity.shouldProcessImage = true;
             while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
@@ -53,17 +53,34 @@ public class VisionTest extends LinearOpMode  {
             ArrayList<Double> goldXs = new ArrayList<>();
             ArrayList<Double> goldYs = new ArrayList<>();
             ArrayList<Double> goldSizes = new ArrayList<>();
+            ArrayList<Double> silverXs = new ArrayList<>();
+            ArrayList<Double> silverYs = new ArrayList<>();
+            ArrayList<Double> silverSizes = new ArrayList<>();
             for (int i = 0; i < NUM_FRAMES_CONSIDERED; i++){
                 ArrayList<double[]> goldDetectorCandidatesData = goldDetector.getCandidatesData();
-                double[] goldInfo = goldDetectorCandidatesData.get(goldDetectorCandidatesData.size()-1);
+                double[] goldInfo;
+                try {
+                    goldInfo = goldDetectorCandidatesData.get(goldDetectorCandidatesData.size() - 1);
+                }catch (ArrayIndexOutOfBoundsException e){
+                    telemetry.addLine("no gold found");
+                    goldInfo = new double[]{0.0,0.0,0.0};
+                }
                 goldXs.add(goldInfo[0]);
                 goldYs.add(goldInfo[1]);
                 goldSizes.add(goldInfo[2]);
-                possibleSilversData.addAll(silverDetector.getCandidatesData());
-                if (goldInfo[2] > 10000 && goldInfo[2] > 0.1) {
-                    numTooClose++;
+                double[] silverInfo;
+                ArrayList<double[]> silverDetectorCandidatesData = silverDetector.getCandidatesData();
+                try {
+                    silverInfo = silverDetectorCandidatesData.get(silverDetectorCandidatesData.size()-1);
+                }catch (ArrayIndexOutOfBoundsException e){
+                    telemetry.addLine("no gold found");
+                    silverInfo = new double[]{0.0,0.0,0.0};
                 }
-                if (goldInfo[2]<0.1){
+
+                silverXs.add(silverInfo[0]);
+                silverYs.add(silverInfo[1]);
+                silverSizes.add(silverInfo[2]);
+                if (goldInfo[2]<0.1 && silverInfo[2] < 0.1){
                     numNotFound++;
                 }
             }
@@ -80,24 +97,11 @@ public class VisionTest extends LinearOpMode  {
                 }
             });
 
-            ArrayList<double[]> arrayOfSilverData = new ArrayList<>();
-            int index = 0;
-            double[] previousPossibleSilver = new double[]{};
-            for (double[] possibleSilver:possibleSilversData){
-                if (index > 0){
-                    if (possibleSilver[2] - previousPossibleSilver[2] < 100) {
-                        arrayOfSilverData.add(possibleSilver);
-                        arrayOfSilverData.add(previousPossibleSilver);
-                    }
-                }
-                index++;
-                previousPossibleSilver = possibleSilver;
-            }
 //            goldX = goldX/(NUM_FRAMES_CONSIDERED-numNotFound);
 //            goldY = goldY/(NUM_FRAMES_CONSIDERED-numNotFound);
 //            goldSize = goldSize/(NUM_FRAMES_CONSIDERED-numNotFound);
             previousGoldPositions.add(new double[]{goldX, goldY});
-            telemetry.addData("position " + goldX + " ",goldY);
+            telemetry.addData("gold position " + goldX + " ",goldY);
             telemetry.addData("horizontal power", -(goldX-288/2)*0.003);
             if (numTooClose < 3){// if gold is farther than 100cm move
                 velY = (-(goldX-288/2)*0.003);
@@ -120,14 +124,14 @@ public class VisionTest extends LinearOpMode  {
             if (numNotFound > 3){
                 velX = 0;
                 velY = 0;
-                DriveTrain.mecanum(baseMotorArrray, 0,0,0, false);
+//                DriveTrain.mecanum(baseMotorArrray, 0,0,0, false);
                 telemetry.addLine("stop");
                 sleep(500);
             }
             if (makesSense(goldX, goldY, goldSize)){
-                DriveTrain.mecanum(baseMotorArrray,velX*2, velY*2,0, true);
+//                DriveTrain.mecanum(baseMotorArrray,velX*2, velY*2,0, true);
                 sleep(200);
-                DriveTrain.mecanum(baseMotorArrray,0, 0,0, false);
+//                DriveTrain.mecanum(baseMotorArrray,0, 0,0, false);
 
                 if (posIdea.value[0] < 0 && posIdea.value[1] < 0) { // if first time
                    posIdea.trajectoryDirection = new double[]{0,0};

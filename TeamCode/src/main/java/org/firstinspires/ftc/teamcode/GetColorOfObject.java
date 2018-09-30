@@ -12,6 +12,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,7 +28,7 @@ public class GetColorOfObject extends LinearOpMode {
         }
         Mat hsvFrame = FtcRobotControllerActivity.imageData.snd;
         Mat white = new Mat();
-        Core.inRange(hsvFrame, new Scalar(0,0,150), new Scalar(180, 60, 255), white);
+        Core.inRange(hsvFrame, new Scalar(0,0,150), new Scalar(180, 80, 255), white);
         Mat kernal = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2,2));
         Imgproc.blur(white, white, new Size(10,10));
         Imgproc.erode(white, white, kernal);
@@ -56,17 +57,20 @@ public class GetColorOfObject extends LinearOpMode {
                 double[] pixel = partOfImage.get(row,col);
                 if (color[0] < minH && color[0] > 0.1) {
                     minH = color[0];
-                }else if (color[0] > maxH) {
+                }
+                if (color[0] > maxH) {
                     maxH = color[0];
                 }
                 if (color[1] < minS && color[1] > 0.1) {
                     minS = color[1];
-                }else if (color[1] > maxS) {
+                }
+                if (color[1] > maxS) {
                     maxS = color[1];
                 }
                 if (color[2] < minV && color[2] > 0.1) {
                     minV = color[2];
-                }else if (color[2] > maxV) {
+                }
+                if (color[2] > maxV) {
                     maxV = color[2];
                 }
                 color[0] += pixel[0];
