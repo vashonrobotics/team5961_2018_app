@@ -92,7 +92,7 @@ import java.util.List;
  */
 
 @TeleOp(name="Concept: Vuforia Rover Nav", group ="Concept")
-//@Disabled
+@Disabled
 public class ConceptVuforiaNavRoverRuckus extends LinearOpMode {
 
     /*
@@ -107,7 +107,7 @@ public class ConceptVuforiaNavRoverRuckus extends LinearOpMode {
      * Once you've obtained a license key, copy the string from the Vuforia web site
      * and paste it in to your code on the next line, between the double quotes.
      */
-    private static final String VUFORIA_KEY = "AcfullL/////AAAAGSOSZA30iEJ6lhWTCbftAasmcUshL/HUebUI6EDhrrnupgA15NCxOkPJDBMD46rE8MlgnGyDIEy3MAYNsykv0eP8Yf/tjV080ZMEAiNBpr2APCddbWLQfBtbN7N1gvCg7ytNJ59sDca1P8g8nsByYb7SXzuTq11DMQfDih3Fz+BR3qW+HBM/4vpa7F4PGkXmbdCF8qFFeD9tkZwjvzgPOiVM0psczS/BMPKwVbsdr3bmVsDYf/0lCfqE1Rzupdtwx9MvtVWxyPvl9EmNExdyLC+NRWW+zTg2bYGVtA/KnWvEXe6m/dLcsUlpdcavc40vAssFruJ+qv2TidEjtLGnKNwkSmUF22GH2Ngk1RiUY1wd";
+    private static final String VUFORIA_KEY = " -- YOUR NEW VUFORIA KEY GOES HERE  --- ";
 
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
@@ -143,7 +143,7 @@ public class ConceptVuforiaNavRoverRuckus extends LinearOpMode {
         parameters.cameraDirection   = CAMERA_CHOICE;
 
         //  Instantiate the Vuforia engine
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
         // Load the data sets that for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.

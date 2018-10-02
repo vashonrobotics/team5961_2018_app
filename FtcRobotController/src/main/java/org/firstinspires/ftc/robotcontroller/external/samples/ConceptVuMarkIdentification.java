@@ -110,12 +110,13 @@ public class ConceptVuMarkIdentification extends LinearOpMode {
          * for a competition robot, the front camera might be more convenient.
          */
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
-//        /** the way they do it
-//         * Instantiate the Vuforia engine
-//         */
-//        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        /**
+         * Instantiate the Vuforia engine
+         */
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+
         /**
          * Load the data set containing the VuMarks for Relic Recovery. There's only one trackable
          * in this data set: all three of the VuMarks in the game were created from this one template,

@@ -129,7 +129,7 @@ public class ConceptVuforiaNavigation extends LinearOpMode {
         /**
          * Instantiate the Vuforia engine
          */
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
         /**
          * Load the data sets that for the trackable objects we wish to track. These particular data

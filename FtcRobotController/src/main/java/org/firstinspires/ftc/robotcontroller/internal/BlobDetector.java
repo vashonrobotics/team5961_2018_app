@@ -2,22 +2,12 @@ package org.firstinspires.ftc.robotcontroller.internal;
 
 import android.util.Log;
 
-import com.qualcomm.robotcore.util.Range;
-import com.sun.tools.javac.util.Pair;
-
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.opencv.core.Core;
-import org.opencv.core.CvException;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -78,7 +68,7 @@ public class BlobDetector {
                     rect.width+borderThickness*2, rect.height+borderThickness*2);
             int numIter = 0;
             while ((borderRect.x < 0 || borderRect.x + borderRect.width > hsvFrame.cols() ||
-                    borderRect.y < 0 || borderRect.y + borderRect.height > hsvFrame.rows()) && numIter < 5){
+                    borderRect.y < 0 || borderRect.y + borderRect.height > hsvFrame.rows()) && numIter < 6){
                 borderThickness -= 1;
                 borderRect = new Rect(rect.x-borderThickness, rect.y-borderThickness,// upper left hand coords
                         rect.width+borderThickness*2, rect.height+borderThickness*2);

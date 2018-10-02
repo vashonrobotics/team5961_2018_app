@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package org.firstinspires.ftc.robotcontroller.internal;
 
-import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -39,31 +38,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Camera;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.media.audiofx.AudioEffect;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.google.blocks.ftcrobotcontroller.BlocksActivity;
@@ -71,8 +67,8 @@ import com.google.blocks.ftcrobotcontroller.ProgrammingModeActivity;
 import com.google.blocks.ftcrobotcontroller.ProgrammingModeControllerImpl;
 import com.google.blocks.ftcrobotcontroller.ProgrammingWebHandlers;
 import com.google.blocks.ftcrobotcontroller.runtime.BlocksOpMode;
-import com.qualcomm.ftccommon.AboutActivity;
 import com.qualcomm.ftccommon.ClassManagerFactory;
+import com.qualcomm.ftccommon.FtcAboutActivity;
 import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.ftccommon.FtcEventLoopIdle;
 import com.qualcomm.ftccommon.FtcRobotControllerService;
@@ -94,22 +90,25 @@ import com.qualcomm.robotcore.eventloop.opmode.FtcRobotControllerServiceState;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegister;
 import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.hardware.configuration.Utility;
+import com.qualcomm.robotcore.util.Device;
 import com.qualcomm.robotcore.util.Dimmer;
 import com.qualcomm.robotcore.util.ImmersiveMode;
 import com.qualcomm.robotcore.util.RobotLog;
+import com.qualcomm.robotcore.wifi.NetworkConnection;
 import com.qualcomm.robotcore.wifi.NetworkConnectionFactory;
 import com.qualcomm.robotcore.wifi.NetworkType;
-import com.qualcomm.robotcore.wifi.WifiDirectAssistant;
 import com.sun.tools.javac.util.Pair;
 
 import org.firstinspires.ftc.ftccommon.external.SoundPlayingRobotMonitor;
 import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
 import org.firstinspires.ftc.ftccommon.internal.ProgramAndManageActivity;
-import org.firstinspires.ftc.robotcore.internal.android.dx.rop.cst.CstArray;
+import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.robotcore.internal.hardware.DragonboardLynxDragonboardIsPresentPin;
-import org.firstinspires.ftc.robotcore.internal.network.DeviceNameManager;
+import org.firstinspires.ftc.robotcore.internal.network.DeviceNameManagerFactory;
 import org.firstinspires.ftc.robotcore.internal.network.PreferenceRemoterRC;
 import org.firstinspires.ftc.robotcore.internal.network.StartResult;
+import org.firstinspires.ftc.robotcore.internal.network.WifiMuteEvent;
+import org.firstinspires.ftc.robotcore.internal.network.WifiMuteStateMachine;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.robotcore.internal.system.Assert;
 import org.firstinspires.ftc.robotcore.internal.system.PreferencesHelper;
@@ -122,71 +121,39 @@ import org.firstinspires.ftc.robotcore.internal.webserver.WebServer;
 import org.firstinspires.inspection.RcInspectionActivity;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.InstallCallbackInterface;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
-import org.opencv.core.CvException;
 import org.opencv.core.CvType;
-import org.opencv.core.DMatch;
-import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfDMatch;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.core.TermCriteria;
-import org.opencv.features2d.DescriptorExtractor;
-import org.opencv.features2d.DescriptorMatcher;
-import org.opencv.features2d.FastFeatureDetector;
-import org.opencv.features2d.Feature2D;
-import org.opencv.features2d.FeatureDetector;
-import org.opencv.features2d.Features2d;
-import org.opencv.features2d.ORB;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.ml.ANN_MLP;
-import org.opencv.ml.Ml;
-import org.opencv.ml.SVM;
-import org.opencv.ml.TrainData;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.opencv.core.Core.minMaxLoc;
-
-
 @SuppressWarnings("WeakerAccess")
 public class FtcRobotControllerActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2
-  {
+{
   public static final String TAG = "RCActivity";
-  private double THRESHOLD = 150;
   public String getTag() { return TAG; }
-  public static Boolean shouldProcessImage = true;
-  public static Pair<ArrayList<MatOfPoint>, Mat> imageData;// = new Pair<>(new ArrayList<MatOfPoint>(), new Mat());
-  public static double minDist = 0;
-  public static double maxDist = 0;
-  public static double medianDist = 0;
-  public static double avgDist = 0;
 
+    public static Boolean shouldProcessImage = true;
+    public static Pair<ArrayList<MatOfPoint>, Mat> imageData;
+  static private CameraBridgeViewBase mOpenCvCameraView;
 
-    private static final int REQUEST_CONFIG_WIFI_CHANNEL = 1;
+  static {
+    if (!OpenCVLoader.initDebug()) {
+      Log.d("ERROR", "It didn't work");
+    }
+  }
+  private static final int REQUEST_CONFIG_WIFI_CHANNEL = 1;
   private static final int NUM_GAMEPADS = 2;
 
   protected WifiManager.WifiLock wifiLock;
@@ -198,8 +165,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   protected UpdateUI.Callback callback;
   protected Context context;
   protected Utility utility;
-  protected StartResult deviceNameManagerStartResult = new StartResult();
   protected StartResult prefRemoterStartResult = new StartResult();
+  protected StartResult deviceNameStartResult = new StartResult();
   protected PreferencesHelper preferencesHelper;
   protected final SharedPreferencesListener sharedPreferencesListener = new SharedPreferencesListener();
 
@@ -221,31 +188,14 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
   protected FtcEventLoop eventLoop;
   protected Queue<UsbDevice> receivedUsbAttachmentNotifications;
-    //// the beginning of object recognition tutorial stuff for part not in a function  (the SVM stuff is mine)/////
+
+  //// the beginning of object recognition tutorial stuff for part not in a function  (the SVM stuff is mine)/////
 //  static {
 //      if (!OpenCVLoader.initDebug()){
 //          Log.d("ERROR", "Couldn't load openCV");
 //      }
 //    }
 //    static{ System.loadLibrary("opencv_java3"); } // might break this if commented
-  private int imageWidth, imageHeight;
-  static private CameraBridgeViewBase mOpenCvCameraView;
-  TextView tvName;
-  static Scalar RED = new Scalar(255, 0, 0);
-  static Scalar GREEN = new Scalar(0, 255, 0);
-  static FeatureDetector detector;
-  static DescriptorExtractor descriptor;
-  static DescriptorMatcher matcher;
-  static Mat descriptors2,descriptors1;
-  static Mat img1;
-  static MatOfKeyPoint keypoints1,keypoints2;
-  private SVM svm;
-//  if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback)){
-//    Log.d("ERROR", "It didn't work");
-//    mLoaderCallback.onManagerConnected(LoaderCallbackInterface.INIT_FAILED);
-//  }else{
-//    mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-//  }
 
   private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
     @Override
@@ -270,256 +220,29 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     }
   };
 
-    static {
-      if (!OpenCVLoader.initDebug()) {
-        Log.d("ERROR", "It didn't work");
-      }
+  static {
+    if (!OpenCVLoader.initDebug()) {
+      Log.d("ERROR", "It didn't work");
     }
-
-//  public void initializeOpenCVDependencies() throws IOException{
-//    mOpenCvCameraView.enableView();
-//    detector = FeatureDetector.create(FeatureDetector.ORB);
-////    ORB orb = new ORB(features);
-////    detector = FastFeatureDetector.create(FastFeatureDetector.THRESHOLD, FastFeatureDetector.NONMAX_SUPPRESSION, FastFeatureDetector.)
-//    descriptor = DescriptorExtractor.create(DescriptorExtractor.ORB);
-//    matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
-//    img1 = new Mat();
-//    AssetManager assetManager = getAssets();
-////    InputStream istr = assetManager.open("ball.jpg");
-//    Bitmap bitmap = BitmapFactory.decodeStream(istr);
-//    Utils.bitmapToMat(bitmap, img1);
-//    Imgproc.cvtColor(img1, img1, Imgproc.COLOR_RGB2GRAY);
-//    img1.convertTo(img1, 0); //converting the image to match with the type of the cameras image
-//    descriptors1 = new Mat();
-//    keypoints1 = new MatOfKeyPoint();
-//    detector.detect(img1, keypoints1);
-//    descriptor.compute(img1, keypoints1, descriptors1);
-////    Imgproc.Canny(img1, img1, THRESHOLD, THRESHOLD*2);
-//    Mat testImages = new Mat(0, 4, 5);
-//  }
-
-  public double[] getMatcherData(Mat inputFrame){
-    Imgproc.cvtColor(inputFrame, inputFrame, Imgproc.COLOR_RGB2GRAY);
-    inputFrame.convertTo(inputFrame, 0);
-    descriptors2 = new Mat();
-    keypoints2 = new MatOfKeyPoint();
-    detector.detect(inputFrame, keypoints2);
-    descriptor.compute(inputFrame, keypoints2, descriptors2);
-
-    // Matching
-
-    MatOfDMatch matches = new MatOfDMatch();
-//    Imgproc.blur(aInputFrame, aInputFrame, new Size(5, 5), new Point(0,0));
-    if (img1.type() == inputFrame.type() && img1.cols() == inputFrame.cols() && img1.rows() == inputFrame.rows()) {
-      try {
-        matcher.match(descriptors1, descriptors2, matches);
-      } catch (CvException e){
-        Log.d("Exception Caught", "CvException, it thinks the images are different sizes");
-      }
-
-    } else {
-      Log.d("ERROR", "images are different sizes");
-      return new double[]{0.0,0.0,0.0,0.0};
-    }
-    List<DMatch> matchesList = matches.toList();
-
-
-    Collections.sort(matchesList, new Comparator<DMatch>() {
-      @Override
-      public int compare(DMatch lhs, DMatch rhs) {
-        return (lhs.distance > rhs.distance) ? 1 :  (lhs.distance < rhs.distance) ? -1 : 0;
-      }
-    });
-    double max_dist;
-    double min_dist;
-    double medianDist;
-    double avgDist = 0;
-    try {
-      max_dist = (double) matchesList.get(matchesList.size()-1).distance;
-      min_dist = (double) matchesList.get(0).distance;
-      for (DMatch item: matchesList){
-        avgDist += item.distance;
-      }
-      avgDist /= matchesList.size();
-      medianDist= (matchesList.get(Math.round(matchesList.size()/2)).distance +
-              matchesList.get(Math.round((matchesList.size()-1)/2)).distance)/2;
-    }catch (IndexOutOfBoundsException e){
-      max_dist = 0;
-      min_dist = 0;
-      medianDist = 0;
-    }
-    return new double[]{min_dist, max_dist, avgDist, medianDist};
   }
 
+
+  protected WifiMuteStateMachine wifiMuteStateMachine;
+  protected MotionDetection motionDetection;
+
+  protected class RobotRestarter implements Restarter {
+
+    public void requestRestart() {
+      requestRobotRestart();
+    }
+
+  }
   @Override
   public void onCameraViewStarted(int width, int height) {
-    imageWidth = width;
-    imageHeight = height;
   }
 
   @Override
   public void onCameraViewStopped() {
-  }
-
-  private Pair<Mat, Boolean> recognizeWithKeypoints(Mat aInputFrame) {
-
-    Imgproc.cvtColor(aInputFrame, aInputFrame, Imgproc.COLOR_RGB2GRAY);
-    aInputFrame.convertTo(aInputFrame, 0);
-//    Imgproc.Canny(aInputFrame, aInputFrame, THRESHOLD, THRESHOLD*2); // canny seems to make it worse
-    descriptors2 = new Mat();
-    keypoints2 = new MatOfKeyPoint();
-    detector.detect(aInputFrame, keypoints2);
-    descriptor.compute(aInputFrame, keypoints2, descriptors2);
-
-    // Matching
-
-    MatOfDMatch matches = new MatOfDMatch();
-//    Imgproc.blur(aInputFrame, aInputFrame, new Size(5, 5), new Point(0,0));
-    if (img1.type() == aInputFrame.type() && img1.cols() == aInputFrame.cols()) {
-      try {
-        matcher.match(descriptors1, descriptors2, matches);
-      } catch (CvException e){
-        Log.d("Exception Caught", "CvException, it thinks the images are different sizes");
-      }
-
-    } else {
-      Log.d("ERROR", "images are different sizes");
-      Log.d("im1 rows", String.valueOf(img1.rows()));
-      Log.d("im1 cols", String.valueOf(img1.cols()));
-      Log.d("im2 rows", String.valueOf(aInputFrame.rows()));
-      Log.d("im2 cols", String.valueOf(aInputFrame.cols()));
-      return new Pair<Mat, Boolean>(aInputFrame, false);
-    }
-    List<DMatch> matchesList = matches.toList();
-
-
-    Collections.sort(matchesList, new Comparator<DMatch>() {
-      @Override
-      public int compare(DMatch lhs, DMatch rhs) {
-        return (lhs.distance > rhs.distance) ? 1 :  (lhs.distance < rhs.distance) ? -1 : 0;
-      }
-    });
-    double max_dist;
-    double min_dist;
-    double median_dist;
-    double avg_dist = 0;
-    try {
-      max_dist = (double) matchesList.get(matchesList.size()-1).distance;
-      min_dist = (double) matchesList.get(0).distance;
-      for (DMatch item: matchesList){
-        avg_dist += item.distance;
-      }
-      avg_dist /= matchesList.size();
-      median_dist = (matchesList.get(Math.round(matchesList.size()/2)).distance +
-              matchesList.get(Math.round((matchesList.size()-1)/2)).distance)/2;
-    }catch (IndexOutOfBoundsException e){
-      max_dist = 0;
-      min_dist = 0;
-      median_dist = 0;
-    }
-    minDist = min_dist;
-    maxDist = max_dist;
-    avgDist = avg_dist;
-    medianDist = median_dist;
-//    for (int i = 0; i < matchesList.size(); i++) {
-//      Double dist = (double) matchesList.get(i).distance;
-//      if (dist < min_dist)
-//        min_dist = dist;
-//      if (dist > max_dist)
-//        max_dist = dist;
-//    }
-    double MATCH_LENIENSE = 1.25; //1.3 and 1.2 work fairly well.
-    LinkedList<DMatch> good_matches = new LinkedList<DMatch>();
-    for (int i = 0; i < matchesList.size(); i++) {
-      if (matchesList.get(i).distance <= (MATCH_LENIENSE * min_dist))
-        good_matches.addLast(matchesList.get(i));
-    }
-
-    MatOfDMatch goodMatches = new MatOfDMatch();
-    goodMatches.fromList(good_matches);
-    Mat outputImg = new Mat();
-    MatOfByte drawnMatches = new MatOfByte();
-    if (aInputFrame.empty() || aInputFrame.cols() < 1 || aInputFrame.rows() < 1) {
-      return new Pair<Mat, Boolean>(aInputFrame, false);
-    }
-    Features2d.drawMatches(img1, keypoints1, aInputFrame, keypoints2, goodMatches, outputImg, GREEN, RED, drawnMatches, Features2d.NOT_DRAW_SINGLE_POINTS);
-//    Log.d("MATCHES", );
-//    Log.d("descriptors", String.valueOf(good_matches));
-//    Log.d("min match dist", String.valueOf(min_dist));
-//    Log.d("max match dist", String.valueOf(max_dist));
-//    Log.d("median match dist", String.valueOf(medianDist));
-//    Log.d("mean match dist", String.valueOf(avgDist));
-    List<Double> netAngles = new ArrayList<>(); // net angles of good keypoints for original image
-
-    double avgRotation = 0;
-    Collections.sort(good_matches, new Comparator<DMatch>() {
-      @Override
-      public int compare(DMatch lhs, DMatch rhs) {
-        return Float.compare(lhs.distance,rhs.distance);
-      }
-    });
-    int index = 0;
-    for (DMatch match: good_matches){
-//      if (index > 4){
-//        break;
-//      }
-      Mat keypoint1 = keypoints1.row(match.queryIdx);// I'm not sure if this is right
-      Mat keypoint2 = keypoints2.row(match.trainIdx);
-      // I think keypoints are in the form x,y, size, angle, response, octave, classId
-//      netAngle
-      double angle1 = keypoint1.get(0, 0)[3];
-      double angle2 = keypoint2.get(0, 0)[3];
-
-      double netAngle = angle2 - angle1;
-
-      if (netAngle > 180) {
-        netAngle = netAngle - 360;
-      }
-      if (netAngle < -180) {
-        netAngle = 360 + netAngle;
-      }
-      netAngles.add(netAngle);
-      avgRotation += netAngle;
-      index += 1;
-    }
-
-    Collections.sort(netAngles);
-    Boolean imageIsThere = false;
-
-    try {
-      avgRotation /= netAngles.size();
-      double minRotation = (netAngles.get(0) + netAngles.get(1))/2;
-      double maxRotation = (netAngles.get(netAngles.size() - 1) + netAngles.get(netAngles.size() - 2))/2;
-      double std = 0;
-      for (double rotation: netAngles){
-        std += Math.pow(rotation - avgRotation, 2);
-      }
-      std = std / (netAngles.size()-1);
-      std = Math.sqrt(std);
-      // done calculating std
-      if (maxRotation - minRotation < 5 ) {
-        imageIsThere = true;
-      }
-      medianDist = 1;
-      avgDist = avgRotation;
-      minDist = maxRotation - minRotation;
-      maxDist = std;
-    }catch (IndexOutOfBoundsException e){
-      System.out.println("list too small");
-      medianDist = 0;
-      avgDist = 0;
-      minDist = 0;
-      maxDist = 0;
-    }
-
-    Mat inputData = new Mat(1,4, 5);
-    double[] dataPoints = {min_dist, max_dist, avg_dist, median_dist};
-    for (int i = 0; i < 4; i++){
-      inputData.put(0, i,(float) dataPoints[i]);
-    }
-    Core.rotate(outputImg, outputImg, Core.ROTATE_90_CLOCKWISE);
-    Imgproc.resize(outputImg, outputImg, aInputFrame.size());
-    return new Pair<Mat, Boolean>(outputImg, imageIsThere);
   }
 
   private Mat recognizeWithContours(Mat inputFrame) {
@@ -580,17 +303,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       shouldProcessImage = false;
       return processedImage;
     }else{
-        return recognizeWithContours(inputFrame.rgba());
+      return recognizeWithContours(inputFrame.rgba());
     }
-  }
-    //// the end of object recognition tutorial stuff for stuff not in an existing function
-    ///// NOTE: the blob detection was not part of the tutorial
-  protected class RobotRestarter implements Restarter {
-
-    public void requestRestart() {
-      requestRobotRestart();
-    }
-
   }
 
   protected ServiceConnection connection = new ServiceConnection() {
@@ -651,6 +365,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     RobotLog.vv(TAG, "onCreate()");
     ThemedActivity.appAppThemeToActivity(getTag(), this); // do this way instead of inherit to help AppInventor
 
+    // Oddly, sometimes after a crash & restart the root activity will be something unexpected, like from the before crash? We don't yet understand
+    RobotLog.vv(TAG, "rootActivity is of class %s", AppUtil.getInstance().getRootActivity().getClass().getSimpleName());
     Assert.assertTrue(FtcRobotControllerWatchdogService.isFtcRobotControllerActivity(AppUtil.getInstance().getRootActivity()));
     Assert.assertTrue(AppUtil.getInstance().isRobotController());
 
@@ -671,7 +387,9 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
     context = this;
     utility = new Utility(this);
-    DeviceNameManager.getInstance().start(deviceNameManagerStartResult);
+
+    DeviceNameManagerFactory.getInstance().start(deviceNameStartResult);
+
     PreferenceRemoterRC.getInstance().start(prefRemoterStartResult);
 
     receivedUsbAttachmentNotifications = new ConcurrentLinkedQueue<UsbDevice>();
@@ -688,11 +406,20 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     buttonMenu.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        AppUtil.getInstance().openOptionsMenuFor(FtcRobotControllerActivity.this);
+        PopupMenu popupMenu = new PopupMenu(FtcRobotControllerActivity.this, v);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+          @Override
+          public boolean onMenuItemClick(MenuItem item) {
+            return onOptionsItemSelected(item); // Delegate to the handler for the hardware menu button
+          }
+        });
+        popupMenu.inflate(R.menu.ftc_robot_controller);
+        popupMenu.show();
       }
     });
 
     BlocksOpMode.setActivityAndWebView(this, (WebView) findViewById(R.id.webViewBlocksRuntime));
+
     ClassManagerFactory.registerFilters();
     ClassManagerFactory.processAllClasses();
     cfgFileMgr = new RobotConfigFileManager(this);
@@ -730,27 +457,17 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     hittingMenuButtonBrightensScreen();
 
     wifiLock.acquire();
-    callback.networkConnectionUpdate(WifiDirectAssistant.Event.DISCONNECTED);
+    callback.networkConnectionUpdate(NetworkConnection.NetworkEvent.DISCONNECTED);
     readNetworkType();
     ServiceController.startService(FtcRobotControllerWatchdogService.class);
     bindToService();
     logPackageVersions();
-    //// the beginning of object recognition tutorial stuff for this function /////
+    logDeviceSerialNumber();
+    RobotLog.logDeviceInfo();
 
-//    Log.d("TIME", "Before INIT");
-//      getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//    if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback)){
-//
-//        Log.d("ERROR", "it failed to load the opencv library");
-////        mLoaderCallback.onManagerConnected(LoaderCallbackInterface.INIT_FAILED);
-//    }else {
-//        Log.d("SUCCESS", "loaded the opencv library");
-//
-//    }
-
-//    mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-
-//    openCvCameraView = (CameraBridgeViewBase) findViewById(org.opencv.R.id.cameraMonitorViewId); // might not work
+    if (preferencesHelper.readBoolean(getString(R.string.pref_wifi_automute), false)) {
+      initWifiMute(true);
+    }
     mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
 //    mOpenCvCameraView.setMinimumHeight(1944);
 //    mOpenCvCameraView.setMinimumWidth(2592);
@@ -828,7 +545,6 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     if (programmingModeController.isActive()) {
       programmingModeController.stopProgrammingMode();
     }
-    //// the beginning of object recognition tutorial stuff for this function /////
     if (mOpenCvCameraView != null) {
       mOpenCvCameraView.disableView();
     }
@@ -846,16 +562,12 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   protected void onDestroy() {
     super.onDestroy();
     RobotLog.vv(TAG, "onDestroy()");
-    //// the beginning of object recognition tutorial stuff for this function /////
-    if (mOpenCvCameraView != null){
-      mOpenCvCameraView.disableView();
-    }
 
     shutdownRobot();  // Ensure the robot is put away to bed
     if (callback != null) callback.close();
 
-    PreferenceRemoterRC.getInstance().start(prefRemoterStartResult);
-    DeviceNameManager.getInstance().stop(deviceNameManagerStartResult);
+    PreferenceRemoterRC.getInstance().stop(prefRemoterStartResult);
+    DeviceNameManagerFactory.getInstance().stop(deviceNameStartResult);
 
     unbindFromService();
     // If the app manually (?) is stopped, then we don't need the auto-starting function (?)
@@ -864,6 +576,10 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
     preferencesHelper.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(sharedPreferencesListener);
     RobotLog.cancelWriteLogcatToDisk();
+
+    if (mOpenCvCameraView != null){
+      mOpenCvCameraView.disableView();
+    }
   }
 
   protected void bindToService() {
@@ -888,6 +604,10 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     RobotLog.logBuildConfig(org.firstinspires.inspection.BuildConfig.class);
   }
 
+  protected void logDeviceSerialNumber() {
+    RobotLog.ii(TAG, "410c serial number: " + Build.SERIAL);
+  }
+
   protected void readNetworkType() {
 
     // The code here used to defer to the value found in a configuration file
@@ -898,10 +618,17 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     // Moreover, the non-Wifi-Direct networking is end-of-life, so the simplest and most robust
     // (e.g.: no one can screw things up by messing with the contents of the config file) fix is
     // to do away with configuration file entirely.
-    networkType = NetworkType.WIFIDIRECT;
+    //
+    // Control hubs are always running the access point model.  Everything else, for the time
+    // being always runs the wifi direct model.
+    if (Device.isRevControlHub() == true) {
+      networkType = NetworkType.RCWIRELESSAP;
+    } else {
+      networkType = NetworkType.fromString(preferencesHelper.readString(context.getString(R.string.pref_pairing_kind), NetworkType.globalDefaultAsString()));
+    }
 
     // update the app_settings
-    preferencesHelper.writeStringPrefIfDifferent(context.getString(R.string.pref_network_connection_type), networkType.toString());
+    preferencesHelper.writeStringPrefIfDifferent(context.getString(R.string.pref_pairing_kind), networkType.toString());
   }
 
   @Override
@@ -978,8 +705,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       return true;
     }
     else if (id == R.id.action_about) {
-      Intent intent = new Intent(AppUtil.getDefContext(), AboutActivity.class);
-      intent.putExtra(LaunchActivityConstantsList.ABOUT_ACTIVITY_CONNECTION_TYPE, networkType);
+      Intent intent = new Intent(AppUtil.getDefContext(), FtcAboutActivity.class);
       startActivity(intent);
       return true;
     }
@@ -1035,14 +761,20 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     if (controllerService != null) {
       callback.networkConnectionUpdate(controllerService.getNetworkConnectionStatus());
       callback.updateRobotStatus(controllerService.getRobotStatus());
-      requestRobotSetup();
+      // Only show this first-time toast on headless systems: what we have now on non-headless suffices
+      requestRobotSetup(LynxConstants.isRevControlHub()
+        ? new Runnable() {
+            @Override public void run() {
+              showRestartRobotCompleteToast(R.string.toastRobotSetupComplete);
+            }
+          }
+        : null);
     }
   }
 
-  private void requestRobotSetup() {
+  private void requestRobotSetup(@Nullable Runnable runOnComplete) {
     if (controllerService == null) return;
 
-    HardwareFactory factory;
     RobotConfigFile file = cfgFileMgr.getActiveConfigAndUpdateUI();
     HardwareFactory hardwareFactory = new HardwareFactory(context);
     try {
@@ -1052,14 +784,13 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       hardwareFactory.setXmlPullParser(file.getXml());
       cfgFileMgr.setActiveConfigAndUpdateUI(false, file);
     }
-    factory = hardwareFactory;
 
     OpModeRegister userOpModeRegister = createOpModeRegister();
-    eventLoop = new FtcEventLoop(factory, userOpModeRegister, callback, this, programmingModeController);
-    FtcEventLoopIdle idleLoop = new FtcEventLoopIdle(factory, userOpModeRegister, callback, this, programmingModeController);
+    eventLoop = new FtcEventLoop(hardwareFactory, userOpModeRegister, callback, this, programmingModeController);
+    FtcEventLoopIdle idleLoop = new FtcEventLoopIdle(hardwareFactory, userOpModeRegister, callback, this, programmingModeController);
 
     controllerService.setCallback(callback);
-    controllerService.setupRobot(eventLoop, idleLoop);
+    controllerService.setupRobot(eventLoop, idleLoop, runOnComplete);
 
     passReceivedUsbAttachmentsToEventLoop();
   }
@@ -1075,10 +806,18 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   private void requestRobotRestart() {
     AppUtil.getInstance().showToast(UILocation.BOTH, AppUtil.getDefContext().getString(R.string.toastRestartingRobot));
     //
+    RobotLog.clearGlobalErrorMsg();
+    RobotLog.clearGlobalWarningMsg();
     shutdownRobot();
-    requestRobotSetup();
-    //
-    AppUtil.getInstance().showToast(UILocation.BOTH, AppUtil.getDefContext().getString(R.string.toastRestartRobotComplete));
+    requestRobotSetup(new Runnable() {
+      @Override public void run() {
+        showRestartRobotCompleteToast(R.string.toastRestartRobotComplete);
+        }
+      });
+  }
+
+  private void showRestartRobotCompleteToast(@StringRes int resid) {
+    AppUtil.getInstance().showToast(UILocation.BOTH, AppUtil.getDefContext().getString(resid));
   }
 
   protected void hittingMenuButtonBrightensScreen() {
@@ -1099,7 +838,44 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     @Override public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
       if (key.equals(context.getString(R.string.pref_app_theme))) {
         ThemedActivity.restartForAppThemeChange(getTag(), getString(R.string.appThemeChangeRestartNotifyRC));
+      } else if (key.equals(context.getString(R.string.pref_wifi_automute))) {
+        if (preferencesHelper.readBoolean(context.getString(R.string.pref_wifi_automute), false)) {
+          initWifiMute(true);
+        } else {
+          initWifiMute(false);
+        }
       }
+    }
+  }
+
+  protected void initWifiMute(boolean enable) {
+    if (enable) {
+      wifiMuteStateMachine = new WifiMuteStateMachine();
+      wifiMuteStateMachine.initialize();
+      wifiMuteStateMachine.start();
+
+      motionDetection = new MotionDetection(2.0, 10);
+      motionDetection.startListening();
+      motionDetection.registerListener(new MotionDetection.MotionDetectionListener() {
+        @Override
+        public void onMotionDetected(double vector)
+        {
+          wifiMuteStateMachine.consumeEvent(WifiMuteEvent.USER_ACTIVITY);
+        }
+      });
+    } else {
+      wifiMuteStateMachine.stop();
+      wifiMuteStateMachine = null;
+      motionDetection.stopListening();
+      motionDetection.purgeListeners();
+      motionDetection = null;
+    }
+  }
+
+  @Override
+  public void onUserInteraction() {
+    if (wifiMuteStateMachine != null) {
+      wifiMuteStateMachine.consumeEvent(WifiMuteEvent.USER_ACTIVITY);
     }
   }
 }
