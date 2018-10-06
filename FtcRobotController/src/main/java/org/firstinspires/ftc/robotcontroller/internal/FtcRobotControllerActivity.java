@@ -40,6 +40,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Camera;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiManager;
@@ -121,6 +122,7 @@ import org.firstinspires.ftc.robotcore.internal.webserver.WebServer;
 import org.firstinspires.inspection.RcInspectionActivity;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
@@ -250,6 +252,10 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     Core.rotate(inputFrame, inputFrame, Core.ROTATE_90_CLOCKWISE);
 //    Imgproc.blur(inputFrame, inputFrame, new Size(5,5));
     Mat hsvInputFrame = new Mat();
+    // adding this purple helps in incandescant light
+    // I don't know if it negatively affects accuracy in other types of light
+    Mat purple = new Mat(new Size(inputFrame.cols(), inputFrame.rows()), inputFrame.type(), new Scalar(25,0,25));
+    Core.add(inputFrame, purple, inputFrame);
     Imgproc.cvtColor(inputFrame, hsvInputFrame, Imgproc.COLOR_RGB2HSV);
 //    hsvInputFrame
     Imgproc.cvtColor(inputFrame, inputFrame, Imgproc.COLOR_RGB2GRAY);

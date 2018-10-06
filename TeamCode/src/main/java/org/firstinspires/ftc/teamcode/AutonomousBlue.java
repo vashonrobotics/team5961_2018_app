@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.opencv.android.JavaCameraView;
 import org.opencv.core.Scalar;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
@@ -31,6 +32,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 @Autonomous(group = "5961", name = "Autonomous Blue")
@@ -55,20 +57,54 @@ public class AutonomousBlue extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-//        initalizeRobot();
-        if (isThereASilverOrAGoldOrNeitherAndCenterOnIt().first == MineralType.Gold){
+        initalizeRobot();
+        waitForStart();
+        telemetry.addLine("started");
+        telemetry.update();
 
-        }
-        while (true) {
-            Pair<MineralType, double[]> goldData = isThereASilverOrAGoldOrNeitherAndCenterOnIt();
-            if (goldData.first == MineralType.Gold) {
-                telemetry.addData("gold "+goldData.second[0]+ " " + goldData.second[1]+" ", goldData.second[2]);
-                telemetry.update();
-            } else {
-                telemetry.addLine("no gold");
-                telemetry.update();
+        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double[] goldAtPos1 = lookForGold();
+        // if gold is straight ahead
+        if (goldAtPos1[0] >= 0 && goldAtPos1[1] >= 0 && goldAtPos1[2] >=0){
+            DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
+            sleep(3000);
+            DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
+        }else {
+
+            DriveTrain.turn(baseMotorArray, 45, 5, 5);
+            sleep(500);
+            setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            double[] goldAtPos2 = lookForGold();
+            // if gold is to the left
+            if (goldAtPos2[0] >= 0 && goldAtPos2[1] >= 0 && goldAtPos2[2] >=0){
+                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
+                sleep(1000);
+                DriveTrain.mecanum(baseMotorArray, 1,1,0,true);
+                sleep(2000);
+            }else {
+                DriveTrain.turn(baseMotorArray, -90, 5, 5);
+                sleep(500);
+                setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                double[] goldAtPos3 = lookForGold();
             }
         }
+        // stuff to check gold detection with robot
+//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        double[] goldAtPos1 = lookForGold();
+//        DriveTrain.turn(baseMotorArray, 45, 5, 5);
+//        sleep(500);
+//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        double[] goldAtPos2 = lookForGold();
+//        DriveTrain.turn(baseMotorArray, -90, 5, 5);
+//        sleep(500);
+//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        double[] goldAtPos3 = lookForGold();
+//        telemetry.addData("goldAtPos1 "+ goldAtPos1[0] + " " + goldAtPos1[1] + " ", goldAtPos1[2]);
+//        telemetry.addData("goldAtPos2 "+ goldAtPos2[0] + " " + goldAtPos2[1] + " ", goldAtPos2[2]);
+//        telemetry.addData("goldAtPos3 "+ goldAtPos3[0] + " " + goldAtPos3[1] + " ", goldAtPos3[2]);
+//        telemetry.update();
+//        sleep(5000);
+
 
 ////        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 //        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -90,6 +126,81 @@ public class AutonomousBlue extends LinearOpMode {
 //        waitForStart();
 //        getPos();
 
+    }
+
+    private void setMotorRunMode(DcMotor.RunMode runMode) {
+        for (Object baseMotorObject: baseMotorArray){
+            DcMotor baseMotor = (DcMotor) baseMotorObject;
+            baseMotor.setMode(runMode);
+        }
+    }
+
+    private double[] lookForGold(){
+        FtcRobotControllerActivity.shouldProcessImage = true;
+        while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
+            sleep(5);
+        }
+        ArrayList<double[]> frameOneCandidates = goldDetector.getCandidatesData();
+        // when conected to a robot move sideways or turn
+        DriveTrain.mecanum(baseMotorArray, -0.5, 0, 0, true);
+        sleep(100);
+        DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+        FtcRobotControllerActivity.shouldProcessImage = true;
+        while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
+            sleep(5);
+        }
+        ArrayList<double[]> frameTwoCandidates = goldDetector.getCandidatesData();
+        ArrayList<Pair<double[], double[]>> pairs = findPairs(frameOneCandidates, frameTwoCandidates);
+        ArrayList<Pair<double[], double[]>> acceptablePairs = new ArrayList<>();
+        for (Pair<double[], double[]> pair: pairs){
+            if (pair.first[2] > 700 && pair.second[2] > 700 && pair.first[2] < 5000 && pair.second[2] < 5000 &&
+                    isAboutEqual(pair.first[2],pair.second[2], 3000) &&
+                    isAboutEqual(pair.first[1], pair.second[1], 40)) {
+                acceptablePairs.add(pair);
+            }
+        }
+        telemetry.addData("length of acceptible size array", acceptablePairs.size());
+        try {
+            Pair<double[], double[]> farthestPairInXDirection = acceptablePairs.get(0);
+            for (Pair<double[], double[]> pair: acceptablePairs){
+                if (Math.abs(pair.first[0]-pair.second[0]) >
+                        Math.abs(farthestPairInXDirection.first[0]-farthestPairInXDirection.second[0])){
+                    farthestPairInXDirection = pair;
+                }
+            }
+            telemetry.addData("gold At" + farthestPairInXDirection.first[1] +" " +farthestPairInXDirection.second[1], farthestPairInXDirection.first[2]);
+            telemetry.update();
+            return farthestPairInXDirection.second;
+        }catch (IndexOutOfBoundsException e){
+            telemetry.addLine("no gold");
+            telemetry.update();
+            return new double[] {-1, -1,-1};
+        }
+    }
+
+    private ArrayList<Pair<double[], double[]>> findPairs(ArrayList<double[]> frame1Data, ArrayList<double[]> frame2Data) {
+        ArrayList<Pair<double[], double[]>> matches = new ArrayList<>();
+        for (double[] oneCandidateData:frame1Data){
+            double[] bestMatch = new double[]{-100,-100,-100};
+
+            for (double[] aSecondCandidateData:frame2Data){
+                // if ys and sizes are about equal
+                if (Math.abs(aSecondCandidateData[1] - oneCandidateData[1]) < Math.abs(oneCandidateData[1] - bestMatch[1]) &&
+                        Math.abs(aSecondCandidateData[2] - oneCandidateData[2]) < Math.abs(oneCandidateData[2] - bestMatch[2])){
+                    bestMatch = aSecondCandidateData;
+                }
+//                if (isAboutEqual(oneCandidateData[1],aSecondCandidateData[1], 40) &&
+//                        isAboutEqual(oneCandidateData[2],aSecondCandidateData[2], 500)){
+//                    matches.add(new Pair<double[], double[]>(oneCandidateData, aSecondCandidateData));
+//                }
+            }
+            matches.add(new Pair<double[], double[]>(oneCandidateData, bestMatch));
+        }
+        return matches;
+    }
+
+    private boolean isAboutEqual(double lhs, double rhs, double leniency){
+        return lhs + leniency/2 > rhs && lhs - leniency/2 < rhs;
     }
 
     private void initalizeRobot(){

@@ -67,11 +67,12 @@ public class BlobDetector {
             Rect borderRect = new Rect(rect.x-borderThickness, rect.y-borderThickness,// upper left hand coords
                     rect.width+borderThickness*2, rect.height+borderThickness*2);
             int numIter = 0;
+            int tempBorderThickness = borderThickness;
             while ((borderRect.x < 0 || borderRect.x + borderRect.width > hsvFrame.cols() ||
                     borderRect.y < 0 || borderRect.y + borderRect.height > hsvFrame.rows()) && numIter < 6){
-                borderThickness -= 1;
-                borderRect = new Rect(rect.x-borderThickness, rect.y-borderThickness,// upper left hand coords
-                        rect.width+borderThickness*2, rect.height+borderThickness*2);
+                tempBorderThickness -= 1;
+                borderRect = new Rect(rect.x-tempBorderThickness, rect.y-tempBorderThickness,// upper left hand coords
+                        rect.width+tempBorderThickness*2, rect.height+tempBorderThickness*2);
                 numIter++;
             }
             Log.d("RECT info x", String.valueOf(rect.x));
@@ -146,7 +147,7 @@ public class BlobDetector {
             double MIN_ASPECT_RATIO = 0.6;
             Log.d("PercentColor ",String.valueOf(percentColor));
             Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
-            if  (percentColor > 0.6 && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
+            if  (percentColor > 0.6){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
 //                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){
                 contourData.add(new double[]{xPos, yPos, rect.height*rect.width});
                 canidatesForBall.add(contour);
