@@ -253,9 +253,9 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 //    Imgproc.blur(inputFrame, inputFrame, new Size(5,5));
     Mat hsvInputFrame = new Mat();
     // adding this purple helps in incandescant light
-    // I don't know if it negatively affects accuracy in other types of light
-    Mat purple = new Mat(new Size(inputFrame.cols(), inputFrame.rows()), inputFrame.type(), new Scalar(25,0,25));
-    Core.add(inputFrame, purple, inputFrame);
+    // it negatively affects accuracy in other types of light
+//    Mat purple = new Mat(new Size(inputFrame.cols(), inputFrame.rows()), inputFrame.type(), new Scalar(25,0,25));
+//    Core.add(inputFrame, purple, inputFrame);
     Imgproc.cvtColor(inputFrame, hsvInputFrame, Imgproc.COLOR_RGB2HSV);
 //    hsvInputFrame
     Imgproc.cvtColor(inputFrame, inputFrame, Imgproc.COLOR_RGB2GRAY);

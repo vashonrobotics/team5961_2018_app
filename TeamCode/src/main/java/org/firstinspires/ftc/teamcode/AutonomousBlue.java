@@ -54,6 +54,7 @@ public class AutonomousBlue extends LinearOpMode {
     BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255), new Scalar(0,0,90), new Scalar(180, 20, 180), 5);
     BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255), new Scalar(0,0,50), new Scalar(180, 20, 160), 5);
     int NUM_FRAMES_CONSIDERED = 5;
+    int NUM_TIME_RESAMPLED = 0;
 
     @Override
     public void runOpMode() {
@@ -61,42 +62,69 @@ public class AutonomousBlue extends LinearOpMode {
         waitForStart();
         telemetry.addLine("started");
         telemetry.update();
-
         setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double[] goldAtPos1 = lookForGold();
         // if gold is straight ahead
-        if (goldAtPos1[0] >= 0 && goldAtPos1[1] >= 0 && goldAtPos1[2] >=0){
-            DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
+        if (goldAtPos1[0] >= 0 && goldAtPos1[1] >= 0 && goldAtPos1[2] >= 0){
+//            DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
+            DriveTrain.mecanum(baseMotorArray, 1, 0, 0, true);
             sleep(3000);
             DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
         }else {
 
-            DriveTrain.turn(baseMotorArray, 45, 5, 5);
-            sleep(500);
+//            DriveTrain.turn(baseMotorArray, 45, 5, 5);
+//            sleep(500);
+            DriveTrain.mecanum(baseMotorArray, 0,0,1,true);
+            sleep(350);
+            DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
             double[] goldAtPos2 = lookForGold();
-            // if gold is to the left
+            // if gold is to the right
             if (goldAtPos2[0] >= 0 && goldAtPos2[1] >= 0 && goldAtPos2[2] >=0){
-                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
-                sleep(1000);
-                DriveTrain.mecanum(baseMotorArray, 1,1,0,true);
+//                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
+                DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
                 sleep(2000);
+                // supposed to go up and right
+                DriveTrain.mecanum(baseMotorArray, 1,-1,0,true);
+                sleep(3000);
             }else {
-                DriveTrain.turn(baseMotorArray, -90, 5, 5);
-                sleep(500);
+                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
+                sleep(600);
+                DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
+//                DriveTrain.turn(baseMotorArray, -90, 5, 5);
+//                sleep(500);
                 setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                double[] goldAtPos3 = lookForGold();
+//                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
+                DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
+                sleep(2000);
+                // supposed to go up and right
+//                DriveTrain.mecanum(baseMotorArray, -1,1,0,true);
+                DriveTrain.mecanum(baseMotorArray, 1,1, 0,true);
+                sleep(3000);
+//                double[] goldAtPos3 = lookForGold();
+//                if (goldAtPos3[0] < 0 && goldAtPos3[1] < 0 && goldAtPos3[2] < 0 && NUM_TIME_RESAMPLED < 2) {
+//                    NUM_TIME_RESAMPLED++;
+//                    sample();
+//                }else {
+
+//                }
             }
         }
-        // stuff to check gold detection with robot
+
+////        sample();
+//        // stuff to check gold detection with robot
 //        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        double[] goldAtPos1 = lookForGold();
-//        DriveTrain.turn(baseMotorArray, 45, 5, 5);
-//        sleep(500);
+//        DriveTrain.mecanum(baseMotorArray, 0,0,1,true);
+////        DriveTrain.turn(baseMotorArray, 45, 5, 5);
+//        sleep(400);
+//        DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
 //        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        double[] goldAtPos2 = lookForGold();
-//        DriveTrain.turn(baseMotorArray, -90, 5, 5);
-//        sleep(500);
+////        DriveTrain.turn(baseMotorArray, -90, 5, 5);
+//        DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
+//        sleep(700);
+//        DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
 //        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        double[] goldAtPos3 = lookForGold();
 //        telemetry.addData("goldAtPos1 "+ goldAtPos1[0] + " " + goldAtPos1[1] + " ", goldAtPos1[2]);
@@ -128,6 +156,8 @@ public class AutonomousBlue extends LinearOpMode {
 
     }
 
+
+
     private void setMotorRunMode(DcMotor.RunMode runMode) {
         for (Object baseMotorObject: baseMotorArray){
             DcMotor baseMotor = (DcMotor) baseMotorObject;
@@ -142,9 +172,10 @@ public class AutonomousBlue extends LinearOpMode {
         }
         ArrayList<double[]> frameOneCandidates = goldDetector.getCandidatesData();
         // when conected to a robot move sideways or turn
-        DriveTrain.mecanum(baseMotorArray, -0.5, 0, 0, true);
+        DriveTrain.mecanum(baseMotorArray, 0, -1, 0, true);
         sleep(100);
         DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+        sleep(200);
         FtcRobotControllerActivity.shouldProcessImage = true;
         while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
             sleep(5);
@@ -155,7 +186,7 @@ public class AutonomousBlue extends LinearOpMode {
         for (Pair<double[], double[]> pair: pairs){
             if (pair.first[2] > 700 && pair.second[2] > 700 && pair.first[2] < 5000 && pair.second[2] < 5000 &&
                     isAboutEqual(pair.first[2],pair.second[2], 3000) &&
-                    isAboutEqual(pair.first[1], pair.second[1], 40)) {
+                    isAboutEqual(pair.first[1], pair.second[1], 10)) {
                 acceptablePairs.add(pair);
             }
         }
