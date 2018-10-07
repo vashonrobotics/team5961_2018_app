@@ -19,7 +19,7 @@ public class DriveTrain {
     public static void mecanum(ArrayList baseMotorArray, double x, double y, double turn, boolean frontIsInTheDirectionOfTheWheels){
         double power = maxUnit(Math.sqrt((x * x) + (y * y)));
 //        double radianAngle = 0;
-        double radianAngle = Math.atan2(y, -x) - (Math.PI * 3 / 4);
+        double radianAngle = Math.atan2(y, x) - Math.PI * 1/4;
 //
         if (Math.abs(power) + Math.abs(turn) > 1)
         {
@@ -47,8 +47,8 @@ public class DriveTrain {
         // WARNING: leaves motors in run to position mode and doesn't wait for them to run to the position
         double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeightBetweenWheels,2)+Math.pow(wheelWidthBetweenWheels,2))*angle/360;
         final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
-        final double     DRIVE_GEAR_REDUCTION = 1.0 ;     // This is < 1.0 if geared UP
-        final double     WHEEL_DIAMETER_MM = 60.0 ;     // For figuring circumference
+        final double     DRIVE_GEAR_REDUCTION = 2.0 ;     // This is < 1.0 if geared UP
+        final double     WHEEL_DIAMETER_MM = 100.0 ;     // For figuring circumference
         final double     COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                 (WHEEL_DIAMETER_MM * 3.1415);
         for (int i = 0; i < baseMotorArray.size(); i++) {
