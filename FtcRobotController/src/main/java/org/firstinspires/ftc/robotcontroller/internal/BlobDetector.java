@@ -4,6 +4,8 @@ import android.util.Log;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfInt4;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -145,6 +147,10 @@ public class BlobDetector {
             double xPos = rect.y+rect.height/2; // because rotated
             double yPos = rect.x+rect.width/2;
             double MIN_ASPECT_RATIO = 0.6;
+            MatOfInt hull = new MatOfInt();
+            Imgproc.convexHull(contour, hull);
+            MatOfInt4 convexityDefects = new MatOfInt4();
+            Imgproc.convexityDefects(contour, hull, convexityDefects); // could use convexity defects to test for convexity
             Log.d("PercentColor ",String.valueOf(percentColor));
             Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
             if  (percentColor > 0.6 && yPos < hsvFrame.rows()*2/3){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
