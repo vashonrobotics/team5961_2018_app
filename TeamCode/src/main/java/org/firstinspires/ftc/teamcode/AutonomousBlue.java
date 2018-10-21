@@ -67,9 +67,7 @@ public class AutonomousBlue extends LinearOpMode {
         // if gold is straight ahead
         if (goldAtPos1[0] >= 0 && goldAtPos1[1] >= 0 && goldAtPos1[2] >= 0){
             // center on the gold
-            double xPower = (goldAtPos1[0]-288/2)/50;
-            DriveTrain.mecanum(baseMotorArray, xPower, 0, 0,true);
-            sleep((long) Math.abs(xPower*20));
+            centerOnGold(goldAtPos1);
             DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
             sleep(3000);
             DriveTrain.mecanum(baseMotorArray, 1,-1,0,true);
@@ -187,6 +185,16 @@ public class AutonomousBlue extends LinearOpMode {
 
     }
 
+    private void centerOnGold(double[] goldPos) {
+        // 6.5in for 5.5cm diameter wheels
+        //101 pixels per 6 in at 2ft 10 in away
+        DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+//        setMotorRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        double xPower = (goldPos[0]-288/2)/50;
+        DriveTrain.mecanum(baseMotorArray, xPower, 0, 0,true);
+        sleep((long) Math.abs(xPower*100));
+    }
+
     private void moveForwardByDistance(double distance, double power) {
 //            distance is in cm
         final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
@@ -243,10 +251,11 @@ public class AutonomousBlue extends LinearOpMode {
         }
         ArrayList<Pair<double[], double[]>> pairs = findPairs(frameOneCandidates, frameTwoCandidates);
         ArrayList<Pair<double[], double[]>> acceptablePairs = new ArrayList<>();
+        double MIN_HORIZONTAL_CHANGE = 20;
         for (Pair<double[], double[]> pair: pairs){
             if (pair.first[2] > 700 && pair.second[2] > 700 && pair.first[2] < 5000 && pair.second[2] < 5000 &&
                     isAboutEqual(pair.first[2],pair.second[2], 3000) &&
-                    isAboutEqual(pair.first[1], pair.second[1], 10)) {
+                    isAboutEqual(pair.first[1], pair.second[1], 10) && pair.second[0] + MIN_HORIZONTAL_CHANGE < pair.first[0]) {
                 acceptablePairs.add(pair);
             }
         }
@@ -259,7 +268,8 @@ public class AutonomousBlue extends LinearOpMode {
                     farthestPairInXDirection = pair;
                 }
             }
-            telemetry.addData("gold At" + farthestPairInXDirection.first[1] +" " +farthestPairInXDirection.second[1], farthestPairInXDirection.first[2]);
+            telemetry.addData("gold At y1: " + farthestPairInXDirection.first[1] +" y2:" +farthestPairInXDirection.second[1] + " size1: ", farthestPairInXDirection.first[2]);
+            telemetry.addLine("x1: " + farthestPairInXDirection.first[0] + " x2: " + farthestPairInXDirection.second[0]);
             telemetry.update();
             return farthestPairInXDirection.second;
         }catch (IndexOutOfBoundsException e){
@@ -305,7 +315,7 @@ public class AutonomousBlue extends LinearOpMode {
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
     }
     private enum MineralType {
-        Gold, Silver, None;
+        Gold, Silver, None
     }
     private Pair<MineralType, double[]> isThereASilverOrAGoldOrNeitherAndCenterOnIt(){
         FtcRobotControllerActivity.shouldProcessImage = true;

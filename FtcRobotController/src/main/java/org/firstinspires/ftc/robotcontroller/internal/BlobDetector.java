@@ -22,6 +22,7 @@ public class BlobDetector {
     private Scalar maxColorRange;
     private Scalar minColorBorderRange;
     private Scalar maxColorBorderRange;
+    public ArrayList<Double> aspectRatios = new ArrayList<>();
     private int borderThickness;
     public BlobDetector(Scalar minColorRange, Scalar maxColorRange, Scalar minColorBorderRange,
                         Scalar maxColorBorderRange, int borderThickness) {
@@ -77,20 +78,20 @@ public class BlobDetector {
                         rect.width+tempBorderThickness*2, rect.height+tempBorderThickness*2);
                 numIter++;
             }
-            Log.d("RECT info x", String.valueOf(rect.x));
-            Log.d("RECT y", String.valueOf(rect.y));
-            Log.d("RECT height", String.valueOf(rect.height));
-            Log.d("RECT width", String.valueOf(rect.width));
-            Log.d("RECT border", String.valueOf(borderThickness));
-
-            Log.d("BorderRECT info x", String.valueOf(borderRect.x));
-            Log.d("RECT y", String.valueOf(borderRect.y));
-            Log.d("RECT height", String.valueOf(borderRect.height));
-            Log.d("RECT width", String.valueOf(borderRect.width));
-            Log.d("RECT border", String.valueOf(borderThickness));
-            Log.d("REct",rect.toString() + "border rect" + borderRect.toString());
-            Log.d("Cols", String.valueOf(hsvFrame.cols()));
-            Log.d("Rows", String.valueOf(hsvFrame.rows()));
+//            Log.d("RECT info x", String.valueOf(rect.x));
+//            Log.d("RECT y", String.valueOf(rect.y));
+//            Log.d("RECT height", String.valueOf(rect.height));
+//            Log.d("RECT width", String.valueOf(rect.width));
+//            Log.d("RECT border", String.valueOf(borderThickness));
+//
+//            Log.d("BorderRECT info x", String.valueOf(borderRect.x));
+//            Log.d("RECT y", String.valueOf(borderRect.y));
+//            Log.d("RECT height", String.valueOf(borderRect.height));
+//            Log.d("RECT width", String.valueOf(borderRect.width));
+//            Log.d("RECT border", String.valueOf(borderThickness));
+//            Log.d("REct",rect.toString() + "border rect" + borderRect.toString());
+//            Log.d("Cols", String.valueOf(hsvFrame.cols()));
+//            Log.d("Rows", String.valueOf(hsvFrame.rows()));
 
 //            borderRect.width = Range.clip(rect.width, 0, hsvFrame.cols()-rect.x);
 //            borderRect.height= Range.clip(rect.height, 0, hsvFrame.rows()-rect.y);
@@ -150,13 +151,16 @@ public class BlobDetector {
             MatOfInt hull = new MatOfInt();
             Imgproc.convexHull(contour, hull);
             MatOfInt4 convexityDefects = new MatOfInt4();
+
             Imgproc.convexityDefects(contour, hull, convexityDefects); // could use convexity defects to test for convexity
             Log.d("PercentColor ",String.valueOf(percentColor));
             Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
-            if  (percentColor > 0.6 && yPos < hsvFrame.rows()*2/3){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
+            // width = rows = 288 height = cols = 384
+            if  (percentColor > 0.6 && yPos < hsvFrame.cols()/2){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
 //                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){
                 contourData.add(new double[]{xPos, yPos, rect.height*rect.width});
                 canidatesForBall.add(contour);
+                aspectRatios.add((double) percentColor);
             }
         }
         try {
