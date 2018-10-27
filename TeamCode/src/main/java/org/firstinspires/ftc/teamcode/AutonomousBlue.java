@@ -37,7 +37,8 @@ import java.util.List;
 
 @Autonomous(group = "5961", name = "Autonomous Blue")
 public class AutonomousBlue extends LinearOpMode {
-    ArrayList baseMotorArray = new ArrayList();
+    private ArrayList baseMotorArray = new ArrayList();
+    private DcMotor lift;
 //    VuforiaLocalizer vuforia;
 //    private final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final float mmPerInch        = 25.4f;
@@ -63,6 +64,19 @@ public class AutonomousBlue extends LinearOpMode {
         initalizeRobot();
         waitForStart();
         setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        unlatch robot
+        lift.setPower(0.5);
+        sleep(1000);
+        lift.setPower(0);
+        DriveTrain.mecanum(baseMotorArray, 0.3,0,0,true);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray, 0,0.4,0,true);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray,-0.3,0,0,true);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray,0,-0.4,0,true);
+        sleep(200);
+        DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         double[] goldAtPos1 = lookForMineral(MineralType.Gold);
         // if gold is straight ahead
         if (goldAtPos1[0] >= 0 && goldAtPos1[1] >= 0 && goldAtPos1[2] >= 0){
@@ -114,8 +128,6 @@ public class AutonomousBlue extends LinearOpMode {
                 DriveTrain.mecanum(baseMotorArray, -1,0,0,true);
                 sleep(3000);
                 // drop marker
-                DriveTrain.mecanum(baseMotorArray, 1, 0,0,true);
-                sleep(7000);
 
             }else {
 //                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
@@ -128,8 +140,6 @@ public class AutonomousBlue extends LinearOpMode {
                 setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
                 sleep(3000);
-                DriveTrain.mecanum(baseMotorArray,0,-1,0,true);
-                sleep(7000);
 //                double[] goldAtPos3 = lookForMineral(MineralType.Gold);
 //                if (goldAtPos3[0] < 0 && goldAtPos3[1] < 0 && goldAtPos3[2] < 0 && NUM_TIME_RESAMPLED < 2) {
 //                    NUM_TIME_RESAMPLED++;
@@ -313,6 +323,7 @@ public class AutonomousBlue extends LinearOpMode {
         baseMotorArray.add(hardwareMap.dcMotor.get("motorRB"));
         ((DcMotor) baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
+        lift = hardwareMap.dcMotor.get("lift");
     }
     private enum MineralType {
         Gold, Silver, None

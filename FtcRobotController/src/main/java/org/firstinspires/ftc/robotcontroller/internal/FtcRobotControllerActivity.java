@@ -290,7 +290,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 //
 //    Imgproc.dilate(reds, reds, kernal);
     for (int i=0; i < contours.size();i++){
-      System.out.println("contour" + i);
+//      System.out.println("contour" + i);
       Rect rect = Imgproc.boundingRect(contours.get(i));
       Imgproc.rectangle(colorToFilter, new Point(rect.x, rect.y), new Point(rect.x+rect.width, rect.y+rect.height), new Scalar(255,255,255));
       Imgproc.drawContours(colorToFilter, contours, i, new Scalar(255,255,255), 6);
