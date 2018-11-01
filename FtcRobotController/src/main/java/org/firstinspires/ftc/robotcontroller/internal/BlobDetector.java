@@ -149,12 +149,12 @@ public class BlobDetector {
             double yPos = rect.x+rect.width/2;
             double MIN_ASPECT_RATIO = 0.6;
             MatOfInt hull = new MatOfInt();
-            Imgproc.convexHull(contour, hull);
-            MatOfInt4 convexityDefects = new MatOfInt4();
+//            Imgproc.convexHull(contour, hull);
+//            MatOfInt4 convexityDefects = new MatOfInt4();
 
-            Imgproc.convexityDefects(contour, hull, convexityDefects); // could use convexity defects to test for convexity
-            Log.d("PercentColor ",String.valueOf(percentColor));
-            Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
+//            Imgproc.convexityDefects(contour, hull, convexityDefects); // could use convexity defects to test for convexity
+//            Log.d("PercentColor ",String.valueOf(percentColor));
+//            Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
             // width = rows = 288 height = cols = 384
             if  (percentColor > 0.6 && yPos < hsvFrame.cols()/2){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
 //                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){

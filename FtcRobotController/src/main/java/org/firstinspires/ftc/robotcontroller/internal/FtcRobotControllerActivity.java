@@ -148,6 +148,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
     public static Boolean shouldProcessImage = true;
     public static Pair<ArrayList<MatOfPoint>, Mat> imageData;
+    public static Size frameSize = null;
   static private CameraBridgeViewBase mOpenCvCameraView;
 
   static {
@@ -241,6 +242,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   }
   @Override
   public void onCameraViewStarted(int width, int height) {
+    frameSize = new Size(height, width); // because rotated
   }
 
   @Override
@@ -258,11 +260,11 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 //    Core.add(inputFrame, purple, inputFrame);
     Imgproc.cvtColor(inputFrame, hsvInputFrame, Imgproc.COLOR_RGB2HSV);
 //    hsvInputFrame
-    Imgproc.cvtColor(inputFrame, inputFrame, Imgproc.COLOR_RGB2GRAY);
+//    Imgproc.cvtColor(inputFrame, inputFrame, Imgproc.COLOR_RGB2GRAY);
 //    Imgproc.Canny(inputFrame, inputFrame, 50, 100);
 //    Imgproc.adaptiveThreshold(inputFrame, inputFrame, 125, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 5, 1.5);
 
-    inputFrame.convertTo(inputFrame, CvType.CV_8UC1);
+//    inputFrame.convertTo(inputFrame, CvType.CV_8UC1);
     List<MatOfPoint> contours = new ArrayList<>();
 //    Imgproc.findContours(inputFrame, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 //    for (int i = 0; i < contours.size(); i++) {
@@ -302,6 +304,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
 
   @Override
   public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+//    System.out.println("cols"+inputFrame.rgba().cols());
+//    System.out.println("rows"+inputFrame.rgba().rows());
     if (shouldProcessImage) {
 
 //      Pair<Mat, Boolean> processedImg = recognizeWithKeypoints(inputFrame.rgba());
@@ -310,6 +314,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       return processedImage;
     }else{
       return recognizeWithContours(inputFrame.rgba());
+
+      //return inputFrame.rgba();
     }
   }
 
@@ -475,12 +481,10 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       initWifiMute(true);
     }
     mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
-//    mOpenCvCameraView.setMinimumHeight(1944);
-//    mOpenCvCameraView.setMinimumWidth(2592);
-//    mOpenCvCameraView.setMaxFrameSize(1944, 2592);
+    mOpenCvCameraView.setMinimumWidth(384);
+    mOpenCvCameraView.setMinimumHeight(288);
+    mOpenCvCameraView.setMaxFrameSize( 384,288);
     mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-
-
     mOpenCvCameraView.setCvCameraViewListener(this);
   }
 

@@ -26,9 +26,11 @@ public class TeleOpMode extends OpMode{
     private DcMotor collectorRotator;
     private Servo collectorGrabber;
     private Servo collectorGrabberRotator;
+    private Servo markerDropper;
     private Boolean setMode = false;
     private double relicLifterPos = 0.0;
     private int maxRelicArmPos = 5000; // needs to be tested
+//    boolean pressedA = false;
 
     @Override
     public void init() {
@@ -42,9 +44,17 @@ public class TeleOpMode extends OpMode{
         ((DcMotor)baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
 
         // lift init
-//        lift = hardwareMap.dcMotor.get("lift");
-//        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift = hardwareMap.dcMotor.get("lift");
+
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        markerDropper = hardwareMap.servo.get("dropper");
+        markerDropper.scaleRange(0,1);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        lift.setTargetPosition(0);
+//        lift.setPower(1);
 //        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // collector init
 //        collectorRotator = hardwareMap.dcMotor.get("colRot");
@@ -60,8 +70,36 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
+        telemetry.addData("dropper port", markerDropper.getPortNumber());
+        telemetry.addData("dropper port", markerDropper.getPosition());
+
+
+        telemetry.addData("lift encoder", lift.getCurrentPosition());
+//        telemetry.addData("lift Target Pos", liftTargetPos);
+//        if (gamepad2.right_stick_x > 0.1 || gamepad2.right_stick_x < -0.1) {
+//            liftTargetPos += gamepad2.right_stick_x*2;
+//
+//            lift.setTargetPosition(liftTargetPos);
+//            lift.setPower(1);
+//        }
+
+        lift.setPower(gamepad2.right_stick_x);
+//        if (gamepad2.a){
+//            pressedA = true;
+//        }
+//        if (gamepad2.b){
+//            pressedA = false;
+//        }
+//        if (pressedA){
+//            lift.setPower(-0.1);
+//        }
+        if (gamepad2.x){
+            markerDropper.setPosition(1);
+        }else{
+            markerDropper.setPosition(0);
+        }
         if (gamepad1.right_trigger >= 0.5) {
-            motorSpeedMultiplier = 0.3;
+            motorSpeedMultiplier = 0.4;
         }else {
             motorSpeedMultiplier = 1.0;
         }
@@ -73,8 +111,7 @@ public class TeleOpMode extends OpMode{
             //  up is negative
         // robot lifter stuff
 //        lift.setPower(gamepad2.right_stick_x);
-//        liftTargetPos += gamepad2.right_stick_x*10;
-//        lift.setTargetPosition(liftTargetPos);
+
         // collector stuff
 //        collectorExtender.setPower(gamepad2.left_stick_x);
 //        collectorRotator.setPower(gamepad2.left_stick_y/2);
@@ -88,5 +125,6 @@ public class TeleOpMode extends OpMode{
 //        }else{
 //            collectorGrabber.setPosition(0);
 //        }
+        telemetry.update();
     }
 }
