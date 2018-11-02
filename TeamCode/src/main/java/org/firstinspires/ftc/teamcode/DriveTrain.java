@@ -58,7 +58,7 @@ public class DriveTrain {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             int sideMultiplier = i % 2 == 0 ? 1 : -1;
-            motor.setPower(0.3*sideMultiplier*Math.signum(angle));
+            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
         while (Math.abs((int) (distanceToTravel * COUNTS_PER_MM)) > Math.abs(((DcMotor) baseMotorArray.get(0)).getCurrentPosition())) {
         }

@@ -484,7 +484,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     mOpenCvCameraView.setMinimumWidth(384);
     mOpenCvCameraView.setMinimumHeight(288);
     mOpenCvCameraView.setMaxFrameSize( 384,288);
-    mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+    mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE); // INVISIBLE doesn't work
     mOpenCvCameraView.setCvCameraViewListener(this);
   }
 

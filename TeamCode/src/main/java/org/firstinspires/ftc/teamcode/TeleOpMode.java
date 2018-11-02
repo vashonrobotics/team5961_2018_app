@@ -50,8 +50,8 @@ public class TeleOpMode extends OpMode{
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        markerDropper = hardwareMap.servo.get("dropper");
-        markerDropper.scaleRange(0,1);
+//        markerDropper = hardwareMap.servo.get("dropper");
+//        markerDropper.scaleRange(0,1);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        lift.setTargetPosition(0);
 //        lift.setPower(1);
@@ -70,9 +70,6 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
-        telemetry.addData("dropper port", markerDropper.getPortNumber());
-        telemetry.addData("dropper port", markerDropper.getPosition());
-
 
         telemetry.addData("lift encoder", lift.getCurrentPosition());
 //        telemetry.addData("lift Target Pos", liftTargetPos);
@@ -93,11 +90,11 @@ public class TeleOpMode extends OpMode{
 //        if (pressedA){
 //            lift.setPower(-0.1);
 //        }
-        if (gamepad2.x){
-            markerDropper.setPosition(1);
-        }else{
-            markerDropper.setPosition(0);
-        }
+//        if (gamepad2.x){
+//            markerDropper.setPosition(1);
+//        }else{
+//            markerDropper.setPosition(0);
+//        }
         if (gamepad1.right_trigger >= 0.5) {
             motorSpeedMultiplier = 0.4;
         }else {
