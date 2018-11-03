@@ -156,7 +156,7 @@ public class BlobDetector {
 //            Log.d("PercentColor ",String.valueOf(percentColor));
 //            Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
             // width = rows = 288 height = cols = 384
-            if  (percentColor > 0.6 && yPos < hsvFrame.cols()/2){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
+            if  (percentColor > 0.6 && yPos < hsvFrame.cols()*2/3){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
 //                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){
                 contourData.add(new double[]{xPos, yPos, rect.height*rect.width});
                 canidatesForBall.add(contour);

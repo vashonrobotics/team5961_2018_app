@@ -50,7 +50,7 @@ public class TeleOpMode extends OpMode{
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-//        markerDropper = hardwareMap.servo.get("dropper");
+        markerDropper = hardwareMap.servo.get("dropper");
 //        markerDropper.scaleRange(0,1);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        lift.setTargetPosition(0);
@@ -70,8 +70,11 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
-
-        telemetry.addData("lift encoder", lift.getCurrentPosition());
+//        for (int i = 0; i < baseMotorArray.size(); i++) {
+//            DcMotor motor = ((DcMotor) baseMotorArray.get(i));
+//            telemetry.addData("motor " + i,motor.getCurrentPosition());
+//        }
+//        telemetry.addData("lift encoder", lift.getCurrentPosition());
 //        telemetry.addData("lift Target Pos", liftTargetPos);
 //        if (gamepad2.right_stick_x > 0.1 || gamepad2.right_stick_x < -0.1) {
 //            liftTargetPos += gamepad2.right_stick_x*2;

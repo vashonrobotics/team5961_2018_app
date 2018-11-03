@@ -80,6 +80,9 @@ public class AutonomousBlue extends LinearOpMode {
         markerDropper.setPosition(0.75); // if zero is up and 1 is down
         lift.setPower(0);
         sleep(4000);
+        lift.setPower(0.5);
+        sleep(200);
+        lift.setPower(0);
         markerDropper.setPosition(1);
         DriveTrain.mecanum(baseMotorArray, 0.4,0,0,true);
         sleep(700);
@@ -133,7 +136,8 @@ public class AutonomousBlue extends LinearOpMode {
 //                centerOnGold();
 //                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
 //                sleep(2000);
-                moveByEncoder(1840,0,1);
+                moveByEncoder(3840,-1,0.3);
+                moveByEncoder(200, 1,0);
 //                DriveTrain.mecanum(baseMotorArray, -1,0,0,true);
 //                sleep(1200);
 //                DriveTrain.mecanum(baseMotorArray,0,0,0,true);
@@ -149,7 +153,7 @@ public class AutonomousBlue extends LinearOpMode {
 //                centerOnGold();
                 moveForwardByDistance(156.5, 1);
                 setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                moveByEncoder(3040,1,0);
+                moveByEncoder(5040,1,0);
 //                DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
 //                sleep(1500);
 //                DriveTrain.mecanum(baseMotorArray,0,0,0,true);
@@ -288,9 +292,9 @@ public class AutonomousBlue extends LinearOpMode {
         }
         ArrayList<Pair<double[], double[]>> pairs = findPairs(frameOneCandidates, frameTwoCandidates);
         ArrayList<Pair<double[], double[]>> acceptablePairs = new ArrayList<>();
-        double MIN_HORIZONTAL_CHANGE = 10;
+        double MIN_HORIZONTAL_CHANGE = 0;
         for (Pair<double[], double[]> pair: pairs){
-            if (pair.first[2] > 700 && pair.second[2] > 700 && pair.first[2] < 5000 && pair.second[2] < 5000 &&
+            if (pair.first[2] > 600 && pair.second[2] > 600 && pair.first[2] < 5000 && pair.second[2] < 5000 &&
                     isAboutEqual(pair.first[2],pair.second[2], 3000) &&
                     isAboutEqual(pair.first[1], pair.second[1], 10) && pair.first[0] - MIN_HORIZONTAL_CHANGE > pair.second[0]) {
                 acceptablePairs.add(pair);
