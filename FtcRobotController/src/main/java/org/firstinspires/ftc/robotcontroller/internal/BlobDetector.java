@@ -35,7 +35,6 @@ public class BlobDetector {
     public ArrayList<double[]> getCandidatesData() {
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         Mat hsvFrame = FtcRobotControllerActivity.imageData.snd;
-        Core.rotate(hsvFrame, hsvFrame, Core.ROTATE_90_CLOCKWISE);
 
         Mat pixelsOfOneColor = new Mat();
         Mat pixelsOfBorder = new Mat();
@@ -104,7 +103,7 @@ public class BlobDetector {
             for (int row = 0; row < contourFrame.rows(); row++){
                 for (int col=0; col < contourFrame.cols(); col++){
                     double[] pixel = contourFrame.get(row,col);
-                    if (pixel[0] > minColorRange.val[0]){ //&& pixel[0] < maxColorRange.val[0] &&
+                    if (pixel[0] > minColorRange.val[0]&& pixel[0] < maxColorRange.val[0]){// &&
                             //pixel[1] > minColorRange.val[1] && pixel[1] < maxColorRange.val[1] &&
                            // pixel[2] > minColorRange.val[2] && pixel[2] < maxColorRange.val[2]) {
                         percentColor += 1;
@@ -145,8 +144,8 @@ public class BlobDetector {
             // ~9000 pixels at ~100cm
             // 5000 pixels at 150cm
             //
-            double xPos = rect.y+rect.height/2; // because rotated
-            double yPos = rect.x+rect.width/2;
+            double xPos = rect.x+rect.width/2; // because rotated
+            double yPos = hsvFrame.rows() - (rect.y+rect.height/2);
             double MIN_ASPECT_RATIO = 0.6;
             MatOfInt hull = new MatOfInt();
 //            Imgproc.convexHull(contour, hull);
@@ -155,8 +154,8 @@ public class BlobDetector {
 //            Imgproc.convexityDefects(contour, hull, convexityDefects); // could use convexity defects to test for convexity
 //            Log.d("PercentColor ",String.valueOf(percentColor));
 //            Log.d("PercentBorderColor ",String.valueOf(percentBorderColor));//yPos < hsvFrame.rows()/3
-            // width = rows = 288 height = cols = 384
-            if  (percentColor > 0.6 && yPos < hsvFrame.cols()*2/3){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
+            // width = cols = 288 height = rows = 384
+            if  (percentColor > 0.6 && yPos < hsvFrame.rows()*2/3){// && percentBorderColor > 0.5 && yPos < hsvFrame.rows()*2/3){
 //                    && rect.width/rect.height > MIN_ASPECT_RATIO && rect.height/rect.width > MIN_ASPECT_RATIO){
                 contourData.add(new double[]{xPos, yPos, rect.height*rect.width});
                 canidatesForBall.add(contour);

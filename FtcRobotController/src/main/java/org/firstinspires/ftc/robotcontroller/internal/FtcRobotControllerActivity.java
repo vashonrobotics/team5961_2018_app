@@ -314,8 +314,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       return processedImage;
     }else{
       return recognizeWithContours(inputFrame.rgba());
-
-      //return inputFrame.rgba();
+//      return inputFrame.rgba();
     }
   }
 

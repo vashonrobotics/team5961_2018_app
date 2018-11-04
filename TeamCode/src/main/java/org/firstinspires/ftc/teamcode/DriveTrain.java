@@ -45,7 +45,7 @@ public class DriveTrain {
     public static void turn(ArrayList baseMotorArray, double angle, double wheelWidthBetweenWheels, double wheelHeightBetweenWheels){
         // angle is in degrees
         // wheel distances are in mm
-        // WARNING: leaves motors in run to position mode and doesn't wait for them to run to the position
+        // clockwise is positive
         double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeightBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*angle/360;
         final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
         final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
