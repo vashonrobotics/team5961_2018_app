@@ -242,7 +242,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   }
   @Override
   public void onCameraViewStarted(int width, int height) {
-    frameSize = new Size(height, width); // because rotated
+    frameSize = new Size(width, height); // because rotated
   }
 
   @Override
@@ -277,12 +277,22 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     Mat redsPart2 = new Mat();
 //    Core.inRange(hsvInputFrame, new Scalar(9, 50,50), new Scalar(38, 255,255), colorToFilter);
 
-    Core.inRange(hsvInputFrame, new Scalar(9, 100,50), new Scalar(38, 255,255), colorToFilter);
+    Core.inRange(hsvInputFrame, new Scalar(0, 0,0), new Scalar(180, 50,74), colorToFilter);
+
     Mat kernal = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2,2));
 
     Imgproc.blur(colorToFilter, colorToFilter, new Size(10,10));
     Imgproc.erode(colorToFilter, colorToFilter, kernal);
     Imgproc.dilate(colorToFilter,colorToFilter,kernal);
+//    for (int col = 0; col < colorToFilter.cols();col++){
+//      for (int row = 0; row < colorToFilter.rows();row++){
+//        if (colorToFilter.get(row,col)[0] < 100) {
+//          System.out.println("changedValue");
+//          System.out.println("value1 " + colorToFilter.get(row,col)[0]);
+//          colorToFilter.put(row,col, 0.0);
+//        }
+//      }
+//    }
     imageData = new Pair<>(new ArrayList<MatOfPoint>(contours), hsvInputFrame);
 
     Imgproc.findContours(colorToFilter, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
