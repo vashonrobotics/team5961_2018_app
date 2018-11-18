@@ -16,6 +16,14 @@ public class DriveTrain {
     public static void nonMecanum(ArrayList baseMotorArray, double power[]) {
     }
 
+    /**
+     *
+     * @param baseMotorArray this is the motor array that is being used.
+     * @param x desired change in position left to right.  Right is positive.
+     * @param y value of movement front/back. Bot-specific. Forward is positive.
+     * @param turn turn-power value. Right is positive. -1 to 1.
+     * @param frontIsInTheDirectionOfTheWheels
+     */
     public static void mecanum(ArrayList baseMotorArray, double x, double y, double turn, boolean frontIsInTheDirectionOfTheWheels){
         double power = maxUnit(Math.sqrt((x * x) + (y * y)));
 //        double radianAngle = 0;
@@ -48,7 +56,7 @@ public class DriveTrain {
         // clockwise is positive
         double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeightBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*angle/360;
         final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
-        final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
+        final double     DRIVE_GEAR_REDUCTION = 1 ;     // This is < 1.0 if geared UP
         final double     WHEEL_DIAMETER_MM = 100.0 ;     // For figuring circumference
         final double     COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                 (WHEEL_DIAMETER_MM * 3.1415);

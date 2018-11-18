@@ -30,7 +30,7 @@ public class BlobDetector {
         this.minColorRange = minColorRange;
         this.maxColorRange = maxColorRange;
     }
-    public ArrayList<BlobDetectorCandidate> getCandidatesData() {
+    public ArrayList<BlobDetectorCandidate> getCandidatesData(boolean removeGray) {
         ArrayList<MatOfPoint> contours = new ArrayList<>();
         Mat hsvFrame = FtcRobotControllerActivity.imageData.snd;
         Mat pixelsOfOneColor = new Mat();
@@ -44,10 +44,12 @@ public class BlobDetector {
 //        Imgproc.blur(pixelsOfOneColor, pixelsOfOneColor, new Size(10,10));
         Imgproc.erode(pixelsOfOneColor, pixelsOfOneColor, kernal);
         Imgproc.dilate(pixelsOfOneColor,pixelsOfOneColor,kernal);
-        for (int col = 0; col < pixelsOfOneColor.cols();col++){
-            for (int row = 0; row < pixelsOfOneColor.rows();row++){
-                if (pixelsOfOneColor.get(row,col)[0] < 100) {
-                    pixelsOfOneColor.put(row,col, 0.0);
+        if (removeGray) {
+            for (int col = 0; col < pixelsOfOneColor.cols(); col++) {
+                for (int row = 0; row < pixelsOfOneColor.rows(); row++) {
+                    if (pixelsOfOneColor.get(row, col)[0] < 100) {
+                        pixelsOfOneColor.put(row, col, 0.0);
+                    }
                 }
             }
         }

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class TeleOpMode extends OpMode{
     private DcMotor lift;
     private double motorSpeedMultiplier = 1.0;
-    private ArrayList baseMotorArray;
+    private ArrayList baseMotorArray = new ArrayList();
     private int liftTargetPos = 0;
     private DcMotor collectorExtender;
     private DcMotor collectorRotator;
@@ -28,51 +28,58 @@ public class TeleOpMode extends OpMode{
     private Servo collectorGrabberRotator;
     private Servo markerDropper;
     private Boolean setMode = false;
-    private double relicLifterPos = 0.0;
-    private int maxRelicArmPos = 5000; // needs to be tested
+    private int previousBaseMotorPos = -1;
 //    boolean pressedA = false;
 
     @Override
     public void init() {
         // base motor init
-        baseMotorArray = new ArrayList();
         baseMotorArray.add(hardwareMap.dcMotor.get("motorLF"));
         baseMotorArray.add(hardwareMap.dcMotor.get("motorRF"));
         baseMotorArray.add(hardwareMap.dcMotor.get("motorLB"));
         baseMotorArray.add(hardwareMap.dcMotor.get("motorRB"));
         ((DcMotor)baseMotorArray.get(1)).setDirection(DcMotor.Direction.REVERSE);
         ((DcMotor)baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
-
-        // lift init
+//
+//        // lift init
         lift = hardwareMap.dcMotor.get("lift");
 
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//
+//        markerDropper = hardwareMap.servo.get("dropper");
 
-        markerDropper = hardwareMap.servo.get("dropper");
-//        markerDropper.scaleRange(0,1);
-//        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        lift.setTargetPosition(0);
-//        lift.setPower(1);
-//        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // collector init
-//        collectorRotator = hardwareMap.dcMotor.get("colRot");
-//        collectorExtender = hardwareMap.dcMotor.get("colExt");
-//        collectorGrabber = hardwareMap.servo.get("colGrab");
-//        collectorGrabberRotator = hardwareMap.servo.get("colGrabRot");
-//        collectorGrabberRotator.setPosition(0);
-//        collectorGrabber.setPosition(0);
-        for(int i = 0; i < 4; i++){
-            ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        }
+//        collectorRotator = hardwareMap.dcMotor.get("rotate");
+//        collectorRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        collectorExtender = hardwareMap.dcMotor.get("extend");
+//        collectorExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        collectorGrabber = hardwareMap.servo.get("grab");
+//        collectorGrabberRotator = hardwareMap.servo.get("assistant");
+//        for(int i = 0; i < 4; i++){
+//            ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        }
     }
 
     @Override
     public void loop() {
+        if (gamepad1.right_stick_x == 0 && gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0) {
+//            ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
+            if (previousBaseMotorPos != -1) {
+                if(previousBaseMotorPos != ((DcMotor) baseMotorArray.get(0)).getCurrentPosition()){
+                    telemetry.addData("change in encoder values", ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousBaseMotorPos);
+                }
+            }else{
+                previousBaseMotorPos = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
+            }
+        }
+        if(gamepad1.x){
+            previousBaseMotorPos = -1;
+        }
 //        for (int i = 0; i < baseMotorArray.size(); i++) {
 //            DcMotor motor = ((DcMotor) baseMotorArray.get(i));
-//            telemetry.addData("motor " + i,motor.getCurrentPosition());
+//            telemetry.addData("motor " + i, motor.getCurrentPosition());
 //        }
 //        telemetry.addData("lift encoder", lift.getCurrentPosition());
 //        telemetry.addData("lift Target Pos", liftTargetPos);
@@ -107,14 +114,11 @@ public class TeleOpMode extends OpMode{
                     (-(double) gamepad1.left_stick_y) * motorSpeedMultiplier,
                     ((double) gamepad1.right_stick_x) * motorSpeedMultiplier, true);
 
-
-            //  up is negative
-        // robot lifter stuff
-//        lift.setPower(gamepad2.right_stick_x);
-
+//
+//            //  up is negative
         // collector stuff
 //        collectorExtender.setPower(gamepad2.left_stick_x);
-//        collectorRotator.setPower(gamepad2.left_stick_y/2);
+//        collectorRotator.setPower(gamepad2.left_stick_y/3);
 //        if (gamepad2.right_bumper) {
 //            collectorGrabberRotator.setPosition(1);
 //        }else{
@@ -123,7 +127,7 @@ public class TeleOpMode extends OpMode{
 //        if (gamepad2.left_bumper){
 //            collectorGrabber.setPosition(1);
 //        }else{
-//            collectorGrabber.setPosition(0);
+//            collectorGrabber.setPosition(0.4);
 //        }
         telemetry.update();
     }
