@@ -158,9 +158,13 @@ public class CraterAutonomous extends LinearOpMode {
             }
             telemetry.addData("crater x: " + crater.getX() + " y: " +crater.getY()+ "width: " + crater.getWidth()+ "height:",crater.getHeight());
 
-            return crater.getY();
+            if (crater.getY() < FtcRobotControllerActivity.frameSize.height/3) {
+                return crater.getY();
+            }else{
+                return FtcRobotControllerActivity.frameSize.height/3;
+            }
         } catch (IndexOutOfBoundsException e){
-            return -1;
+            return FtcRobotControllerActivity.frameSize.height/3;
         }
     }
 

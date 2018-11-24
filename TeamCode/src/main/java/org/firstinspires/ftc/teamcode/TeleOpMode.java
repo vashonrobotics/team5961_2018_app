@@ -5,11 +5,16 @@ import android.graphics.Color;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.opencv.core.Range;
+
 import java.util.ArrayList;
+
+import static com.qualcomm.robotcore.util.Range.clip;
 
 /**
  * Created by FTC on 9/23/2017.
@@ -29,6 +34,7 @@ public class TeleOpMode extends OpMode{
     private Servo markerDropper;
     private Boolean setMode = false;
     private int previousBaseMotorPos = -1;
+//    private CRServo stickyArm;
 //    boolean pressedA = false;
 
     @Override
@@ -47,6 +53,8 @@ public class TeleOpMode extends OpMode{
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        stickyArm = hardwareMap.crservo.get("stickyArm");
+
 //
 //        markerDropper = hardwareMap.servo.get("dropper");
 
@@ -64,6 +72,7 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
+//        telemetry.addData("arm power",stickyArm.getPower());
         if (gamepad1.right_stick_x == 0 && gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0) {
 //            ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
             if (previousBaseMotorPos != -1) {
@@ -91,20 +100,10 @@ public class TeleOpMode extends OpMode{
 //        }
 
         lift.setPower(gamepad2.right_stick_x);
-//        if (gamepad2.a){
-//            pressedA = true;
-//        }
-//        if (gamepad2.b){
-//            pressedA = false;
-//        }
-//        if (pressedA){
-//            lift.setPower(-0.1);
-//        }
-//        if (gamepad2.x){
-//            markerDropper.setPosition(1);
-//        }else{
-//            markerDropper.setPosition(0);
-//        }
+
+//        stickyArm.setPower(gamepad2.left_stick_x/2-.4);
+
+
         if (gamepad1.right_trigger >= 0.5) {
             motorSpeedMultiplier = 0.4;
         }else {
