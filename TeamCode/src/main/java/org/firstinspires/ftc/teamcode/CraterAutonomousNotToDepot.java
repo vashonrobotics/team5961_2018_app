@@ -10,11 +10,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.opencv.core.Scalar;
 
-
 import java.util.ArrayList;
 
-@Autonomous(group = "5961", name = "Full Crater Autonomous")
-public class CraterAutonomous extends LinearOpMode {
+@Autonomous(group = "5961", name = "Crater Autonomous-not to depot")
+public class CraterAutonomousNotToDepot extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
     private Servo markerDropper;
@@ -36,7 +35,7 @@ public class CraterAutonomous extends LinearOpMode {
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
     double wheelWidthBetweenWheels = 230;
-    double wheelHeighBetweenWheels = 350;// different than depot autonomous
+    double wheelHeighBetweenWheels = 350;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -84,12 +83,7 @@ public class CraterAutonomous extends LinearOpMode {
         if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0){
             // center on the gold
 //            centerOnGold();
-            moveForwardByDistance(97,0.5);
-            sleep(100);
-            moveForwardByDistance(90, -0.5);
-            DriveTrain.turn(baseMotorArray,-60,wheelWidthBetweenWheels,wheelWidthBetweenWheels);
-
-
+            moveForwardByDistance(120,0.5);
         }else {
             DriveTrain.turn(baseMotorArray, 20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             sleep(1000);
@@ -97,9 +91,7 @@ public class CraterAutonomous extends LinearOpMode {
             telemetry.addData("gold pos 2", goldAtPos2.getY());
             // if gold is to the right
             if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0){
-                moveForwardByDistance(100, 0.5);
-                moveForwardByDistance (90, -0.5);
-                DriveTrain.turn(baseMotorArray,-80,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                moveForwardByDistance(130, 0.5);
 
 //                centerOnGold();
 //                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
@@ -119,24 +111,10 @@ public class CraterAutonomous extends LinearOpMode {
                 DriveTrain.turn(baseMotorArray, -50, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //                sleep(500);
 //                centerOnGold();
-                moveForwardByDistance(100, 0.5);
-                moveForwardByDistance(90, -0.5);
-                setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-
+                moveForwardByDistance(130, 0.5);
 //                moveByEncoder();
             }
         }
-        moveForwardByDistance(150,0.5);
-        moveByEncoder(6030,-1,0);
-        moveByEncoder(1200,-0.5,0);
-        moveByEncoder(500,1,-1);
-        markerDropper.setPosition(0);
-        sleep(1000);
-        DriveTrain.turn(baseMotorArray,90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-        moveByEncoder(700,-1,0);
-        moveForwardByDistance(170,1);
-        moveForwardByDistance(200,0.5);
 //        sleep(50000);
 
 
@@ -345,7 +323,7 @@ public class CraterAutonomous extends LinearOpMode {
             baseMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
         DriveTrain.mecanum(baseMotorArray,x,y,0,true);
-        while (encoderDistance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition()) && opModeIsActive()){
+        while (encoderDistance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition())){
 
         }
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
