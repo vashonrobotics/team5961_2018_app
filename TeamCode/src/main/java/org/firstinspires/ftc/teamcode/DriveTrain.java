@@ -5,6 +5,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import java.util.ArrayList;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+import static java.lang.Thread.sleep;
+
 
 /**
  * Created by Caz on 9/30/2017.
@@ -63,13 +67,40 @@ public class DriveTrain {
         for (int i = 0; i < baseMotorArray.size(); i++) {
             DcMotor motor = ((DcMotor) baseMotorArray.get(i));
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             int sideMultiplier = i % 2 == 0 ? 1 : -1;
-            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
+            motor.setTargetPosition((int) (distanceToTravel * COUNTS_PER_MM*sideMultiplier));
+//            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
-        while (Math.abs((int) (distanceToTravel * COUNTS_PER_MM)) > Math.abs(((DcMotor) baseMotorArray.get(0)).getCurrentPosition())) {
+        DriveTrain.mecanum(baseMotorArray,0,1,0,true);
+
+        try {
+            sleep(300);
+        }catch (InterruptedException e){
+            System.out.println(e);
+        }
+        int encoderChange = 1000;
+        int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
+        int numTimes_looped = 0;
+        while (Math.abs(encoderChange) > 5 || numTimes_looped < 3){
+            numTimes_looped++;
+            try {
+                sleep(30);
+            }catch (InterruptedException e){
+                break;
+            }
+            encoderChange = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
+            previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
+        }try {
+            sleep(300);
+        }catch (InterruptedException e){
+            System.out.println(e);
         }
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+        for (int i = 0; i < baseMotorArray.size(); i++) {
+            DcMotor motor = ((DcMotor) baseMotorArray.get(i));
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
     }
 }

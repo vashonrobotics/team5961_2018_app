@@ -13,6 +13,8 @@ import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
 
+import static com.qualcomm.robotcore.util.Range.clip;
+
 @Autonomous(group = "5961", name = "Full Crater Autonomous")
 public class CraterAutonomous extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
@@ -53,28 +55,28 @@ public class CraterAutonomous extends LinearOpMode {
 //        unlatch robot
 //        lift.setTargetPosition((int)(COUNTS_PER_MOTOR_REV*20/60*5.7));
         lift.setPower(1);
-        sleep(500);
+        safeSleep(500);
         markerDropper.setPosition(0.75); // if 1 is up and 0 is down
         lift.setPower(0);
-        sleep(4000);
+        safeSleep(4000);
         lift.setPower(1);
-        sleep(200);
+        safeSleep(200);
         lift.setPower(0);
         markerDropper.setPosition(1);
         DriveTrain.mecanum(baseMotorArray, 0.4,0,0,true);
-        sleep(700);
+        safeSleep(700);
         lift.setPower(-1);
         DriveTrain.mecanum(baseMotorArray, 0,0.4,0,true);
-        sleep(300);
+        safeSleep(300);
         DriveTrain.mecanum(baseMotorArray,-0.4,0,0,true);
-        sleep(700);
+        safeSleep(700);
         lift.setPower(0);
         DriveTrain.mecanum(baseMotorArray,0,-0.4,0,true);
-        sleep(300);
+        safeSleep(300);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
-        sleep(500);
+        safeSleep(500);
         int craterHeight = (int)getCraterHeight();
-        sleep(1000);
+        safeSleep(1000);
         BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold,0,craterHeight);
         // middle
         // x1 122 x2 92
@@ -85,14 +87,14 @@ public class CraterAutonomous extends LinearOpMode {
             // center on the gold
 //            centerOnGold();
             moveForwardByDistance(97,0.5);
-            sleep(100);
+            safeSleep(100);
             moveForwardByDistance(90, -0.5);
             DriveTrain.turn(baseMotorArray,-60,wheelWidthBetweenWheels,wheelWidthBetweenWheels);
 
 
         }else {
             DriveTrain.turn(baseMotorArray, 20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-            sleep(1000);
+            safeSleep(1000);
             BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold,0,craterHeight);
             telemetry.addData("gold pos 2", goldAtPos2.getY());
             // if gold is to the right
@@ -103,23 +105,23 @@ public class CraterAutonomous extends LinearOpMode {
 
 //                centerOnGold();
 //                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
-//                sleep(2000);
+//                safeSleep(2000);
 //                moveByEncoder(3840,-1,0.3);
 //                moveByEncoder(200, 1,0);
 //                DriveTrain.mecanum(baseMotorArray, -1,0,0,true);
-//                sleep(1200);
+//                safeSleep(1200);
 //                DriveTrain.mecanum(baseMotorArray,0,0,0,true);
                 // drop marker
 
 
             }else {
 //                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
-//                sleep(600);
+//                safeSleep(600);
 //                DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
                 DriveTrain.turn(baseMotorArray, -50, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//                sleep(500);
+//                safeSleep(500);
 //                centerOnGold();
-                moveForwardByDistance(100, 0.5);
+                moveForwardByDistance(110, 0.5);
                 moveForwardByDistance(90, -0.5);
                 setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
@@ -132,12 +134,12 @@ public class CraterAutonomous extends LinearOpMode {
         moveByEncoder(1200,-0.5,0);
         moveByEncoder(500,1,-1);
         markerDropper.setPosition(0);
-        sleep(1000);
+        safeSleep(1000);
         DriveTrain.turn(baseMotorArray,90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
         moveByEncoder(700,-1,0);
         moveForwardByDistance(170,1);
         moveForwardByDistance(200,0.5);
-//        sleep(50000);
+//        safeSleep(50000);
 
 
     }
@@ -146,7 +148,7 @@ public class CraterAutonomous extends LinearOpMode {
         BlobDetector craterDetector = new BlobDetector(new Scalar(0, 0, 0), new Scalar (180, 50, 74));
         FtcRobotControllerActivity.shouldProcessImage = true;
         while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
-            sleep(5);
+            safeSleep(5);
         }
         ArrayList<BlobDetectorCandidate> craterCandidates = craterDetector.getCandidatesData(true);
 
@@ -175,7 +177,7 @@ public class CraterAutonomous extends LinearOpMode {
         for (int i = 0; i < 5;i++) {
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
 //        setMotorRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            sleep(300);
+            safeSleep(300);
             BlobDetectorCandidate goldPos = lookForMineral(MineralType.Gold,0,300);
 
             double xPower;
@@ -185,7 +187,7 @@ public class CraterAutonomous extends LinearOpMode {
                 xPower = (goldPos.getX() - 240 / 2) / 50;
             }
             DriveTrain.mecanum(baseMotorArray, -xPower, 0, 0, true);
-            sleep((long) Math.abs(xPower * 60));
+            safeSleep((int) Math.abs(xPower * 60));
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
         }
     }
@@ -209,15 +211,17 @@ public class CraterAutonomous extends LinearOpMode {
 //            }
             baseMotor.setTargetPosition((int) (COUNTS_PER_MM*10*distance)*directionMultiplier);
         }
-        sleep(200);
+        safeSleep(300);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
-        while (Math.abs(encoderChange) > 5 && opModeIsActive()){
-            sleep(30);
+        int numLooped = 0;
+        while ((Math.abs(encoderChange) > 5 || numLooped < 3) && opModeIsActive()){
+            numLooped++;
+            safeSleep(30);
             encoderChange = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
             previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         }
-        sleep(100);
+        safeSleep(300);
 //        while (COUNTS_PER_MM*10*distance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition())){
 //
 //        }
@@ -236,7 +240,7 @@ public class CraterAutonomous extends LinearOpMode {
     private BlobDetectorCandidate lookForMineral(MineralType mineralType, double minumumHorizDistance, int maxY){
         FtcRobotControllerActivity.shouldProcessImage = true;
         while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
-            sleep(5);
+            safeSleep(5);
         }
         ArrayList<BlobDetectorCandidate> frameOneCandidates;
         if (mineralType == MineralType.Gold) {
@@ -247,10 +251,10 @@ public class CraterAutonomous extends LinearOpMode {
 
 
         moveByEncoder(350, 0.4,0);
-        sleep(1000);
+        safeSleep(1000);
         FtcRobotControllerActivity.shouldProcessImage = true;
         while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
-            sleep(5);
+            safeSleep(5);
         }
         ArrayList<BlobDetectorCandidate> frameTwoCandidates;
         if (mineralType == MineralType.Gold) {
@@ -339,15 +343,44 @@ public class CraterAutonomous extends LinearOpMode {
 
     private void moveByEncoder(int encoderDistance, double x, double y){
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
-        for (Object baseMotorObject: baseMotorArray){
-            DcMotor baseMotor = (DcMotor) baseMotorObject;
-            baseMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            baseMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double power = clip(Math.sqrt((x * x) + (y * y)),-1.0,1.0);
+//        double radianAngle = 0;
+        double radianAngle = Math.atan2(y, x) - Math.PI * 1/4;
+        double[] motorPowers = {(Math.cos(radianAngle) * power), // frontLeft
+                (Math.sin(radianAngle) * power), // frontRight
+                (Math.sin(radianAngle) * power),// backLeft
+                (Math.cos(radianAngle) * power)};
+        double totalPower = 0;
+        for(double motorPower:motorPowers){
+            totalPower += motorPower;
         }
-        DriveTrain.mecanum(baseMotorArray,x,y,0,true);
-        while (encoderDistance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition()) && opModeIsActive()){
+        for(int i = 0; i < baseMotorArray.size(); i++) {
+            DcMotor motor = ((DcMotor) baseMotorArray.get(i));
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            int sideMultiplier = i % 2 == 0 ? 1 : -1;
 
+            motor.setTargetPosition((int) (encoderDistance*motorPowers[i]*2));
+//            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
+        DriveTrain.mecanum(baseMotorArray,0,1,0,true);
+        sleep(300);
+        int encoderChange = 1000;
+        int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
+        int numTimes_looped = 0;
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive()) {
+            numTimes_looped++;
+            sleep(30);
+            encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
+            previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
+        }
+        sleep(300);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
     }
+    private void safeSleep(int sleepTime){
+        if (opModeIsActive()) {
+            sleep(sleepTime);
+        }
+    }
+            
 }
