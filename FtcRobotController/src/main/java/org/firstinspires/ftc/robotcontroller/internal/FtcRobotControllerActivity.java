@@ -275,9 +275,9 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     Mat greens = new Mat();
     Mat redsPart1 = new Mat();
     Mat redsPart2 = new Mat();
-    Core.inRange(hsvInputFrame, new Scalar(9, 50,50), new Scalar(38, 255,255), colorToFilter);
-//
-//    Core.inRange(hsvInputFrame, new Scalar(0, 0,0), new Scalar(180, 50,74), colorToFilter);
+//    Core.inRange(hsvInputFrame, new Scalar(9, 50,50), new Scalar(38, 255,255), colorToFilter);
+
+    Core.inRange(hsvInputFrame, new Scalar(0, 0,0), new Scalar(180, 50,74), colorToFilter);
 
     Mat kernal = Imgproc.getStructuringElement(Imgproc.CV_SHAPE_RECT, new Size(2,2));
 

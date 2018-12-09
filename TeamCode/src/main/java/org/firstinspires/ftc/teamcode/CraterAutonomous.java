@@ -37,8 +37,8 @@ public class CraterAutonomous extends LinearOpMode {
     BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
-    double wheelWidthBetweenWheels = 230;
-    double wheelHeighBetweenWheels = 350;// different than depot autonomous
+    double wheelWidthBetweenWheels = 215;
+    double wheelHeighBetweenWheels = 340;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -76,8 +76,8 @@ public class CraterAutonomous extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         safeSleep(500);
         int craterHeight = (int)getCraterHeight();
-        safeSleep(1000);
-        BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold,0,craterHeight);
+//        safeSleep(1000);
+        BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold,craterHeight,FtcRobotControllerActivity.frameSize.width/6);
         // middle
         // x1 122 x2 92
         //x1 112 x2 77
@@ -86,21 +86,21 @@ public class CraterAutonomous extends LinearOpMode {
         if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0){
             // center on the gold
 //            centerOnGold();
-            moveForwardByDistance(97,0.5);
-            safeSleep(100);
-            moveForwardByDistance(90, -0.5);
+            moveForwardByDistance(100,0.8);
+//            safeSleep(100);
+            moveForwardByDistance(95, -1);
             DriveTrain.turn(baseMotorArray,-60,wheelWidthBetweenWheels,wheelWidthBetweenWheels);
 
 
         }else {
-            DriveTrain.turn(baseMotorArray, 20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-            safeSleep(1000);
-            BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold,0,craterHeight);
+            DriveTrain.turn(baseMotorArray, 30, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+//            safeSleep(1000);
+            BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold,craterHeight,FtcRobotControllerActivity.frameSize.width/8);
             telemetry.addData("gold pos 2", goldAtPos2.getY());
             // if gold is to the right
             if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0){
-                moveForwardByDistance(100, 0.5);
-                moveForwardByDistance (90, -0.5);
+                moveForwardByDistance(110, 0.8);
+                moveForwardByDistance (100, -1);
                 DriveTrain.turn(baseMotorArray,-80,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
 //                centerOnGold();
@@ -118,27 +118,29 @@ public class CraterAutonomous extends LinearOpMode {
 //                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
 //                safeSleep(600);
 //                DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
-                DriveTrain.turn(baseMotorArray, -50, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                DriveTrain.turn(baseMotorArray, -57, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //                safeSleep(500);
 //                centerOnGold();
-                moveForwardByDistance(110, 0.5);
-                moveForwardByDistance(90, -0.5);
+                moveForwardByDistance(110, 0.8);
+//                moveForwardByDistance(30, 0.5);
+                moveForwardByDistance(100, -1);
                 setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+                DriveTrain.turn(baseMotorArray,-35,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 
 //                moveByEncoder();
             }
         }
-        moveForwardByDistance(150,0.5);
-        moveByEncoder(6030,-1,0);
-        moveByEncoder(1200,-0.5,0);
+        moveForwardByDistance(190,1);
+        moveByEncoder(6530,-1,0);
+//        moveByEncoder(1000,-1,0);
         moveByEncoder(500,1,-1);
         markerDropper.setPosition(0);
-        safeSleep(1000);
-        DriveTrain.turn(baseMotorArray,90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-        moveByEncoder(700,-1,0);
-        moveForwardByDistance(170,1);
-        moveForwardByDistance(200,0.5);
+        safeSleep(700);
+        DriveTrain.turn(baseMotorArray,-90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+        moveForwardByDistance(20,-1);
+        moveByEncoder(1000,1,0);
+        moveForwardByDistanceWithoutRunToPosition(190,-1);
+        moveForwardByDistanceWithoutRunToPosition(180,-0.5);
 //        safeSleep(50000);
 
 
@@ -237,7 +239,8 @@ public class CraterAutonomous extends LinearOpMode {
         }
     }
 
-    private BlobDetectorCandidate lookForMineral(MineralType mineralType, double minumumHorizDistance, int maxY){
+    private BlobDetectorCandidate lookForMineral(MineralType mineralType, double maxY, double XBorderWidth){
+//        safeSleep(500);
         FtcRobotControllerActivity.shouldProcessImage = true;
         while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
             safeSleep(5);
@@ -250,8 +253,8 @@ public class CraterAutonomous extends LinearOpMode {
         }
 
 
-        moveByEncoder(350, 0.4,0);
-        safeSleep(1000);
+//        moveByEncoder(200, 0.4,0);
+        telemetry.addData("Encoder Distance: ",((DcMotor) baseMotorArray.get(0)).getCurrentPosition());
         FtcRobotControllerActivity.shouldProcessImage = true;
         while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
             safeSleep(5);
@@ -268,14 +271,15 @@ public class CraterAutonomous extends LinearOpMode {
         for (Pair<BlobDetectorCandidate, BlobDetectorCandidate> pair: pairs){
             double sizeOfFirst = pair.first.getWidth()*pair.first.getHeight();// size of bounding rect
             double sizeOfSecond = pair.second.getWidth()*pair.second.getHeight();
-            if (sizeOfFirst > 600 && sizeOfSecond > 600 && sizeOfFirst < 5000 && sizeOfSecond < 5000 &&
-                    isAboutEqual(sizeOfFirst,sizeOfSecond, 3000) &&
-                    isAboutEqual(pair.first.getY(), pair.second.getY(), 10) && pair.first.getX() - MIN_HORIZONTAL_CHANGE > pair.second.getX() && pair.first.getY() < maxY) {
+            if (sizeOfFirst > 100 && sizeOfSecond > 100 && sizeOfFirst < 2000 && sizeOfSecond < 2000 &&
+                    isAboutEqual(sizeOfFirst,sizeOfSecond, 1000) &&
+                    isAboutEqual(pair.first.getY(), pair.second.getY(), 10) &&
+                    pair.first.getY() <= maxY && pair.second.getX() > XBorderWidth && pair.second.getX() < FtcRobotControllerActivity.frameSize.width - XBorderWidth) {
                 acceptablePairs.add(pair);
             }
         }
         telemetry.addData("length of acceptible size array", acceptablePairs.size());
-        moveByEncoder(350, -0.4,0);
+//        moveByEncoder(200, -0.4,0);
         try {
             Pair<BlobDetectorCandidate, BlobDetectorCandidate> farthestPairInXDirection = acceptablePairs.get(0);
             for (Pair<BlobDetectorCandidate, BlobDetectorCandidate> pair: acceptablePairs){
@@ -382,5 +386,23 @@ public class CraterAutonomous extends LinearOpMode {
             sleep(sleepTime);
         }
     }
-            
+    private void moveForwardByDistanceWithoutRunToPosition(double distance, double power) {
+//            distance is in cm and always positive
+        final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
+        final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
+        final double     WHEEL_DIAMETER_MM = 100.0 ;     // For figuring circumference
+        final double     COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+                (WHEEL_DIAMETER_MM * 3.1415);
+        for (Object baseMotorObject: baseMotorArray){
+            DcMotor baseMotor = (DcMotor) baseMotorObject;
+            baseMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            baseMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            baseMotor.setPower(power);
+
+        }
+        while (COUNTS_PER_MM*10*distance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition())&&opModeIsActive()){
+
+        }
+        DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+    }
 }

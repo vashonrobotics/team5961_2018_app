@@ -34,7 +34,7 @@ public class TeleOpMode extends OpMode{
     private Servo markerDropper;
     private Boolean setMode = false;
     private int previousBaseMotorPos = -1;
-//    private CRServo stickyArm;
+    private CRServo stickyArm;
 //    boolean pressedA = false;
 
     @Override
@@ -53,7 +53,7 @@ public class TeleOpMode extends OpMode{
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        stickyArm = hardwareMap.crservo.get("stickyArm");
+        stickyArm = hardwareMap.crservo.get("stickyArm");
 
 //
 //        markerDropper = hardwareMap.servo.get("dropper");
@@ -72,7 +72,7 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
-//        telemetry.addData("arm power",stickyArm.getPower());
+        telemetry.addData("arm power",stickyArm.getPower());
         if (gamepad1.right_stick_x == 0 && gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0) {
 //            ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
             if (previousBaseMotorPos != -1) {
@@ -101,7 +101,7 @@ public class TeleOpMode extends OpMode{
 
         lift.setPower(gamepad2.right_stick_x);
 
-//        stickyArm.setPower(gamepad2.left_stick_x/2-.4);
+        stickyArm.setPower(clip(gamepad2.left_stick_x/2-.6,-1,1));
 
 
         if (gamepad1.right_trigger >= 0.5) {
