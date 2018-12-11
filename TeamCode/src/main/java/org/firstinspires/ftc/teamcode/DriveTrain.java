@@ -102,5 +102,6 @@ public class DriveTrain {
             DcMotor motor = ((DcMotor) baseMotorArray.get(i));
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        DriveTrain.mecanum(baseMotorArray,0,0,0,true);
     }
 }

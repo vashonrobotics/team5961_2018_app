@@ -49,7 +49,7 @@ public class DepotAutonomous extends LinearOpMode {
     @Override
     public void runOpMode() {
         initalizeRobot();
-        DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+//        DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
         waitForStart();
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -76,13 +76,13 @@ public class DepotAutonomous extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray,0,-0.4,0,true);
         safeSleep(300);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
-        DriveTrain.turn(baseMotorArray,-5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+        DriveTrain.turn(baseMotorArray,-8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
         BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold,FtcRobotControllerActivity.frameSize.height/3,FtcRobotControllerActivity.frameSize.width/6);
         // if gold is straight ahead
         if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0){
             // center on the gold
 //            centerOnGold();
-            moveForwardByDistance(180,1);
+            moveForwardByDistance(195,1);
             moveByEncoder(1000,1,0);
             DriveTrain.turn(baseMotorArray,-45,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             moveByEncoder(1000,1,0);
@@ -111,11 +111,11 @@ public class DepotAutonomous extends LinearOpMode {
 //                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
 //                safeSleep(600);
 //                DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
-                DriveTrain.turn(baseMotorArray, -56, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                DriveTrain.turn(baseMotorArray, -60, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //                safeSleep(500);
 //                centerOnGold();
                 moveForwardByDistance(156.5, 1);
-                DriveTrain.turn(baseMotorArray,-15, wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+                DriveTrain.turn(baseMotorArray,-20, wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //                moveForwardByDistance(5,1);
 //                DriveTrain.mecanum(baseMotorArray,-0.5,0,0,true);
 //                safeSleep(1000);
@@ -144,7 +144,7 @@ public class DepotAutonomous extends LinearOpMode {
         moveByEncoder(1000,0,-1);
         DriveTrain.turn(baseMotorArray,-181,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 
-        moveByEncoder(1000,0.9,0);
+        moveByEncoder(1500,0.9,0);
         moveForwardByDistanceWithoutRunToPosition(190,1);
         moveForwardByDistanceWithoutRunToPosition(180,0.5);
 
@@ -246,6 +246,7 @@ public class DepotAutonomous extends LinearOpMode {
 //        while (COUNTS_PER_MM*10*distance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition())){
 //
 //        }
+        DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
         setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
         DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
     }
@@ -419,8 +420,10 @@ public class DepotAutonomous extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
     }
     private void safeSleep(int sleepTime){
-        if (opModeIsActive()) {
-            sleep(sleepTime);
+        try {
+            Thread.sleep(sleepTime);
+        }catch (InterruptedException e){
+            System.out.println(e);
         }
     }
 }
