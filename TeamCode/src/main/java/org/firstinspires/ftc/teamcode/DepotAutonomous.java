@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 import static com.qualcomm.robotcore.util.Range.clip;
 
-@Autonomous(group = "5961", name = "Depot Autonomous")
+@Autonomous(group = "5961", name = "Full Depot Autonomous")
 public class DepotAutonomous extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
@@ -76,8 +76,8 @@ public class DepotAutonomous extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray,0,-0.4,0,true);
         safeSleep(300);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
-        DriveTrain.turn(baseMotorArray,-8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-        BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold,FtcRobotControllerActivity.frameSize.height/3,FtcRobotControllerActivity.frameSize.width/6);
+//        DriveTrain.turn(baseMotorArray,8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+        BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold,FtcRobotControllerActivity.frameSize.height/3,FtcRobotControllerActivity.frameSize.width/5,FtcRobotControllerActivity.frameSize.width/5);
         // if gold is straight ahead
         if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0){
             // center on the gold
@@ -90,7 +90,7 @@ public class DepotAutonomous extends LinearOpMode {
         }else {
             DriveTrain.turn(baseMotorArray, 30, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold,FtcRobotControllerActivity.frameSize.height/3,FtcRobotControllerActivity.frameSize.width/6);
+            BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold,FtcRobotControllerActivity.frameSize.height/2.5,0, 0);
             // if gold is to the right
             if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0){
                 moveForwardByDistance(156.5, 1);
@@ -144,7 +144,7 @@ public class DepotAutonomous extends LinearOpMode {
         moveByEncoder(1000,0,-1);
         DriveTrain.turn(baseMotorArray,-181,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 
-        moveByEncoder(1500,0.9,0);
+        moveByEncoder(500,0.9,0);
         moveForwardByDistanceWithoutRunToPosition(190,1);
         moveForwardByDistanceWithoutRunToPosition(180,0.5);
 
@@ -200,7 +200,7 @@ public class DepotAutonomous extends LinearOpMode {
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
 //        setMotorRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             safeSleep(300);
-            BlobDetectorCandidate goldPos = lookForMineral(MineralType.Gold,1000,0);
+            BlobDetectorCandidate goldPos = lookForMineral(MineralType.Gold,1000,0,1);
 
             double xPower;
             if (FtcRobotControllerActivity.frameSize != null) {
@@ -277,10 +277,10 @@ public class DepotAutonomous extends LinearOpMode {
         }
     }
 
-    private BlobDetectorCandidate lookForMineral(MineralType mineralType, double maxY, double XBorderWidth){
+    private BlobDetectorCandidate lookForMineral(MineralType mineralType, double maxY, double XBorderWidthLeft, double XBorderWidthRight){
 //        safeSleep(500);
         FtcRobotControllerActivity.shouldProcessImage = true;
-        while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
+        while (FtcRobotControllerActivity.shouldProcessImage && opModeIsActive()) { // should process image is turned to false after the image is processed
             safeSleep(5);
         }
         ArrayList<BlobDetectorCandidate> frameOneCandidates;
@@ -292,9 +292,9 @@ public class DepotAutonomous extends LinearOpMode {
 
 
 //        moveByEncoder(200, 0.4,0);
-        telemetry.addData("Encoder Distance: ",((DcMotor) baseMotorArray.get(0)).getCurrentPosition());
+//        telemetry.addData("Encoder Distance: ",((DcMotor) baseMotorArray.get(0)).getCurrentPosition());
         FtcRobotControllerActivity.shouldProcessImage = true;
-        while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
+        while (FtcRobotControllerActivity.shouldProcessImage && opModeIsActive()) { // should process image is turned to false after the image is processed
             safeSleep(5);
         }
         ArrayList<BlobDetectorCandidate> frameTwoCandidates;
@@ -309,10 +309,10 @@ public class DepotAutonomous extends LinearOpMode {
         for (Pair<BlobDetectorCandidate, BlobDetectorCandidate> pair: pairs){
             double sizeOfFirst = pair.first.getWidth()*pair.first.getHeight();// size of bounding rect
             double sizeOfSecond = pair.second.getWidth()*pair.second.getHeight();
-            if (sizeOfFirst > 600 && sizeOfSecond > 600 && sizeOfFirst < 2000 && sizeOfSecond < 2000 &&
+            if (sizeOfFirst > 300 && sizeOfSecond > 300 && sizeOfFirst < 5000 && sizeOfSecond < 5000 &&
                     isAboutEqual(sizeOfFirst,sizeOfSecond, 1000) &&
                     isAboutEqual(pair.first.getY(), pair.second.getY(), 10) &&
-                    pair.first.getY() <= maxY && pair.second.getX() > XBorderWidth && pair.second.getX() < FtcRobotControllerActivity.frameSize.width - XBorderWidth) {
+                    pair.first.getY() <= maxY && pair.second.getX() > XBorderWidthLeft && pair.second.getX() < FtcRobotControllerActivity.frameSize.width - XBorderWidthRight) {
                 acceptablePairs.add(pair);
             }
         }
