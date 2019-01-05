@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Pair;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
@@ -20,6 +23,7 @@ public class DepotAutonomous extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
     private Servo markerDropper;
+    private BNO055IMU imu;
 //    VuforiaLocalizer vuforia;
 //    private final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final float mmPerInch        = 25.4f;
@@ -35,6 +39,7 @@ public class DepotAutonomous extends LinearOpMode {
 //    VuforiaTrackables targetsRoverRuckus;
     BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
     BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
+    IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
     double wheelWidthBetweenWheels = 215;
@@ -86,6 +91,7 @@ public class DepotAutonomous extends LinearOpMode {
             moveByEncoder(1000,1,0);
             DriveTrain.turn(baseMotorArray,-45,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             moveByEncoder(1000,1,0);
+
 
         }else {
             DriveTrain.turn(baseMotorArray, 30, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
@@ -145,6 +151,7 @@ public class DepotAutonomous extends LinearOpMode {
         DriveTrain.turn(baseMotorArray,-181,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 
         moveByEncoder(500,0.9,0);
+        turnToAngle(180);
         moveForwardByDistanceWithoutRunToPosition(190,1);
         moveForwardByDistanceWithoutRunToPosition(180,0.5);
 
@@ -376,6 +383,10 @@ public class DepotAutonomous extends LinearOpMode {
         lift = hardwareMap.dcMotor.get("lift");
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         markerDropper = hardwareMap.servo.get("dropper");
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imu.initialize(parameters);
 //        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
@@ -406,11 +417,12 @@ public class DepotAutonomous extends LinearOpMode {
 //            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
         DriveTrain.mecanum(baseMotorArray,0,1,0,true);
+        imuWallImpactDetector.setImpact(false);
         safeSleep(300);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;
-        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200) {
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200 && !imuWallImpactDetector.isImpact()) {
             numTimes_looped++;
             safeSleep(30);
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
@@ -425,5 +437,11 @@ public class DepotAutonomous extends LinearOpMode {
         }catch (InterruptedException e){
             System.out.println(e);
         }
+    }
+    void turnToAngle(double desiredAngle){
+        // angle in degrees. clock-wise is positive
+        // angle where the lander position is 45 degrees counterclockwise
+        double angleToTurn = imu.getAngularOrientation().thirdAngle+desiredAngle+45;
+        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
     }
 }

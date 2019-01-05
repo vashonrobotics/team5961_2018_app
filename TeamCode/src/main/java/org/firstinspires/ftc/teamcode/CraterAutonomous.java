@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Pair;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,6 +19,7 @@ import static com.qualcomm.robotcore.util.Range.clip;
 
 @Autonomous(group = "5961", name = "Full Crater Autonomous")
 public class CraterAutonomous extends LinearOpMode {
+    private BNO055IMU imu;
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
     private Servo markerDropper;
@@ -33,8 +36,9 @@ public class CraterAutonomous extends LinearOpMode {
 //    VuforiaTrackable backSpace;
 //    List<VuforiaTrackable> allTrackables;
 //    VuforiaTrackables targetsRoverRuckus;
-    BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
-    BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
+    private BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
+    private BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
+    private IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry,new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
     double wheelWidthBetweenWheels = 215;
@@ -137,8 +141,10 @@ public class CraterAutonomous extends LinearOpMode {
 //                moveByEncoder();
             }
         }
-        moveByEncoder(100,-1,0);
+//        moveByEncoder(100,-1,0);
+        turnToAngle(0);
         moveForwardByDistance(220,1);
+        turnToAngle(0);
         moveByEncoder(5530,-1,0);
 //        moveByEncoder(1000,-1,0);
         moveByEncoder(500,1,0);
@@ -350,6 +356,10 @@ public class CraterAutonomous extends LinearOpMode {
         lift = hardwareMap.dcMotor.get("lift");
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         markerDropper = hardwareMap.servo.get("dropper");
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imu.initialize(parameters);
 //        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
@@ -380,11 +390,12 @@ public class CraterAutonomous extends LinearOpMode {
 //            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
         DriveTrain.mecanum(baseMotorArray,0,1,0,true);
+        imuWallImpactDetector.setImpact(false);
         sleep(300);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;
-        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive()) {
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && !imuWallImpactDetector.isImpact()) {
             numTimes_looped++;
             sleep(30);
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
@@ -419,5 +430,13 @@ public class CraterAutonomous extends LinearOpMode {
 
         }
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+    }
+
+    void turnToAngle(double desiredAngle){
+        // angle in degrees. clock-wise is positive
+        // angle where the lander position is 45 degrees clockwise
+        double angleToTurn = imu.getAngularOrientation().thirdAngle+desiredAngle-45;
+        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+
     }
 }
