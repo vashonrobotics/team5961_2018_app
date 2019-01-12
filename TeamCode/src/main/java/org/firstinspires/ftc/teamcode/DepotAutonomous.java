@@ -203,20 +203,33 @@ public class DepotAutonomous extends LinearOpMode {
     private void centerOnGold() {
         // 6.5in for 5.5cm diameter wheels
         //101 pixels per 6 in at 2ft 10 in away
+        double previousXOffset = 1000;
+        double sleepReduceFactor = 1;
         for (int i = 0; i < 5;i++) {
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
 //        setMotorRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             safeSleep(300);
-            BlobDetectorCandidate goldPos = lookForMineral(MineralType.Gold,1000,0,1);
-
-            double xPower;
-            if (FtcRobotControllerActivity.frameSize != null) {
-                xPower = (goldPos.getX() - FtcRobotControllerActivity.frameSize.width / 2) / 50;
-            }else{
-                xPower = (goldPos.getX() - 240 / 2) / 50;
+            BlobDetectorCandidate goldPos = lookForMineral(MineralType.Gold,
+                    FtcRobotControllerActivity.frameSize.height/3,0,1);
+            if (goldPos.getX() < 0 && goldPos.getY() < 0){
+                break;
             }
-            DriveTrain.mecanum(baseMotorArray, -xPower, 0, 0, true);
-            safeSleep((int) Math.abs(xPower * 60));
+            double xPower;
+//            if (FtcRobotControllerActivity.frameSize != null) {
+            xPower = (goldPos.getX() - FtcRobotControllerActivity.frameSize.width / 2) / 45;
+            telemetry.addData("xpower", xPower);
+            telemetry.update();
+
+//            }else{
+//                xPower = (goldPos.getX() - 240 / 2) / 50;
+//            }
+            DriveTrain.mecanum(baseMotorArray, xPower, 0, 0, true);
+            if (Math.abs(goldPos.getX() - FtcRobotControllerActivity.frameSize.width / 2) > Math.abs(previousXOffset)){
+                sleepReduceFactor = sleepReduceFactor * 2 / 3;
+            }
+            previousXOffset = goldPos.getX() - FtcRobotControllerActivity.frameSize.width / 2;
+            safeSleep((int)(Math.abs(xPower * 60)*sleepReduceFactor));
+
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
         }
     }
@@ -287,7 +300,7 @@ public class DepotAutonomous extends LinearOpMode {
     private BlobDetectorCandidate lookForMineral(MineralType mineralType, double maxY, double XBorderWidthLeft, double XBorderWidthRight){
 //        safeSleep(500);
         FtcRobotControllerActivity.shouldProcessImage = true;
-        while (FtcRobotControllerActivity.shouldProcessImage && opModeIsActive()) { // should process image is turned to false after the image is processed
+        while (FtcRobotControllerActivity.shouldProcessImage&& opModeIsActive()) { // should process image is turned to false after the image is processed
             safeSleep(5);
         }
         ArrayList<BlobDetectorCandidate> frameOneCandidates;
@@ -298,45 +311,34 @@ public class DepotAutonomous extends LinearOpMode {
         }
 
 
-//        moveByEncoder(200, 0.4,0);
-//        telemetry.addData("Encoder Distance: ",((DcMotor) baseMotorArray.get(0)).getCurrentPosition());
-        FtcRobotControllerActivity.shouldProcessImage = true;
-        while (FtcRobotControllerActivity.shouldProcessImage && opModeIsActive()) { // should process image is turned to false after the image is processed
-            safeSleep(5);
-        }
-        ArrayList<BlobDetectorCandidate> frameTwoCandidates;
-        if (mineralType == MineralType.Gold) {
-            frameTwoCandidates = goldDetector.getCandidatesData(false);
-        }else {
-            frameTwoCandidates = silverDetector.getCandidatesData(false);
-        }
-        ArrayList<Pair<BlobDetectorCandidate,BlobDetectorCandidate>> pairs = findPairs(frameOneCandidates, frameTwoCandidates);
-        ArrayList<Pair<BlobDetectorCandidate, BlobDetectorCandidate>> acceptablePairs = new ArrayList<>();
+
+        ArrayList<BlobDetectorCandidate> blobs = frameOneCandidates;
+        ArrayList<BlobDetectorCandidate> acceptableBlobs = new ArrayList<>();
         double MIN_HORIZONTAL_CHANGE = 0;
-        for (Pair<BlobDetectorCandidate, BlobDetectorCandidate> pair: pairs){
-            double sizeOfFirst = pair.first.getWidth()*pair.first.getHeight();// size of bounding rect
-            double sizeOfSecond = pair.second.getWidth()*pair.second.getHeight();
-            if (sizeOfFirst > 300 && sizeOfSecond > 300 && sizeOfFirst < 5000 && sizeOfSecond < 5000 &&
+        for (BlobDetectorCandidate blob: blobs){
+            double sizeOfFirst = blob.getWidth()*blob.getHeight();// size of bounding rect
+            double sizeOfSecond = blob.getWidth()*blob.getHeight();
+            if (sizeOfFirst > 500 && sizeOfSecond > 500 && sizeOfFirst < 5000 && sizeOfSecond < 5000 &&
                     isAboutEqual(sizeOfFirst,sizeOfSecond, 1000) &&
-                    isAboutEqual(pair.first.getY(), pair.second.getY(), 10) &&
-                    pair.first.getY() <= maxY && pair.second.getX() > XBorderWidthLeft && pair.second.getX() < FtcRobotControllerActivity.frameSize.width - XBorderWidthRight) {
-                acceptablePairs.add(pair);
+                    isAboutEqual(blob.getY(), blob.getY(), 10) &&
+                    blob.getY() <= maxY && blob.getX() > XBorderWidthLeft && blob.getX() < FtcRobotControllerActivity.frameSize.width - XBorderWidthRight) {
+                acceptableBlobs.add(blob);
             }
         }
-        telemetry.addData("length of acceptible size array", acceptablePairs.size());
+        telemetry.addData("length of acceptible size array", acceptableBlobs.size());
 //        moveByEncoder(200, -0.4,0);
         try {
-            Pair<BlobDetectorCandidate, BlobDetectorCandidate> farthestPairInXDirection = acceptablePairs.get(0);
-            for (Pair<BlobDetectorCandidate, BlobDetectorCandidate> pair: acceptablePairs){
-                if (Math.abs(pair.first.getX()-pair.second.getX()) >
-                        Math.abs(farthestPairInXDirection.first.getX()-farthestPairInXDirection.second.getX())){
-                    farthestPairInXDirection = pair;
+            BlobDetectorCandidate farthestBlobInXDirection = acceptableBlobs.get(0);
+            for (BlobDetectorCandidate blob: acceptableBlobs){
+                if (Math.abs(blob.getX()-blob.getX()) >
+                        Math.abs(farthestBlobInXDirection.getX()-farthestBlobInXDirection.getX())){
+                    farthestBlobInXDirection = blob;
                 }
             }
-            telemetry.addData("gold At y1: " + farthestPairInXDirection.first.getY() +" y2:" +farthestPairInXDirection.second.getY() + " size1: ", farthestPairInXDirection.first.getWidth()*farthestPairInXDirection.first.getHeight());
-            telemetry.addLine("x1: " + farthestPairInXDirection.first.getX() + " x2: " + farthestPairInXDirection.second.getX());
+            telemetry.addData("gold At y1: " + farthestBlobInXDirection.getY() +" y2:" +farthestBlobInXDirection.getY() + " size1: ", farthestBlobInXDirection.getWidth()*farthestBlobInXDirection.getHeight());
+            telemetry.addLine("x1: " + farthestBlobInXDirection.getX() + " x2: " + farthestBlobInXDirection.getX());
             telemetry.update();
-            return farthestPairInXDirection.first;
+            return farthestBlobInXDirection;
         }catch (IndexOutOfBoundsException e){
             telemetry.addLine("no gold");
             telemetry.update();
@@ -417,8 +419,8 @@ public class DepotAutonomous extends LinearOpMode {
 //            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
         DriveTrain.mecanum(baseMotorArray,0,1,0,true);
-        imuWallImpactDetector.setImpact(false);
         safeSleep(300);
+        imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;

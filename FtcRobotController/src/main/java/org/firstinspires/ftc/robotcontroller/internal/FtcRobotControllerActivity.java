@@ -242,7 +242,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   }
   @Override
   public void onCameraViewStarted(int width, int height) {
-    frameSize = new Size(width, height); // because rotated
+    frameSize = new Size(height, width); // because rotated
   }
 
   @Override
@@ -256,8 +256,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     Mat hsvInputFrame = new Mat();
     // adding this purple helps in incandescant light
     // it negatively affects accuracy in other types of light
-//    Mat purple = new Mat(new Size(inputFrame.cols(), inputFrame.rows()), inputFrame.type(), new Scalar(25,0,25));
-//    Core.add(inputFrame, purple, inputFrame);
+    Mat purple = new Mat(new Size(inputFrame.cols(), inputFrame.rows()), inputFrame.type(), new Scalar(15,0,15));
+    Core.add(inputFrame, purple, inputFrame);
     Imgproc.cvtColor(inputFrame, hsvInputFrame, Imgproc.COLOR_RGB2HSV);
 //    hsvInputFrame
 //    Imgproc.cvtColor(inputFrame, inputFrame, Imgproc.COLOR_RGB2GRAY);
@@ -323,8 +323,8 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
       shouldProcessImage = false;
       return processedImage;
     }else{
-//      return recognizeWithContours(inputFrame.rgba());
-      return inputFrame.rgba();
+      return recognizeWithContours(inputFrame.rgba());
+//      return inputFrame.rgba();
     }
   }
 
