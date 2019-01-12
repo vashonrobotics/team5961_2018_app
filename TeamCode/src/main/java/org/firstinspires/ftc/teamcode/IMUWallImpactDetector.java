@@ -15,6 +15,7 @@ public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
     private final BNO055IMU.AccelerationIntegrator realIntegrator;
     private final Telemetry telemetry;
     private boolean impact = false;
+    private double maxAcceleration = 0;
 
     private final Object[] lock = new Object[0];
 
@@ -46,21 +47,20 @@ public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
 
     @Override
     public void update(Acceleration linearAcceleration) {
-        final double Magnitude = Math.sqrt(Math.pow(linearAcceleration.xAccel, 2) +
+        final double magnitude = Math.sqrt(Math.pow(linearAcceleration.xAccel, 2) +
                 Math.pow(linearAcceleration.yAccel, 2) +
                 Math.pow(linearAcceleration.zAccel, 2));
 
-        if (Magnitude > THRESHOLD) {
-            telemetry.addData("Impact Detected,",
-                    "Acceleration Magnitude: %f", Magnitude);
+        maxAcceleration = Math.max(maxAcceleration, magnitude);
+        if (magnitude > THRESHOLD) {
+            telemetry.addData("Impact Detected,", "Acceleration Magnitude: %f", magnitude);
             telemetry.update();
             setImpact(true);
 
-        } else {
-            telemetry.addData("No Impact,",
-                    "Acceleration Magnitude: %f", Magnitude);
+        }else{
+            telemetry.addData("Max Acceleration", "Max. Acceleration %f", maxAcceleration);
+            telemetry.update();
         }
-        telemetry.update();
         realIntegrator.update(linearAcceleration);
     }
 
