@@ -78,7 +78,8 @@ public class DriveTrain {
         try {
             sleep(300);
         }catch (InterruptedException e){
-            System.out.println(e);
+            throw new RuntimeException(e);
+//            System.out.println(e);
         }
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
@@ -95,7 +96,8 @@ public class DriveTrain {
         }try {
             sleep(100);
         }catch (InterruptedException e){
-            System.out.println(e);
+            throw new RuntimeException(e);
+//            System.out.println(e);
         }
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         for (int i = 0; i < baseMotorArray.size(); i++) {

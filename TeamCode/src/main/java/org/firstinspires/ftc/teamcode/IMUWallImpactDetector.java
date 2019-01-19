@@ -11,11 +11,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
-    private static final double THRESHOLD = .2;
+    private static final double THRESHOLD = 3;
     private final BNO055IMU.AccelerationIntegrator realIntegrator;
     private final Telemetry telemetry;
     private boolean impact = false;
     private double maxAcceleration = 0;
+    private double timeReset;
 
     private final Object[] lock = new Object[0];
 
@@ -48,18 +49,18 @@ public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
     @Override
     public void update(Acceleration linearAcceleration) {
         final double magnitude = Math.sqrt(Math.pow(linearAcceleration.xAccel, 2) +
-                Math.pow(linearAcceleration.yAccel, 2) +
-                Math.pow(linearAcceleration.zAccel, 2));
+                Math.pow(linearAcceleration.yAccel, 2));
+
 
         maxAcceleration = Math.max(maxAcceleration, magnitude);
-        if (magnitude > THRESHOLD) {
+        if (magnitude > THRESHOLD && System.currentTimeMillis()-timeReset > 200) {
             telemetry.addData("Impact Detected,", "Acceleration Magnitude: %f", magnitude);
             telemetry.update();
             setImpact(true);
 
         }else{
-            telemetry.addData("Max Acceleration", "Max. Acceleration %f", maxAcceleration);
-            telemetry.update();
+//            telemetry.addData("Max Acceleration", "Max. Acceleration %f", maxAcceleration);
+//            telemetry.update();
         }
         realIntegrator.update(linearAcceleration);
     }
@@ -73,6 +74,9 @@ public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
     public void setImpact(boolean impact) {
         synchronized (lock) {
             this.impact = impact;
+            if (!impact) {
+                timeReset = System.currentTimeMillis();
+            }
         }
     }
 }
