@@ -46,8 +46,8 @@ public class CraterAutonomous extends LinearOpMode {
     private IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry,new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
-    double wheelWidthBetweenWheels = 215;
-    double wheelHeighBetweenWheels = 340;
+    double wheelWidthBetweenWheels = 279.4;//215;
+    double wheelHeighBetweenWheels = 257;//340;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -63,6 +63,8 @@ public class CraterAutonomous extends LinearOpMode {
             telemetry.addData("time to initialize", System.nanoTime()-start);
             telemetry.update();
             waitForStart();
+            moveByEncoder(100000,1,0,true);
+            sleep(50000);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        unlatch robot
@@ -381,7 +383,10 @@ public class CraterAutonomous extends LinearOpMode {
         parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
-        imu.startAccelerationIntegration(new Position(), new Velocity(),100);
+        imu.startAccelerationIntegration(new Position(), new Velocity(),1000);
+        for(int i = 0; i < 4; i++){
+            ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
 //        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }

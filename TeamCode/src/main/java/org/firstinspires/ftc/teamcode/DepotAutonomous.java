@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 
@@ -42,8 +44,8 @@ public class DepotAutonomous extends LinearOpMode {
     IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
-    double wheelWidthBetweenWheels = 215;
-    double wheelHeighBetweenWheels = 340;
+    double wheelWidthBetweenWheels = 279.4;//215;
+    double wheelHeighBetweenWheels = 257;//340;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -55,6 +57,8 @@ public class DepotAutonomous extends LinearOpMode {
     public void runOpMode() {
         try {
             initalizeRobot();
+            telemetry.addLine("intialized");
+            telemetry.update();
 //        DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
             waitForStart();
@@ -67,6 +71,7 @@ public class DepotAutonomous extends LinearOpMode {
             markerDropper.setPosition(0.75); // if 1 is up and 0 is down
             lift.setPower(0);
             safeSleep(3000);
+
             lift.setPower(1);
             safeSleep(200);
             lift.setPower(0);
@@ -82,6 +87,8 @@ public class DepotAutonomous extends LinearOpMode {
             DriveTrain.mecanum(baseMotorArray, 0, -0.4, 0, true);
             safeSleep(300);
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+
+            DriveTrain.turn(baseMotorArray,20,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             safeSleep(100);
 //        DriveTrain.turn(baseMotorArray,8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold, FtcRobotControllerActivity.frameSize.height / 2.8, FtcRobotControllerActivity.frameSize.width / 5, FtcRobotControllerActivity.frameSize.width / 5);
@@ -395,6 +402,10 @@ public class DepotAutonomous extends LinearOpMode {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
+        imu.startAccelerationIntegration(new Position(),new Velocity(),1000);
+        for(int i = 0; i < 4; i++){
+            ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
 //        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
@@ -449,7 +460,7 @@ public class DepotAutonomous extends LinearOpMode {
     void turnToAngle(double desiredAngle){
         // angle in degrees. clock-wise is positive
         // angle where the lander position is 45 degrees counterclockwise
-        double angleToTurn = imu.getAngularOrientation().thirdAngle+desiredAngle+45;
+        double angleToTurn = -imu.getAngularOrientation().thirdAngle+desiredAngle+45;
         DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
     }
 }

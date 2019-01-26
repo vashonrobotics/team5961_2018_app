@@ -26,15 +26,16 @@ import static com.qualcomm.robotcore.util.Range.clip;
 @TeleOp(name = "Vashon 5961 teleop", group = "Vashon 5961")
 public class TeleOpMode extends OpMode{
 
-    double wheelWidthBetweenWheels = 215;
-    double wheelHeighBetweenWheels = 340;
+    double wheelWidthBetweenWheels = 279.4;//215;
+    double wheelHeighBetweenWheels = 257;//340;
     private DcMotor lift;
     private double motorSpeedMultiplier = 1.0;
     private ArrayList baseMotorArray = new ArrayList();
     private int liftTargetPos = 0;
     private DcMotor collectorExtender;
     private DcMotor collectorRotator;
-    private Servo collectorGrabber;
+    private CRServo collector;
+
     private Servo collectorGrabberRotator;
     private Servo markerDropper;
     private Boolean setMode = false;
@@ -59,6 +60,7 @@ public class TeleOpMode extends OpMode{
 
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        stickyArm = hardwareMap.crservo.get("stickyArm");
 
@@ -66,19 +68,20 @@ public class TeleOpMode extends OpMode{
 //        markerDropper = hardwareMap.servo.get("dropper");
 
         // collector init
-//        collectorRotator = hardwareMap.dcMotor.get("rotate");
-//        collectorRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        collectorExtender = hardwareMap.dcMotor.get("extend");
-//        collectorExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        collectorGrabber = hardwareMap.servo.get("grab");
+        collectorRotator = hardwareMap.dcMotor.get("rotate");
+        collectorRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        collectorExtender = hardwareMap.dcMotor.get("extend");
+        collectorExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        collector = hardwareMap.crservo.get("collector");
 //        collectorGrabberRotator = hardwareMap.servo.get("assistant");
         imu = hardwareMap.get(BNO055IMU.class,"imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
-//        for(int i = 0; i < 4; i++){
-//            ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        }
+        for(int i = 0; i < 4; i++){
+            ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+
     }
 
     @Override
@@ -90,7 +93,8 @@ public class TeleOpMode extends OpMode{
         telemetry.addData("rotation 2: ", imu.getAngularOrientation().secondAngle);
         telemetry.addData("rotation 3: ", imu.getAngularOrientation().thirdAngle);
         telemetry.addData("mag field x"+imu.getMagneticFieldStrength().x+",y "+imu.getMagneticFieldStrength().y+", z", imu.getMagneticFieldStrength().z);
-////        telemetry.addData("arm power",stickyArm.getPower());
+        telemetry.addData("collector power:",collector.getPower());
+// telemetry.addData("arm power",stickyArm.getPower());
 //        if (gamepad1.right_stick_x == 0 && gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0) {
 ////            ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
 //            if (previousBaseMotorPos != -1) {
@@ -117,7 +121,7 @@ public class TeleOpMode extends OpMode{
 ////            lift.setPower(1);
 ////        }
 //
-//        lift.setPower(gamepad2.right_stick_x);
+        lift.setPower(gamepad2.right_stick_x);
 //
 ////        stickyArm.setPower(clip(gamepad2.left_stick_x/2-.6,-1,1));
 //
@@ -140,9 +144,14 @@ public class TeleOpMode extends OpMode{
 ////
 ////            //  up is negative
 //        // collector stuff
-//        collectorExtender.setPower(gamepad2.left_stick_x);
-//        collectorRotator.setPower(-gamepad2.left_stick_y*2/3);
-//
+
+        collectorExtender.setPower(-gamepad2.left_stick_y);
+        collectorRotator.setPower(clip(gamepad2.right_trigger-gamepad2.left_trigger,-1,1));
+        if (gamepad2.left_bumper){
+            collector.setPower(1);
+        }else if (gamepad2.right_bumper){
+            collector.setPower(-1);
+        }
 //        if (gamepad2.right_bumper) {
 //            collectorGrabber.setPosition(1);
 //        }
