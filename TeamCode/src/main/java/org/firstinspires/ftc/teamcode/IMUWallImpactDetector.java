@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
-    private static final double THRESHOLD = 3;
+    private static final double THRESHOLD = 4;
     private final BNO055IMU.AccelerationIntegrator realIntegrator;
     private final Telemetry telemetry;
     private boolean impact = false;
@@ -49,7 +49,7 @@ public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
     @Override
     public void update(Acceleration linearAcceleration) {
         final double magnitude = Math.sqrt(Math.pow(linearAcceleration.xAccel, 2) +
-                Math.pow(linearAcceleration.yAccel, 2));
+                Math.pow(linearAcceleration.yAccel, 2)+Math.pow(linearAcceleration.zAccel,2));
 
 
         maxAcceleration = Math.max(maxAcceleration, magnitude);
@@ -60,9 +60,10 @@ public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
 
         }else{
             telemetry.addData("active ",(System.currentTimeMillis()-timeReset > 300));
-            telemetry.update();
-//            telemetry.addData("Max Acceleration", "Max. Acceleration %f", maxAcceleration);
 //            telemetry.update();
+//            telemetry.addData("Max Acceleration", "Max Acceleration %f", maxAcceleration);
+            telemetry.addData("acceleration",magnitude);
+            telemetry.update();
         }
         realIntegrator.update(linearAcceleration);
     }

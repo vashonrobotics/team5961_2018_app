@@ -1,18 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.opencv.core.Range;
 
 import java.util.ArrayList;
 
@@ -32,11 +25,11 @@ public class TeleOpMode extends OpMode{
     private double motorSpeedMultiplier = 1.0;
     private ArrayList baseMotorArray = new ArrayList();
     private int liftTargetPos = 0;
-    private DcMotor collectorExtender;
-    private DcMotor collectorRotator;
+    private DcMotor collectorArmExtender;
+    private DcMotor collectorArmRotator;
     private CRServo collector;
 
-    private Servo collectorGrabberRotator;
+    private Servo collectorRotator;
     private Servo markerDropper;
     private Boolean setMode = false;
     private int previousBaseMotorPos = -1;
@@ -68,12 +61,12 @@ public class TeleOpMode extends OpMode{
 //        markerDropper = hardwareMap.servo.get("dropper");
 
         // collector init
-        collectorRotator = hardwareMap.dcMotor.get("rotate");
-        collectorRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        collectorExtender = hardwareMap.dcMotor.get("extend");
-        collectorExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        collectorArmRotator = hardwareMap.dcMotor.get("rotate");
+        collectorArmRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        collectorArmExtender = hardwareMap.dcMotor.get("extend");
+        collectorArmExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         collector = hardwareMap.crservo.get("collector");
-//        collectorGrabberRotator = hardwareMap.servo.get("assistant");
+        collectorRotator = hardwareMap.servo.get("assistant");
         imu = hardwareMap.get(BNO055IMU.class,"imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -81,18 +74,21 @@ public class TeleOpMode extends OpMode{
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-
+        collectorRotator.scaleRange(0.2,1);
     }
 
     @Override
     public void loop() {
-        telemetry.addData("accel calibrated", imu.isAccelerometerCalibrated());
-        telemetry.addData("gyro calibrated", imu.isGyroCalibrated());
-        telemetry.addData("accel" + imu.getAcceleration().xAccel + ", "+ imu.getAcceleration().yAccel, imu.getAcceleration().zAccel);
-        telemetry.addData("rotation 1: ", imu.getAngularOrientation().firstAngle);
-        telemetry.addData("rotation 2: ", imu.getAngularOrientation().secondAngle);
-        telemetry.addData("rotation 3: ", imu.getAngularOrientation().thirdAngle);
-        telemetry.addData("mag field x"+imu.getMagneticFieldStrength().x+",y "+imu.getMagneticFieldStrength().y+", z", imu.getMagneticFieldStrength().z);
+        for (int i = 0; i < 4; i++) {
+            telemetry.addData("encoder "+Integer.valueOf(i),((DcMotor) baseMotorArray.get(i)).getCurrentPosition());
+        }
+//        telemetry.addData("accel calibrated", imu.isAccelerometerCalibrated());
+//        telemetry.addData("gyro calibrated", imu.isGyroCalibrated());
+//        telemetry.addData("accel" + imu.getAcceleration().xAccel + ", "+ imu.getAcceleration().yAccel, imu.getAcceleration().zAccel);
+//        telemetry.addData("rotation 1: ", imu.getAngularOrientation().firstAngle);
+//        telemetry.addData("rotation 2: ", imu.getAngularOrientation().secondAngle);
+//        telemetry.addData("rotation 3: ", imu.getAngularOrientation().thirdAngle);
+//        telemetry.addData("mag field x"+imu.getMagneticFieldStrength().x+",y "+imu.getMagneticFieldStrength().y+", z", imu.getMagneticFieldStrength().z);
         telemetry.addData("collector power:",collector.getPower());
 // telemetry.addData("arm power",stickyArm.getPower());
 //        if (gamepad1.right_stick_x == 0 && gamepad1.left_stick_x == 0 && gamepad1.left_stick_y == 0) {
@@ -126,32 +122,51 @@ public class TeleOpMode extends OpMode{
 ////        stickyArm.setPower(clip(gamepad2.left_stick_x/2-.6,-1,1));
 //
 //
-        if (gamepad1.a){
+        if (gamepad1.y){
             fixBump(0);
         }
         if (gamepad1.b){
             DriveTrain.turn(baseMotorArray,90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
         }
+
         if (gamepad1.right_trigger >= 0.5) {
-            motorSpeedMultiplier = 0.4;
+            motorSpeedMultiplier = 1;
         }else {
-            motorSpeedMultiplier = 1.0;
+            motorSpeedMultiplier = 0.4;
         }
+        if (gamepad1.right_bumper) {
+            goStraight(((double) gamepad1.left_stick_x) * motorSpeedMultiplier, ((double) -gamepad1.left_stick_y) * motorSpeedMultiplier);
+        }else {
             DriveTrain.mecanum(baseMotorArray, ((double) gamepad1.left_stick_x) * motorSpeedMultiplier,
                     (-(double) gamepad1.left_stick_y) * motorSpeedMultiplier,
                     ((double) gamepad1.right_stick_x) * motorSpeedMultiplier, true);
-//
+        }
+        if (gamepad1.x){
+            DriveTrain.mecanum(baseMotorArray,0,1,0,true);
+        }
 ////
 ////            //  up is negative
 //        // collector stuff
 
-        collectorExtender.setPower(-gamepad2.left_stick_y);
-        collectorRotator.setPower(clip(gamepad2.right_trigger-gamepad2.left_trigger,-1,1));
+        collectorArmExtender.setPower(gamepad2.left_stick_x);
+////        collectorArmRotator.setPower(Math.sqrt(gamepad2.left_stick_y));
+        collectorArmRotator.setPower(Math.signum(gamepad2.left_stick_y)*Math.pow(gamepad2.left_stick_y,2));
+        collector.setPower(clip((gamepad2.right_trigger-gamepad2.left_trigger)*0.8,-0.8,0.8));
         if (gamepad2.left_bumper){
-            collector.setPower(1);
+            collectorRotator.setPosition(collectorRotator.getPosition()+0.01);
         }else if (gamepad2.right_bumper){
-            collector.setPower(-1);
+            collectorRotator.setPosition(collectorRotator.getPosition()-0.01);
         }
+        if(gamepad2.y) {
+            collectorRotator.setPosition(1);
+        }
+
+
+
+        if(gamepad2.x) {
+            collectorRotator.setPosition(0);
+        }
+//        collector.setPower(gamepad1.left_trigger*2-1);
 //        if (gamepad2.right_bumper) {
 //            collectorGrabber.setPosition(1);
 //        }
@@ -165,5 +180,14 @@ public class TeleOpMode extends OpMode{
         // angle in degrees. clock-wise is positive
         double angleToTurn = imu.getAngularOrientation().firstAngle + desiredAngle;
         DriveTrain.turn(baseMotorArray, angleToTurn, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+    }
+    private void goStraight(double x,double y){
+        double turn;
+        if (Math.abs(imu.getAngularOrientation().firstAngle) > 1) {
+            turn = Math.signum(imu.getAngularOrientation().firstAngle)*Math.log(Math.abs(imu.getAngularOrientation().firstAngle)) / 10;
+        }else {
+            turn = 0;
+        }
+        DriveTrain.mecanum(baseMotorArray,x,y,turn, true);
     }
 }

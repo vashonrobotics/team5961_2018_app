@@ -52,8 +52,8 @@ public class test extends LinearOpMode {
             sleep(1000);
             ((DcMotor)baseMotorArray.get(i)).setPower(0);
         }
-        DriveTrain.turn(baseMotorArray,90, 235, 240);
-        requestOpModeStop();
+        DriveTrain.turn(baseMotorArray,90, 279.4, 257);
+//        requestOpModeStop();
 
     }
 }

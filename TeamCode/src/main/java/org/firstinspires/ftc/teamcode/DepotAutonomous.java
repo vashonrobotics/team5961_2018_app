@@ -25,6 +25,7 @@ public class DepotAutonomous extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
     private Servo markerDropper;
+    private Servo liftLock;
     private BNO055IMU imu;
 //    VuforiaLocalizer vuforia;
 //    private final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
@@ -44,8 +45,8 @@ public class DepotAutonomous extends LinearOpMode {
     IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
-    double wheelWidthBetweenWheels = 279.4;//215;
-    double wheelHeighBetweenWheels = 257;//340;
+    double wheelWidthBetweenWheels = 241.3;//279.4;//215;
+    double wheelHeighBetweenWheels = 241.3;//257;//340;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -60,35 +61,34 @@ public class DepotAutonomous extends LinearOpMode {
             telemetry.addLine("intialized");
             telemetry.update();
 //        DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-
             waitForStart();
+            liftLock.setPosition(0);
+            sleep(300);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        unlatch robot
 //        lift.setTargetPosition((int)(COUNTS_PER_MOTOR_REV*20/60*5.7));
             lift.setPower(1);
             safeSleep(500);
-            markerDropper.setPosition(0.75); // if 1 is up and 0 is down
+            markerDropper.setPosition(1);
+//            markerDropper.setPosition(0.75); // if 1 is up and 0 is down
             lift.setPower(0);
             safeSleep(3000);
 
             lift.setPower(1);
             safeSleep(200);
             lift.setPower(0);
-            markerDropper.setPosition(1);
-            DriveTrain.mecanum(baseMotorArray, 0.4, 0, 0, true);
-            safeSleep(700);
+//            markerDropper.setPosition(1);
+            moveByEncoder(500,0.4,0,false);
+//
             lift.setPower(-1);
-            DriveTrain.mecanum(baseMotorArray, 0, 0.4, 0, true);
-            safeSleep(300);
-            DriveTrain.mecanum(baseMotorArray, -0.4, 0, 0, true);
-            safeSleep(700);
-            lift.setPower(0);
-            DriveTrain.mecanum(baseMotorArray, 0, -0.4, 0, true);
-            safeSleep(300);
-            DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+            moveByEncoder(500,0,0.4,false);
 
-            DriveTrain.turn(baseMotorArray,20,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            moveByEncoder(500,-.4,0,false);
+            lift.setPower(0);
+            moveByEncoder(500,0,-0.4,false);
+            DriveTrain.turn(baseMotorArray,15,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+//            DriveTrain.turn(baseMotorArray,37,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             safeSleep(100);
 //        DriveTrain.turn(baseMotorArray,8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold, FtcRobotControllerActivity.frameSize.height / 2.8, FtcRobotControllerActivity.frameSize.width / 5, FtcRobotControllerActivity.frameSize.width / 5);
@@ -97,9 +97,9 @@ public class DepotAutonomous extends LinearOpMode {
                 // center on the gold
                 centerOnGold(FtcRobotControllerActivity.frameSize.width / 2);
                 moveForwardByDistance(195, 1);
-                moveByEncoder(1000, 1, 0);
+                moveByEncoder(1000, 1, 0,false);
                 DriveTrain.turn(baseMotorArray, -47, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-                moveByEncoder(1000, 1, 0);
+                moveByEncoder(800, 1, 0,false);
 
 
             } else {
@@ -112,7 +112,7 @@ public class DepotAutonomous extends LinearOpMode {
                     moveForwardByDistance(156.5, 1);
                     setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     DriveTrain.turn(baseMotorArray, -70, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-                    moveByEncoder(500, 1, 0);
+                    moveByEncoder(500, 1, 0,false);
 //                centerOnGold();
 //                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
 //                safeSleep(2000);
@@ -136,7 +136,7 @@ public class DepotAutonomous extends LinearOpMode {
 //                DriveTrain.mecanum(baseMotorArray,-0.5,0,0,true);
 //                safeSleep(1000);
                     setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    moveByEncoder(3540, 1, 0.0);
+                    moveByEncoder(3540, 1, 0.0,false);
 //                moveByEncoder(500,0.7,0);
 //                DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
 //                safeSleep(1500);
@@ -151,16 +151,16 @@ public class DepotAutonomous extends LinearOpMode {
 //                }
                 }
             }
-            moveByEncoder(4000, 0, 1);
-            moveByEncoder(700, 0.5, 0);
-            moveByEncoder(500, -1, -1);
+            moveByEncoder(3000, 0, 1,false);
+            moveByEncoder(700, 0.5, 0,false);
+            moveByEncoder(500, -1, -1,false);
             DriveTrain.turn(baseMotorArray, 90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             markerDropper.setPosition(0);
             safeSleep(700);
-            moveByEncoder(1000, 0, -1);
-            DriveTrain.turn(baseMotorArray, -182, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            moveByEncoder(1000, 0, -1,false);
+            DriveTrain.turn(baseMotorArray, -180, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
-            moveByEncoder(500, 0.9, 0);
+            moveByEncoder(1000, 0.9, 0,false);
             moveForwardByDistanceWithoutRunToPosition(190, 1);
             moveForwardByDistanceWithoutRunToPosition(180, 0.5);
 
@@ -397,12 +397,15 @@ public class DepotAutonomous extends LinearOpMode {
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
         lift = hardwareMap.dcMotor.get("lift");
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftLock = hardwareMap.servo.get("liftLock");
         markerDropper = hardwareMap.servo.get("dropper");
         imu = hardwareMap.get(BNO055IMU.class,"imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
         imu.initialize(parameters);
-        imu.startAccelerationIntegration(new Position(),new Velocity(),1000);
+        imu.startAccelerationIntegration(new Position(),new Velocity(),10);
+
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
@@ -413,7 +416,7 @@ public class DepotAutonomous extends LinearOpMode {
         Gold, Silver, None
     }
 
-    private void moveByEncoder(int encoderDistance, double x, double y){
+    private void moveByEncoder(int encoderDistance, double x, double y, boolean stopWithBumpDetection){
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         double power = clip(Math.sqrt((x * x) + (y * y)),-1.0,1.0);
 //        double radianAngle = 0;
@@ -441,7 +444,7 @@ public class DepotAutonomous extends LinearOpMode {
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;
-        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200 && !imuWallImpactDetector.isImpact()) {
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200 && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
             numTimes_looped++;
             safeSleep(30);
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
@@ -464,3 +467,4 @@ public class DepotAutonomous extends LinearOpMode {
         DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
     }
 }
+

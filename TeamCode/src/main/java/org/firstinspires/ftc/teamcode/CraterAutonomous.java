@@ -28,6 +28,7 @@ public class CraterAutonomous extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
     private Servo markerDropper;
+    private Servo liftLock;
     //    VuforiaLocalizer vuforia;
 //    private final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final float mmPerInch        = 25.4f;
@@ -62,16 +63,18 @@ public class CraterAutonomous extends LinearOpMode {
             initalizeRobot();
             telemetry.addData("time to initialize", System.nanoTime()-start);
             telemetry.update();
+            DriveTrain.turn(baseMotorArray,90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             waitForStart();
-            moveByEncoder(100000,1,0,true);
-            sleep(50000);
+
+            liftLock.setPosition(1);
+            sleep(400);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        unlatch robot
 //        lift.setTargetPosition((int)(COUNTS_PER_MOTOR_REV*20/60*5.7));
             lift.setPower(1);
             safeSleep(500);
-            markerDropper.setPosition(0.75); // if 1 is up and 0 is down
+            markerDropper.setPosition(0); // if 1 is up and 0 is down
             lift.setPower(0);
             safeSleep(1000);
             telemetry.addLine("slept 1000");
@@ -92,18 +95,25 @@ public class CraterAutonomous extends LinearOpMode {
             safeSleep(200);
             lift.setPower(0);
             markerDropper.setPosition(1);
-            DriveTrain.mecanum(baseMotorArray, 0.4, 0, 0, true);
-            safeSleep(700);
+            moveByEncoder(500,0.4,0,false);
+//            DriveTrain.mecanum(baseMotorArray, 0.4, 0, 0, true);
+//            safeSleep(600);
             lift.setPower(-1);
-            DriveTrain.mecanum(baseMotorArray, 0, 0.4, 0, true);
-            safeSleep(300);
-            DriveTrain.mecanum(baseMotorArray, -0.4, 0, 0, true);
-            safeSleep(700);
+            moveByEncoder(500,0,0.4,false);
+//            DriveTrain.mecanum(baseMotorArray, 0, 0.4, 0, true);
+//            safeSleep(400);
+//            DriveTrain.mecanum(baseMotorArray, -0.4, 0, 0, true);
+//            safeSleep(600);
+
+            moveByEncoder(500,-.4,0,false);
             lift.setPower(0);
-            DriveTrain.mecanum(baseMotorArray, 0, -0.4, 0, true);
-            safeSleep(300);
-            DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
-            DriveTrain.turn(baseMotorArray, -8, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            moveByEncoder(500,0,-0.4,false);
+//            DriveTrain.mecanum(baseMotorArray, 0, -0.4, 0, true);
+//            safeSleep(400);
+//            DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+//            DriveTrain.turn(baseMotorArray,30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+//            safeSleep(100);
+            DriveTrain.turn(baseMotorArray,15,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //        safeSleep(500);
 //        int craterHeight = (int)getCraterHeight();
 //        safeSleep(1000);
@@ -119,9 +129,8 @@ public class CraterAutonomous extends LinearOpMode {
                 moveForwardByDistance(100, 1);
 //            safeSleep(100);
                 moveForwardByDistance(100, -1);
-//            moveForwardByDistance(5,-0.5);
-                DriveTrain.turn(baseMotorArray, -63, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
-
+//                DriveTrain.turn(baseMotorArray, -63, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
+                DriveTrain.turn(baseMotorArray, -45, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
 
             } else {
                 DriveTrain.turn(baseMotorArray, 30, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
@@ -148,7 +157,7 @@ public class CraterAutonomous extends LinearOpMode {
                     moveForwardByDistance(110, -1);
 //                moveForwardByDistance(5,-0.5);
 //                setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    DriveTrain.turn(baseMotorArray, -20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                    DriveTrain.turn(baseMotorArray, -15, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
 //                moveByEncoder();
                 }
@@ -159,14 +168,14 @@ public class CraterAutonomous extends LinearOpMode {
             moveForwardByDistance(220, 1);
 //            turnToAngle(0, 10);
             moveByEncoder(4530, -1, 0,false);
-            moveByEncoder(1030, -0.5, 0.5,false);
+            moveByEncoder(1030, -0.5, 0.5,false);//possibly unnecessary
             moveByEncoder(500, 1, 0, false);
             markerDropper.setPosition(0);
-            safeSleep(700);
-            moveByEncoder(1000, 1, 0,false);
+            safeSleep(500);
+            moveByEncoder(1000, 1, -.1,false);
             DriveTrain.turn(baseMotorArray, -100, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //        /moveForwardByDistance(20,-1);
-            moveByEncoder(5000, 1, 0,true);
+            moveByEncoder(500, 1, 0,false);
             moveForwardByDistanceWithoutRunToPosition(180, -1);
 //            DriveTrain.turn(baseMotorArray, -10, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             moveByEncoder(4000, 0.8, -1,false);
@@ -378,15 +387,18 @@ public class CraterAutonomous extends LinearOpMode {
         lift = hardwareMap.dcMotor.get("lift");
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         markerDropper = hardwareMap.servo.get("dropper");
+        liftLock = hardwareMap.servo.get("liftLock");
         imu = hardwareMap.get(BNO055IMU.class,"imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(parameters);
-        imu.startAccelerationIntegration(new Position(), new Velocity(),1000);
+        imu.startAccelerationIntegration(new Position(), new Velocity(),100);
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
+
+
 //        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
