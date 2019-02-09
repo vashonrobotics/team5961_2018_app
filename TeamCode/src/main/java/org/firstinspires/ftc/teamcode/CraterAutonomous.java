@@ -162,10 +162,10 @@ public class CraterAutonomous extends LinearOpMode {
 //                moveByEncoder();
                 }
             }
-            moveForwardByDistance(20,0.5);
-            moveByEncoder(400,-1,0,false);
+            moveForwardByDistance(100,1);
+            moveByEncoder(800,-1,0,false);
 //            turnToAngle(0, 10);
-            moveForwardByDistance(220, 1);
+            moveForwardByDistance(140, 1);
 //            turnToAngle(0, 10);
             moveByEncoder(4530, -1, 0,false);
             moveByEncoder(1030, -0.5, 0.5,false);//possibly unnecessary
