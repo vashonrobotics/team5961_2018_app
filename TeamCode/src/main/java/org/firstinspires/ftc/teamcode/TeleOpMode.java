@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import java.util.ArrayList;
 
@@ -19,8 +20,8 @@ import static com.qualcomm.robotcore.util.Range.clip;
 @TeleOp(name = "Vashon 5961 teleop", group = "Vashon 5961")
 public class TeleOpMode extends OpMode{
 
-    double wheelWidthBetweenWheels = 279.4;//215;
-    double wheelHeighBetweenWheels = 257;//340;
+    double wheelWidthBetweenWheels = 395.44;//215;
+    double wheelHeighBetweenWheels = 0;//340;
     private DcMotor lift;
     private double motorSpeedMultiplier = 1.0;
     private ArrayList baseMotorArray = new ArrayList();
@@ -28,13 +29,15 @@ public class TeleOpMode extends OpMode{
     private DcMotor collectorArmExtender;
     private DcMotor collectorArmRotator;
     private CRServo collector;
-
     private Servo collectorRotator;
     private Servo markerDropper;
+    private BNO055IMU imu;
+    private TouchSensor collectorRotationLimitSwitch;
+
     private Boolean setMode = false;
     private int previousBaseMotorPos = -1;
 
-    private BNO055IMU imu;
+
 //    private CRServo stickyArm;
 //    boolean pressedA = false;
 
@@ -65,6 +68,7 @@ public class TeleOpMode extends OpMode{
         collectorArmRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         collectorArmExtender = hardwareMap.dcMotor.get("extend");
         collectorArmExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         collector = hardwareMap.crservo.get("collector");
         collectorRotator = hardwareMap.servo.get("assistant");
         imu = hardwareMap.get(BNO055IMU.class,"imu");
@@ -74,20 +78,22 @@ public class TeleOpMode extends OpMode{
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
+
+        collectorRotationLimitSwitch = hardwareMap.touchSensor.get("rotationLimitSwitch");
         collectorRotator.scaleRange(0.2,1);
     }
 
     @Override
     public void loop() {
-        for (int i = 0; i < 4; i++) {
-            telemetry.addData("encoder "+Integer.valueOf(i),((DcMotor) baseMotorArray.get(i)).getCurrentPosition());
-        }
+//        for (int i = 0; i < 4; i++) {
+//            telemetry.addData("encoder "+Integer.valueOf(i),((DcMotor) baseMotorArray.get(i)).getCurrentPosition());
+//        }
 //        telemetry.addData("accel calibrated", imu.isAccelerometerCalibrated());
 //        telemetry.addData("gyro calibrated", imu.isGyroCalibrated());
 //        telemetry.addData("accel" + imu.getAcceleration().xAccel + ", "+ imu.getAcceleration().yAccel, imu.getAcceleration().zAccel);
-//        telemetry.addData("rotation 1: ", imu.getAngularOrientation().firstAngle);
-//        telemetry.addData("rotation 2: ", imu.getAngularOrientation().secondAngle);
-//        telemetry.addData("rotation 3: ", imu.getAngularOrientation().thirdAngle);
+        telemetry.addData("rotation 1: ", imu.getAngularOrientation().firstAngle);
+        telemetry.addData("rotation 2: ", imu.getAngularOrientation().secondAngle);
+        telemetry.addData("rotation 3: ", imu.getAngularOrientation().thirdAngle);
 //        telemetry.addData("mag field x"+imu.getMagneticFieldStrength().x+",y "+imu.getMagneticFieldStrength().y+", z", imu.getMagneticFieldStrength().z);
         telemetry.addData("collector power:",collector.getPower());
 // telemetry.addData("arm power",stickyArm.getPower());
@@ -126,7 +132,7 @@ public class TeleOpMode extends OpMode{
             fixBump(0);
         }
         if (gamepad1.b){
-            DriveTrain.turn(baseMotorArray,90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            DriveTrain.turn(baseMotorArray,360,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
         }
 
         if (gamepad1.right_trigger >= 0.5) {
@@ -150,7 +156,11 @@ public class TeleOpMode extends OpMode{
 
         collectorArmExtender.setPower(gamepad2.left_stick_x);
 ////        collectorArmRotator.setPower(Math.sqrt(gamepad2.left_stick_y));
-        collectorArmRotator.setPower(Math.signum(gamepad2.left_stick_y)*Math.pow(gamepad2.left_stick_y,2));
+        if (collectorRotationLimitSwitch.isPressed()) {
+            collectorArmRotator.setPower(0);
+        }else {
+            collectorArmRotator.setPower(Math.signum(gamepad2.left_stick_y) * Math.pow(gamepad2.left_stick_y, 2));
+        }
         collector.setPower(clip((gamepad2.right_trigger-gamepad2.left_trigger)*0.8,-0.8,0.8));
         if (gamepad2.left_bumper){
             collectorRotator.setPosition(collectorRotator.getPosition()+0.01);

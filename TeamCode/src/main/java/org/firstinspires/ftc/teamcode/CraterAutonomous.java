@@ -47,8 +47,8 @@ public class CraterAutonomous extends LinearOpMode {
     private IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry,new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
-    double wheelWidthBetweenWheels = 279.4;//215;
-    double wheelHeighBetweenWheels = 257;//340;
+    double wheelWidthBetweenWheels = 395.44;//215;
+    double wheelHeighBetweenWheels = 0;//340;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -72,7 +72,7 @@ public class CraterAutonomous extends LinearOpMode {
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        unlatch robot
 //        lift.setTargetPosition((int)(COUNTS_PER_MOTOR_REV*20/60*5.7));
-            lift.setPower(1);
+//            lift.setPower(-1);
             safeSleep(500);
             markerDropper.setPosition(0); // if 1 is up and 0 is down
             lift.setPower(0);
@@ -91,29 +91,29 @@ public class CraterAutonomous extends LinearOpMode {
             int craterHeight = (int) getCraterHeight();
             telemetry.addData("done getting craterHeight took ", System.currentTimeMillis()-t1);
             telemetry.update();
-            lift.setPower(1);
+//            lift.setPower(-1);
             safeSleep(200);
             lift.setPower(0);
             markerDropper.setPosition(1);
-            moveByEncoder(500,0.4,0,false);
+            moveByEncoder(400,0.6,0,false);
 //            DriveTrain.mecanum(baseMotorArray, 0.4, 0, 0, true);
 //            safeSleep(600);
-            lift.setPower(-1);
-            moveByEncoder(500,0,0.4,false);
+//            lift.setPower(1);
+            moveByEncoder(400,0,0.6,false);
 //            DriveTrain.mecanum(baseMotorArray, 0, 0.4, 0, true);
 //            safeSleep(400);
 //            DriveTrain.mecanum(baseMotorArray, -0.4, 0, 0, true);
 //            safeSleep(600);
 
-            moveByEncoder(500,-.4,0,false);
+            moveByEncoder(400,-.6,0,false);
             lift.setPower(0);
-            moveByEncoder(500,0,-0.4,false);
+            moveByEncoder(400,0,-0.6,false);
 //            DriveTrain.mecanum(baseMotorArray, 0, -0.4, 0, true);
 //            safeSleep(400);
 //            DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
 //            DriveTrain.turn(baseMotorArray,30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //            safeSleep(100);
-            DriveTrain.turn(baseMotorArray,15,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //        safeSleep(500);
 //        int craterHeight = (int)getCraterHeight();
 //        safeSleep(1000);
@@ -162,10 +162,10 @@ public class CraterAutonomous extends LinearOpMode {
 //                moveByEncoder();
                 }
             }
-            moveForwardByDistance(100,1);
+            moveForwardByDistance(160,1);
             moveByEncoder(800,-1,0,false);
 //            turnToAngle(0, 10);
-            moveForwardByDistance(140, 1);
+            moveForwardByDistance(80, 1);
 //            turnToAngle(0, 10);
             moveByEncoder(4530, -1, 0,false);
             moveByEncoder(1030, -0.5, 0.5,false);//possibly unnecessary
@@ -409,7 +409,8 @@ public class CraterAutonomous extends LinearOpMode {
     private void moveByEncoder(int encoderDistance, double x, double y, boolean stopWithBumpDetection){
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         double power = clip(Math.sqrt((x * x) + (y * y)),-1.0,1.0);
-//        double radianAngle = 0;
+        double beginningAngle = imu.getAngularOrientation().firstAngle;
+
         double radianAngle = Math.atan2(y, x) - Math.PI * 1/4;
         double[] motorPowers = {(Math.cos(radianAngle) * power), // frontLeft
                 (Math.sin(radianAngle) * power), // frontRight
@@ -443,6 +444,10 @@ public class CraterAutonomous extends LinearOpMode {
         }
         sleep(100);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+        double angleToTurn = imu.getAngularOrientation().firstAngle*Math.signum(beginningAngle) + beginningAngle;
+        DriveTrain.turn(baseMotorArray, angleToTurn, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+        angleToTurn = imu.getAngularOrientation().firstAngle*Math.signum(beginningAngle) + beginningAngle;
+        DriveTrain.turn(baseMotorArray, angleToTurn, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
     }
     private void safeSleep(int sleepTime) {
 //        sleep(sleepTime);

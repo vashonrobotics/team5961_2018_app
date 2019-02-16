@@ -45,8 +45,8 @@ public class DepotAutonomous extends LinearOpMode {
     IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
-    double wheelWidthBetweenWheels = 241.3;//279.4;//215;
-    double wheelHeighBetweenWheels = 241.3;//257;//340;
+    double wheelWidthBetweenWheels = 395.44;//215;
+    double wheelHeighBetweenWheels = 0;//340;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -62,32 +62,32 @@ public class DepotAutonomous extends LinearOpMode {
             telemetry.update();
 //        DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             waitForStart();
-            liftLock.setPosition(0);
+            liftLock.setPosition(1);
             sleep(300);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        unlatch robot
 //        lift.setTargetPosition((int)(COUNTS_PER_MOTOR_REV*20/60*5.7));
-            lift.setPower(1);
+            lift.setPower(-1);
             safeSleep(500);
             markerDropper.setPosition(1);
 //            markerDropper.setPosition(0.75); // if 1 is up and 0 is down
             lift.setPower(0);
             safeSleep(3000);
 
-            lift.setPower(1);
+            lift.setPower(-1);
             safeSleep(200);
             lift.setPower(0);
 //            markerDropper.setPosition(1);
-            moveByEncoder(500,0.4,0,false);
+            moveByEncoder(400,0.6,0,false);
 //
-            lift.setPower(-1);
-            moveByEncoder(500,0,0.4,false);
+            lift.setPower(1);
+            moveByEncoder(400,0,0.6,false);
 
-            moveByEncoder(500,-.4,0,false);
+            moveByEncoder(400,-0.6,0,false);
             lift.setPower(0);
-            moveByEncoder(500,0,-0.4,false);
-            DriveTrain.turn(baseMotorArray,15,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            moveByEncoder(400,0,-0.6,false);
+            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //            DriveTrain.turn(baseMotorArray,37,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             safeSleep(100);
 //        DriveTrain.turn(baseMotorArray,8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
@@ -100,6 +100,7 @@ public class DepotAutonomous extends LinearOpMode {
                 moveByEncoder(1000, 1, 0,false);
                 DriveTrain.turn(baseMotorArray, -47, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
                 moveByEncoder(800, 1, 0,false);
+                moveByEncoder(1000,0,1,false);
 
 
             } else {
@@ -113,6 +114,7 @@ public class DepotAutonomous extends LinearOpMode {
                     setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     DriveTrain.turn(baseMotorArray, -70, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
                     moveByEncoder(500, 1, 0,false);
+                    moveByEncoder(2000,0,1,false);
 //                centerOnGold();
 //                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
 //                safeSleep(2000);
@@ -151,14 +153,14 @@ public class DepotAutonomous extends LinearOpMode {
 //                }
                 }
             }
-            moveByEncoder(3000, 0, 1,false);
+            moveByEncoder(1000, 0, 1,false);
             moveByEncoder(700, 0.5, 0,false);
             moveByEncoder(500, -1, -1,false);
-            DriveTrain.turn(baseMotorArray, 90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            DriveTrain.turn(baseMotorArray, 170, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             markerDropper.setPosition(0);
             safeSleep(700);
-            moveByEncoder(1000, 0, -1,false);
-            DriveTrain.turn(baseMotorArray, -180, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            moveByEncoder(1000, 1, 0,false);
+            DriveTrain.turn(baseMotorArray, 88, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
             moveByEncoder(1000, 0.9, 0,false);
             moveForwardByDistanceWithoutRunToPosition(190, 1);
