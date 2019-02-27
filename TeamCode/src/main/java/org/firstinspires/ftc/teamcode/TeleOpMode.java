@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -37,7 +36,11 @@ public class TeleOpMode extends OpMode{
     private Boolean setMode = false;
     private int previousBaseMotorPos = -1;
 
-
+    private double collectorArmAngle = 0;
+    private double INITAL_ARM_ANGLE = -10;
+    private double relativeCollectorPosition; //used assmuming one is close to parallel with the arm
+                            // and collector facing outand zero is 180 clock wise from that
+    private double desiredEncoderValueForCollectorArm = 0;
 //    private CRServo stickyArm;
 //    boolean pressedA = false;
 
@@ -81,6 +84,7 @@ public class TeleOpMode extends OpMode{
 
         collectorRotationLimitSwitch = hardwareMap.touchSensor.get("rotationLimitSwitch");
         collectorRotator.scaleRange(0.2,1);
+        relativeCollectorPosition = collectorRotator.getPosition();
     }
 
     @Override
@@ -120,18 +124,39 @@ public class TeleOpMode extends OpMode{
 
         collectorArmExtender.setPower(gamepad2.left_stick_x);
 ////        collectorArmRotator.setPower(Math.sqrt(gamepad2.left_stick_y));
-        double armPower = Math.signum(-gamepad2.left_stick_y) * Math.sqrt(Math.abs(gamepad2.left_stick_y)) + 0.1;
+        double armPower = Math.signum(-gamepad2.left_stick_y) * Math.sqrt(Math.abs(gamepad2.left_stick_y));
         if (collectorRotationLimitSwitch.isPressed() && armPower < 0) {
-            collectorArmRotator.setPower(-0.1);
+                collectorArmRotator.setPower(-0.1);
+
         }else {
-            collectorArmRotator.setPower(-armPower);
+            if (armPower > 0.1 || armPower < -0.1) { // I'm not sure if there could be a time where arm power is zero but isn't read as zero because it's float
+                collectorArmRotator.setPower(-armPower);
+                desiredEncoderValueForCollectorArm = collectorArmRotator.getCurrentPosition();
+            }else{ // if armpower == 0
+                if (desiredEncoderValueForCollectorArm != collectorArmRotator.getCurrentPosition()) {
+                    double correctionPower = (desiredEncoderValueForCollectorArm -  collectorArmRotator.getCurrentPosition())/20;
+                    if (Math.abs(correctionPower) > 0.2){
+                        correctionPower = 0.2*Math.signum(correctionPower);
+                        telemetry.addData("had to reduce to ",correctionPower);
+                    }
+                    collectorArmRotator.setPower(correctionPower);
+                }
+            }
         }
         collector.setPower(gamepad2.right_trigger-gamepad2.left_trigger);
         if (gamepad2.left_bumper){
-            collectorRotator.setPosition(collectorRotator.getPosition()+0.01);
+            relativeCollectorPosition = collectorRotator.getPosition()+0.01;
         }else if (gamepad2.right_bumper){
-            collectorRotator.setPosition(collectorRotator.getPosition()-0.01);
+            relativeCollectorPosition = collectorRotator.getPosition()-0.01;
         }
+        collectorArmAngle = collectorArmRotator.getCurrentPosition()*288/60 - INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
+        if (collectorArmAngle > 10){
+//            collectorRotator.setPosition(0); //might be better but might want a higher angle
+            collectorRotator.setPosition(relativeCollectorPosition-collectorArmAngle/180);
+        }else{
+            collectorRotator.setPosition(relativeCollectorPosition);
+        }
+
         if(gamepad2.y) {
             collectorRotator.setPosition(1);
         }
@@ -150,6 +175,7 @@ public class TeleOpMode extends OpMode{
 //        }
 //        collectorGrabberRotator.setPosition(clip(collectorGrabberRotator.getPosition()+gamepad2.right_trigger/16-gamepad2.left_trigger/16,0,1));
         telemetry.addData("time:", System.currentTimeMillis()-t1);
+
         telemetry.update();
     }
     private void fixBump(double desiredAngle) {
