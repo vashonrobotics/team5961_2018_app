@@ -39,7 +39,7 @@ public class TeleOpMode extends OpMode{
     private double collectorArmAngle = 0;
     private double INITAL_ARM_ANGLE = -10;
     private double relativeCollectorPosition; //used assmuming one is close to parallel with the arm
-                            // and collector facing outand zero is 180 clock wise from that
+                            // and collector facing out and zero is 180 clock wise from that
     private double desiredEncoderValueForCollectorArm = 0;
 //    private CRServo stickyArm;
 //    boolean pressedA = false;
@@ -89,6 +89,7 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
+        collectorArmAngle = collectorArmRotator.getCurrentPosition()*288/60 - INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
         double t1 = System.currentTimeMillis();
         telemetry.addData("servo pos", collectorRotator.getPosition());
         lift.setPower(gamepad2.right_stick_x);
@@ -149,16 +150,20 @@ public class TeleOpMode extends OpMode{
         }else if (gamepad2.right_bumper){
             relativeCollectorPosition = collectorRotator.getPosition()-0.01;
         }
-        collectorArmAngle = collectorArmRotator.getCurrentPosition()*288/60 - INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
-        if (collectorArmAngle > 10){
+
+        if (collectorArmAngle > 60) {
+            collectorRotator.setPosition(clip(-(collectorArmAngle-90)/180,0,1));
+        }else if (collectorArmAngle > 10){
 //            collectorRotator.setPosition(0); //might be better but might want a higher angle
             collectorRotator.setPosition(relativeCollectorPosition-collectorArmAngle/180);
         }else{
             collectorRotator.setPosition(relativeCollectorPosition);
         }
 
+//     dump off minerals
         if(gamepad2.y) {
-            collectorRotator.setPosition(1);
+            double angle_to_be_parallel_to =  90;
+            collectorRotator.setPosition(clip(1-(collectorArmAngle-angle_to_be_parallel_to)/180,0,1));
         }
 
 
