@@ -54,16 +54,16 @@ public class IMUWallImpactDetector implements BNO055IMU.AccelerationIntegrator {
 
         maxAcceleration = Math.max(maxAcceleration, magnitude);
         if (magnitude > THRESHOLD && System.currentTimeMillis()-timeReset > 500) {
-            telemetry.addData("Impact Detected,", "Acceleration Magnitude: %f", magnitude);
-            telemetry.update();
+//            telemetry.addData("Impact Detected,", "Acceleration Magnitude: %f", magnitude);
+//            telemetry.update();
             setImpact(true);
 
         }else{
-            telemetry.addData("active ",(System.currentTimeMillis()-timeReset > 300));
+//            telemetry.addData("active ",(System.currentTimeMillis()-timeReset > 300));
 //            telemetry.update();
 //            telemetry.addData("Max Acceleration", "Max Acceleration %f", maxAcceleration);
-            telemetry.addData("acceleration",magnitude);
-            telemetry.update();
+//            telemetry.addData("acceleration",magnitude);
+//            telemetry.update();
         }
         realIntegrator.update(linearAcceleration);
     }

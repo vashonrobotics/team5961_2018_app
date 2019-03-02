@@ -30,6 +30,7 @@ public class TeleOpMode extends OpMode{
     private DcMotor collector;
     private Servo collectorRotator;
     private Servo markerDropper;
+    private Servo liftLock;
     private BNO055IMU imu;
     private TouchSensor collectorRotationLimitSwitch;
 
@@ -65,7 +66,7 @@ public class TeleOpMode extends OpMode{
 
 //
 //        markerDropper = hardwareMap.servo.get("dropper");
-
+        liftLock = hardwareMap.servo.get("liftLock");
         // collector init
         collectorArmRotator = hardwareMap.dcMotor.get("rotate");
         collectorArmRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -89,9 +90,11 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
-        collectorArmAngle = collectorArmRotator.getCurrentPosition()*288/60 - INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
+        collectorArmAngle = collectorArmRotator.getCurrentPosition()*4/288 + INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
         double t1 = System.currentTimeMillis();
         telemetry.addData("servo pos", collectorRotator.getPosition());
+        telemetry.addData("arm angle", collectorArmAngle);
+        telemetry.addData("encoder val ",collectorArmRotator.getCurrentPosition());
         lift.setPower(gamepad2.right_stick_x);
 //
 ////        stickyArm.setPower(clip(gamepad2.left_stick_x/2-.6,-1,1));
@@ -136,8 +139,8 @@ public class TeleOpMode extends OpMode{
             }else{ // if armpower == 0
                 if (desiredEncoderValueForCollectorArm != collectorArmRotator.getCurrentPosition()) {
                     double correctionPower = (desiredEncoderValueForCollectorArm -  collectorArmRotator.getCurrentPosition())/20;
-                    if (Math.abs(correctionPower) > 0.2){
-                        correctionPower = 0.2*Math.signum(correctionPower);
+                    if (Math.abs(correctionPower) > 0.1){
+                        correctionPower = 0.1*Math.signum(correctionPower);
                         telemetry.addData("had to reduce to ",correctionPower);
                     }
                     collectorArmRotator.setPower(correctionPower);
@@ -151,11 +154,12 @@ public class TeleOpMode extends OpMode{
             relativeCollectorPosition = collectorRotator.getPosition()-0.01;
         }
 
-        if (collectorArmAngle > 60) {
-            collectorRotator.setPosition(clip(-(collectorArmAngle-90)/180,0,1));
-        }else if (collectorArmAngle > 10){
+//        if (collectorArmAngle > 60) {
+//            collectorRotator.setPosition(clip(-(collectorArmAngle-90)/180,0,1));
+//        }else
+        if (collectorArmAngle > 20){
 //            collectorRotator.setPosition(0); //might be better but might want a higher angle
-            collectorRotator.setPosition(relativeCollectorPosition-collectorArmAngle/180);
+            collectorRotator.setPosition(relativeCollectorPosition+collectorArmAngle/180);
         }else{
             collectorRotator.setPosition(relativeCollectorPosition);
         }
@@ -170,6 +174,12 @@ public class TeleOpMode extends OpMode{
 
         if(gamepad2.x) {
             collectorRotator.setPosition(0);
+        }
+        if (gamepad2.a){
+            liftLock.setPosition(0);
+        }
+        if (gamepad2.b){
+            liftLock.setPosition(1);
         }
 //        collector.setPower(gamepad1.left_trigger*2-1);
 //        if (gamepad2.right_bumper) {
