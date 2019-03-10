@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+
 import java.util.ArrayList;
 
 import static com.qualcomm.robotcore.util.Range.clip;
@@ -91,6 +93,7 @@ public class TeleOpMode extends OpMode{
         collectorRotationLimitSwitch = hardwareMap.touchSensor.get("rotationLimitSwitch");
         collectorRotator.scaleRange(0.2,1);
         relativeCollectorPosition = collectorRotator.getPosition();
+        FtcRobotControllerActivity.pauseCamera();
     }
 
     @Override

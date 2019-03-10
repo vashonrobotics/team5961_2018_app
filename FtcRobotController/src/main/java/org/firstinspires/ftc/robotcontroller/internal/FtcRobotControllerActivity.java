@@ -150,7 +150,11 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     public static Pair<ArrayList<MatOfPoint>, Mat> imageData;
     public static Size frameSize = null;
   static private CameraBridgeViewBase mOpenCvCameraView;
-
+  static public void pauseCamera(){
+      if (mOpenCvCameraView != null){
+          mOpenCvCameraView.disableView();
+      }
+  }
   static {
     if (!OpenCVLoader.initDebug()) {
       Log.d("ERROR", "It didn't work");
@@ -316,6 +320,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
   public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 //    System.out.println("cols"+inputFrame.rgba().cols());
 //    System.out.println("rows"+inputFrame.rgba().rows());
+
     if (shouldProcessImage) {
 
 //      Pair<Mat, Boolean> processedImg = recognizeWithKeypoints(inputFrame.rgba());
