@@ -101,9 +101,9 @@ public class CraterAutonomous extends LinearOpMode {
             lift.setPower(1);
             safeSleep(1700);
             lift.setPower(0);
-            DriveTrain.turn(baseMotorArray,30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            DriveTrain.turn(baseMotorArray,33,wheelWidthBetweenWheels,wheelHeighBetweenWheels);// was 30 with 5 degrees later
             moveByEncoder(100,0,1,false);
-
+//            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //            moveByEncoder(300,0,1,false);
 
 
@@ -125,7 +125,7 @@ public class CraterAutonomous extends LinearOpMode {
 //            DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
 //            DriveTrain.turn(baseMotorArray,30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //            safeSleep(100);
-            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+
 //        safeSleep(500);
 //        int craterHeight = (int)getCraterHeight();
 //        safeSleep(1000);
@@ -186,8 +186,8 @@ public class CraterAutonomous extends LinearOpMode {
 //            moveByEncoder(500, 1, 0, false);
             markerDropper.setPosition(0);
             safeSleep(300);
-            telemetry.addLine("start last move");
-            telemetry.update();
+//            telemetry.addLine("start last move");
+//            telemetry.update();
 //            moveByEncoder(1000, 1, -.1,false);
 //            DriveTrain.turn(baseMotorArray, -100, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //        /moveForwardByDistance(20,-1);
@@ -200,7 +200,8 @@ public class CraterAutonomous extends LinearOpMode {
 //        moveForwardByDistanceWithoutRunToPosition(180,-0.5);
 //        safeSleep(50000);
         }catch (Throwable e){
-            System.out.println(e);
+            DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+//            System.out.println(e);
 
         }
 
@@ -290,10 +291,11 @@ public class CraterAutonomous extends LinearOpMode {
             baseMotor.setTargetPosition((int) (COUNTS_PER_MM*10*distance)*directionMultiplier);
         }
 
-        for(int t = 5; t < 10; t++){
-            DriveTrain.mecanum(baseMotorArray, 0, power*t/10, 0, true);
-            sleep(60);
+        for(int t = 50; t < 100; t++){
+            DriveTrain.mecanum(baseMotorArray, 0, power*t/100, 0, true);
+            sleep(4);
         }
+
 //        sleep(60);
         DriveTrain.mecanum(baseMotorArray,0,power,0,true);
         imuWallImpactDetector.setImpact(false);

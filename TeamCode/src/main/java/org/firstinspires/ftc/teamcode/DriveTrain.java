@@ -73,6 +73,15 @@ public class DriveTrain {
             motor.setTargetPosition((int) (distanceToTravel * COUNTS_PER_MM*sideMultiplier));
 //            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
+        for(int t = 5; t < 10; t++){
+            DriveTrain.mecanum(baseMotorArray, 0, t/10, 0, true);
+
+            try {
+                sleep(15);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
         DriveTrain.mecanum(baseMotorArray,0,1,0,true);
 
         try {

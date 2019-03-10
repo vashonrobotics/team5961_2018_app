@@ -45,6 +45,11 @@ public class TeleOpMode extends OpMode{
 //    private CRServo stickyArm;
 //    boolean pressedA = false;
 
+//    public TeleOpMode() {
+//        super();
+//        this.msStuckDetectLoop = 200;
+//    }
+
     @Override
     public void init() {
         // base motor init
@@ -90,12 +95,19 @@ public class TeleOpMode extends OpMode{
 
     @Override
     public void loop() {
-        collectorArmAngle = collectorArmRotator.getCurrentPosition()*4/288 + INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
+//        collectorArmAngle = collectorArmRotator.getCurrentPosition()*4/288 + INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
         double t1 = System.currentTimeMillis();
-        telemetry.addData("servo pos", collectorRotator.getPosition());
-        telemetry.addData("arm angle", collectorArmAngle);
-        telemetry.addData("encoder val ",collectorArmRotator.getCurrentPosition());
-        lift.setPower(gamepad2.right_stick_x);
+//        telemetry.addData("servo pos", collectorRotator.getPosition());
+//        telemetry.addData("arm angle", collectorArmAngle);
+//        telemetry.addData("encoder val ",collectorArmRotator.getCurrentPosition());
+        if (liftLock.getPosition() > 0.5) {
+            lift.setPower(gamepad2.right_stick_x);
+        }else{
+            lift.setPower(0);
+            if (gamepad2.right_stick_x > 0.2 || gamepad2.right_stick_x < -0.2) {
+                liftLock.setPosition(1);
+            }
+        }
 //
 ////        stickyArm.setPower(clip(gamepad2.left_stick_x/2-.6,-1,1));
 //
@@ -128,13 +140,18 @@ public class TeleOpMode extends OpMode{
 
         collectorArmExtender.setPower(gamepad2.left_stick_x);
 ////        collectorArmRotator.setPower(Math.sqrt(gamepad2.left_stick_y));
-        double armPower = Math.signum(-gamepad2.left_stick_y) * Math.sqrt(Math.abs(gamepad2.left_stick_y));
+        double armPower = Math.signum(-gamepad2.left_stick_y) * Math.pow(Math.abs(gamepad2.left_stick_y),2);
         if (collectorRotationLimitSwitch.isPressed() && armPower < 0) {
                 collectorArmRotator.setPower(-0.1);
 
         }else {
-            if (armPower > 0.1 || armPower < -0.1) { // I'm not sure if there could be a time where arm power is zero but isn't read as zero because it's float
-                collectorArmRotator.setPower(-armPower);
+            if (armPower > 0.1 || armPower < -0.1) { // I'm not sure if there could be a time where arm power is zero but isn't read as zero because it's a afloat
+
+                if (armPower < 0){
+                    collectorArmRotator.setPower(-armPower - .2);
+                }else {
+                    collectorArmRotator.setPower(-armPower);
+                }
                 desiredEncoderValueForCollectorArm = collectorArmRotator.getCurrentPosition();
             }else{ // if armpower == 0
                 if (desiredEncoderValueForCollectorArm != collectorArmRotator.getCurrentPosition()) {
@@ -148,27 +165,28 @@ public class TeleOpMode extends OpMode{
             }
         }
         collector.setPower(gamepad2.right_trigger-gamepad2.left_trigger);
-        if (gamepad2.left_bumper){
-            relativeCollectorPosition = collectorRotator.getPosition()+0.01;
-        }else if (gamepad2.right_bumper){
-            relativeCollectorPosition = collectorRotator.getPosition()-0.01;
+         if (gamepad2.right_bumper || -gamepad2.left_stick_y < -0.7){
+            collectorRotator.setPosition(collectorRotator.getPosition()-0.01);
         }
+        if (gamepad2.left_bumper || -gamepad2.left_stick_y > 0.7){
+             collectorRotator.setPosition(collectorRotator.getPosition()+0.01);
+         }
 
 //        if (collectorArmAngle > 60) {
 //            collectorRotator.setPosition(clip(-(collectorArmAngle-90)/180,0,1));
 //        }else
-        if (collectorArmAngle > 20){
-//            collectorRotator.setPosition(0); //might be better but might want a higher angle
-            collectorRotator.setPosition(relativeCollectorPosition+collectorArmAngle/180);
-        }else{
-            collectorRotator.setPosition(relativeCollectorPosition);
-        }
 
+//        if (collectorArmAngle > 20){
+////            collectorRotator.setPosition(0); //might be better but might want a higher angle
+//            collectorRotator.setPosition(relativeCollectorPosition+collectorArmAngle/180);
+//        }else{
+//            collectorRotator.setPosition(relativeCollectorPosition);
+//        }
 //     dump off minerals
-        if(gamepad2.y) {
-            double angle_to_be_parallel_to =  90;
-            collectorRotator.setPosition(clip(1-(collectorArmAngle-angle_to_be_parallel_to)/180,0,1));
-        }
+//        if(gamepad2.y) {
+//            double angle_to_be_parallel_to =  90;
+//            collectorRotator.setPosition(clip(1-(collectorArmAngle-angle_to_be_parallel_to)/180,0,1));
+//        }
 
 
 
@@ -190,7 +208,9 @@ public class TeleOpMode extends OpMode{
 //        }
 //        collectorGrabberRotator.setPosition(clip(collectorGrabberRotator.getPosition()+gamepad2.right_trigger/16-gamepad2.left_trigger/16,0,1));
         telemetry.addData("time:", System.currentTimeMillis()-t1);
-
+//        if (System.currentTimeMillis()-t1> 20){
+//            Thread.sleep((long)20-System.currentTimeMillis()-t1)
+//        }
         telemetry.update();
     }
     private void fixBump(double desiredAngle) {

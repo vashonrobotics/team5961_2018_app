@@ -19,6 +19,7 @@ import org.opencv.core.Scalar;
 import java.util.ArrayList;
 
 import static com.qualcomm.robotcore.util.Range.clip;
+import static com.qualcomm.robotcore.util.Range.throwIfRangeIsInvalid;
 
 @Autonomous(group = "5961", name = "Full Depot Autonomous")
 public class DepotAutonomous extends LinearOpMode {
@@ -63,41 +64,47 @@ public class DepotAutonomous extends LinearOpMode {
 //        DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             waitForStart();
             liftLock.setPosition(1);
-            sleep(300);
+            markerDropper.setPosition(1);
+            sleep(200);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        unlatch robot
 //        lift.setTargetPosition((int)(COUNTS_PER_MOTOR_REV*20/60*5.7));
             lift.setPower(-1);
             safeSleep(500);
-            markerDropper.setPosition(1);
 //            markerDropper.setPosition(0.75); // if 1 is up and 0 is down
             lift.setPower(0);
-            safeSleep(3000);
+            safeSleep(2500);
 
             lift.setPower(-1);
             safeSleep(200);
             lift.setPower(0);
 //            markerDropper.setPosition(1);
+//            lift.setPower(-0.5);
+//            moveByEncoder(50,0,1,false);
+//            lift.setPower(0);
+            markerDropper.setPosition(1);
             DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             lift.setPower(1);
             safeSleep(1700);
-            lift.setPower(0);
             DriveTrain.turn(baseMotorArray,32,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+
 //            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //            DriveTrain.turn(baseMotorArray,37,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            lift.setPower(0);
             safeSleep(100);
+
 //        DriveTrain.turn(baseMotorArray,8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold, FtcRobotControllerActivity.frameSize.height / 2.8, FtcRobotControllerActivity.frameSize.width / 5, FtcRobotControllerActivity.frameSize.width / 5);
             // if gold is straight ahead
             if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0) {
                 // center on the gold
                 centerOnGold(FtcRobotControllerActivity.frameSize.width / 2);
-                moveForwardByDistance(195, 1);
-                moveByEncoder(1000, 1, 0,false);
+                moveForwardByDistance(200, 1);
+//                moveByEncoder(500, 1, 0,false);
                 DriveTrain.turn(baseMotorArray, -47, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-                moveByEncoder(800, 1, 0,false);
-                moveByEncoder(1000,0,1,false);
+                moveByEncoder(1000, 1, 0,false);
+//                moveByEncoder(1000,0,1,false);
 
 
             } else {
@@ -122,7 +129,7 @@ public class DepotAutonomous extends LinearOpMode {
                     // drop marker
 
 
-                } else {
+                } else { // pos 3 (left)
 //                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
 //                safeSleep(600);
 //                DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
@@ -130,12 +137,14 @@ public class DepotAutonomous extends LinearOpMode {
 //                safeSleep(500);
                     centerOnGold(FtcRobotControllerActivity.frameSize.width * 2 / 3);
                     moveForwardByDistance(156.5, 1);
+//                    moveByEncoder(400,-1,-1,false);
                     DriveTrain.turn(baseMotorArray, -20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//                moveForwardByDistance(5,1);
+//                    moveByEncoder(130,0,1,false);
+
 //                DriveTrain.mecanum(baseMotorArray,-0.5,0,0,true);
 //                safeSleep(1000);
-                    setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    moveByEncoder(3540, 1, 0.0,false);
+//                    setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    moveByEncoder(3000, 1, 0.0,false);
 //                moveByEncoder(500,0.7,0);
 //                DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
 //                safeSleep(1500);
@@ -153,62 +162,17 @@ public class DepotAutonomous extends LinearOpMode {
             moveByEncoder(1000, 0, 1,false);
 //            moveByEncoder(700, 0.5, 0,false);
             moveByEncoder(500, -1, -1,false);
-            DriveTrain.turn(baseMotorArray, 170, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            DriveTrain.turn(baseMotorArray, 181, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             markerDropper.setPosition(0);
-            safeSleep(700);
+            safeSleep(300);
             moveByEncoder(1000, 1, 0,false);
-            moveByEncoder(1000,0,-1,false);
-            moveByEncoder(6000,1,-.2,false);
-//            DriveTrain.turn(baseMotorArray, 88, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-
-//            moveByEncoder(1000, 0.9, 0,false);
-//            moveForwardByDistanceWithoutRunToPosition(190, 1);
-//            moveForwardByDistanceWithoutRunToPosition(180, 0.5);
-
-////        sample();
-//        // stuff to check gold detection with robot
-//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,1,true);
-////        DriveTrain.turn(baseMotorArray, 45, 5, 5);
-//        safeSleep(400);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
-//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold);
-////        DriveTrain.turn(baseMotorArray, -90, 5, 5);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
-//        safeSleep(700);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
-//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        BlobDetectorCandidate goldAtPos3 = lookForMineral(MineralType.Gold);
-//        telemetry.addData("goldAtPos1 "+ goldAtPos1[0] + " " + goldAtPos1[1] + " ", goldAtPos1[2]);
-//        telemetry.addData("goldAtPos2 "+ goldAtPos2[0] + " " + goldAtPos2[1] + " ", goldAtPos2[2]);
-//        telemetry.addData("goldAtPos3 "+ goldAtPos3[0] + " " + goldAtPos3[1] + " ", goldAtPos3[2]);
-//        telemetry.update();
-//        safeSleep(5000);
-
-
-////        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-//        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-//        parameters.cameraDirection = CAMERA_CHOICE;
-//        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
-//        targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
-//        blueRover = targetsRoverRuckus.get(0);
-//        blueRover.setName("Blue-Rover");
-//        redFootprint = targetsRoverRuckus.get(1);
-//        redFootprint.setName("Red-Footprint");
-//        frontCraters = targetsRoverRuckus.get(2);
-//        frontCraters.setName("Front-Craters");
-//        backSpace = targetsRoverRuckus.get(3);
-//        backSpace.setName("Back-Space");
-//
-//        allTrackables = new ArrayList<>();
-//        allTrackables.addAll(targetsRoverRuckus);
-//        waitForStart();
-//        getPos();
+            moveByEncoder(800,0,-1,false);
+            moveByEncoder(100,0,1,false);
+            moveByEncoder(6000,1,0,false); // was 2500 possibly with stuff below
+//            moveByEncoder(1000,0,-1, false);
+//            moveByEncoder(3500,1,-0.8,false);
         }catch (Throwable e){
-
+            DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         }
 
     }
@@ -262,13 +226,22 @@ public class DepotAutonomous extends LinearOpMode {
             DcMotor baseMotor = (DcMotor) baseMotorArray.get(i);
             baseMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             baseMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            baseMotor.setPower(power);
+//            baseMotor.setPower(power);
             int directionMultiplier = (int) Math.signum(power);
 //            if (i % 2 == 0){
 //                directionMultiplier *= -1;
 //            }
             baseMotor.setTargetPosition((int) (COUNTS_PER_MM * 10 * distance) * directionMultiplier);
         }
+//        for(int t = 50; t < 100; t++){
+//            DriveTrain.mecanum(baseMotorArray, 0, Math.abs(power*t/100), 0, true);
+////            sleep(4);
+//        }
+        for (int t = 5; t < 10;t++){
+            DriveTrain.mecanum(baseMotorArray,0,Math.abs(power*t/10),0,true);
+            sleep(20);
+        }
+        DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
         safeSleep(300);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
@@ -442,7 +415,11 @@ public class DepotAutonomous extends LinearOpMode {
             motor.setTargetPosition((int) (encoderDistance*motorPowers[i]*2));
 //            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
-        DriveTrain.mecanum(baseMotorArray,0,1,0,true);
+        for(int t = 5; t < 10; t++){
+            DriveTrain.mecanum(baseMotorArray, 0, Math.abs(power)*t/10, 0, true);
+            sleep(20);
+        }
+        DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
         safeSleep(300);
         imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
@@ -454,7 +431,7 @@ public class DepotAutonomous extends LinearOpMode {
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
             previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
         }
-        safeSleep(100);
+        safeSleep(80);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
     }
     private void safeSleep(int sleepTime){
