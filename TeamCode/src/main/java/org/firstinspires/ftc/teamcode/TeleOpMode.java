@@ -33,7 +33,7 @@ public class TeleOpMode extends OpMode{
     private Servo collectorRotator;
     private Servo markerDropper;
     private Servo liftLock;
-    private BNO055IMU imu;
+//    private BNO055IMU imu;
     private TouchSensor collectorRotationLimitSwitch;
 
     private Boolean setMode = false;
@@ -82,10 +82,10 @@ public class TeleOpMode extends OpMode{
 
         collector = hardwareMap.dcMotor.get("collector");
         collectorRotator = hardwareMap.servo.get("assistant");
-        imu = hardwareMap.get(BNO055IMU.class,"imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        imu.initialize(parameters);
+//        imu = hardwareMap.get(BNO055IMU.class,"imu");
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//        imu.initialize(parameters);
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
@@ -216,18 +216,18 @@ public class TeleOpMode extends OpMode{
 //        }
         telemetry.update();
     }
-    private void fixBump(double desiredAngle) {
-        // angle in degrees. clock-wise is positive
-        double angleToTurn = imu.getAngularOrientation().firstAngle + desiredAngle;
-        DriveTrain.turn(baseMotorArray, angleToTurn, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-    }
-    private void goStraight(double x,double y){
-        double turn;
-        if (Math.abs(imu.getAngularOrientation().firstAngle) > 1) {
-            turn = Math.signum(imu.getAngularOrientation().firstAngle)*Math.log(Math.abs(imu.getAngularOrientation().firstAngle)) / 10;
-        }else {
-            turn = 0;
-        }
-        DriveTrain.mecanum(baseMotorArray,x,y,turn, true);
-    }
+//    private void fixBump(double desiredAngle) {
+//        // angle in degrees. clock-wise is positive
+//        double angleToTurn = imu.getAngularOrientation().firstAngle + desiredAngle;
+//        DriveTrain.turn(baseMotorArray, angleToTurn, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+//    }
+//    private void goStraight(double x,double y){
+//        double turn;
+//        if (Math.abs(imu.getAngularOrientation().firstAngle) > 1) {
+//            turn = Math.signum(imu.getAngularOrientation().firstAngle)*Math.log(Math.abs(imu.getAngularOrientation().firstAngle)) / 10;
+//        }else {
+//            turn = 0;
+//        }
+//        DriveTrain.mecanum(baseMotorArray,x,y,turn, true);
+//    }
 }

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import android.util.Pair;
@@ -10,6 +12,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
@@ -21,6 +25,8 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
     private Servo markerDropper;
+    private Servo liftLock;
+//    private BNO055IMU imu;
     //    VuforiaLocalizer vuforia;
 //    private final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final float mmPerInch        = 25.4f;
@@ -36,10 +42,11 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
 //    VuforiaTrackables targetsRoverRuckus;
     BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
     BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
+//    IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
-    double wheelWidthBetweenWheels = 230;
-    double wheelHeighBetweenWheels = 355;
+    double wheelWidthBetweenWheels = 395.44;//215;
+    double wheelHeighBetweenWheels = 0;//340;
     double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeighBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*180/360;
     final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
     final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -49,79 +56,95 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        initalizeRobot();
-        waitForStart();
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        try {
+            initalizeRobot();
+            telemetry.addLine("intialized");
+            telemetry.update();
+//        DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            waitForStart();
+            liftLock.setPosition(1);
+            markerDropper.setPosition(1);
+            sleep(200);
+            lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        unlatch robot
 //        lift.setTargetPosition((int)(COUNTS_PER_MOTOR_REV*20/60*5.7));
-        lift.setPower(1);
-        sleep(500);
-        markerDropper.setPosition(0.75); // if 1 is up and 0 is down
-        lift.setPower(0);
-        sleep(4000);
-        lift.setPower(1);
-        sleep(200);
-        lift.setPower(0);
-        markerDropper.setPosition(1);
-        DriveTrain.mecanum(baseMotorArray, 0.4,0,0,true);
-        sleep(700);
-        lift.setPower(-1);
-        DriveTrain.mecanum(baseMotorArray, 0,0.4,0,true);
-        sleep(300);
-        DriveTrain.mecanum(baseMotorArray,-0.4,0,0,true);
-        sleep(700);
-        lift.setPower(0);
-        DriveTrain.mecanum(baseMotorArray,0,-0.4,0,true);
-        sleep(300);
-        DriveTrain.mecanum(baseMotorArray,0,0,0,true);
-        BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold,FtcRobotControllerActivity.frameSize.height/3);
-        // if gold is straight ahead
-        if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0){
-            // center on the gold
-//            centerOnGold();
-            moveForwardByDistance(180,1);
-            moveByEncoder(1000,0.7,0);
-            DriveTrain.turn(baseMotorArray,-45,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-            moveByEncoder(2000,0.7,0);
+            lift.setPower(-1);
+            safeSleep(500);
+//            markerDropper.setPosition(0.75); // if 1 is up and 0 is down
+            lift.setPower(0);
+            safeSleep(2500);
 
-        }else {
-            DriveTrain.turn(baseMotorArray, 21, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-            setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold,FtcRobotControllerActivity.frameSize.height/3);
-            // if gold is to the right
-            if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0){
-                moveForwardByDistance(156.5, 1);
+            lift.setPower(-1);
+            safeSleep(200);
+            lift.setPower(0);
+//            markerDropper.setPosition(1);
+//            lift.setPower(-0.5);
+//            moveByEncoder(50,0,1,false);
+//            lift.setPower(0);
+            markerDropper.setPosition(1);
+            DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            lift.setPower(1);
+            safeSleep(1000); // could reduce and lower more when turning right for second gold pos
+            DriveTrain.turn(baseMotorArray,32,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+
+//            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+//            DriveTrain.turn(baseMotorArray,37,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            lift.setPower(0);
+            safeSleep(100);
+
+//        DriveTrain.turn(baseMotorArray,8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
+            BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold, FtcRobotControllerActivity.frameSize.height / 2.8, FtcRobotControllerActivity.frameSize.width / 5, FtcRobotControllerActivity.frameSize.width / 5);
+            // if gold is straight ahead
+            if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0) {
+                // center on the gold
+                centerOnGold(FtcRobotControllerActivity.frameSize.width / 2);
+                moveForwardByDistance(200, 1);
+//                moveByEncoder(500, 1, 0,false);
+                DriveTrain.turn(baseMotorArray, -47, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                moveByEncoder(1000, 1, 0,false);
+//                moveByEncoder(1000,0,1,false);
+
+
+            } else {
+                DriveTrain.turn(baseMotorArray, 30, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
                 setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                DriveTrain.turn(baseMotorArray,-60,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-                moveByEncoder(500,1,0);
+                BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold, FtcRobotControllerActivity.frameSize.height / 2.5, 0, 0);
+                // if gold is to the right
+                if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0) {
+                    centerOnGold(FtcRobotControllerActivity.frameSize.width / 3);
+                    moveForwardByDistance(156.5, 1);
+                    setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    DriveTrain.turn(baseMotorArray, -70, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                    moveByEncoder(500, 1, 0,false);
+                    moveByEncoder(2000,0,1,false);
 //                centerOnGold();
 //                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
-//                sleep(2000);
-                moveByEncoder(3040,0,0.7);
+//                safeSleep(2000);
+//                moveByEncoder(2040,0,1);
 //                DriveTrain.mecanum(baseMotorArray, -1,0,0,true);
-//                sleep(1200);
+//                safeSleep(1200);
 //                DriveTrain.mecanum(baseMotorArray,0,0,0,true);
-                // drop marker
+                    // drop marker
 
 
-            }else {
+                } else { // pos 3 (left)
 //                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
-//                sleep(600);
+//                safeSleep(600);
 //                DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
-                DriveTrain.turn(baseMotorArray, -56, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//                sleep(500);
-//                centerOnGold();
-                moveForwardByDistance(156.5, 1);
-                DriveTrain.turn(baseMotorArray,-10, wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-                moveForwardByDistance(5,0.5);
+                    DriveTrain.turn(baseMotorArray, -60, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+//                safeSleep(500);
+                    centerOnGold(FtcRobotControllerActivity.frameSize.width * 2 / 3);
+                    moveForwardByDistance(156.5, 1);
+                    DriveTrain.turn(baseMotorArray, -20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+
 //                DriveTrain.mecanum(baseMotorArray,-0.5,0,0,true);
-//                sleep(1000);
-                setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                moveByEncoder(4040,0.7,0.0);
+//                safeSleep(1000);
+//                    setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    moveByEncoder(3000, 1, 0,false);
 //                moveByEncoder(500,0.7,0);
 //                DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
-//                sleep(1500);
+//                safeSleep(1500);
 //                DriveTrain.mecanum(baseMotorArray,0,0,0,true);
 //                markerDropper.setPosition(1);
 //                BlobDetectorCandidate goldAtPos3 = lookForMineral(MineralType.Gold);
@@ -131,82 +154,119 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
 //                }else {
 
 //                }
+                }
             }
+
+            FtcRobotControllerActivity.pauseCamera();
+            moveByEncoder(1000, 0, 1,false);
+//            moveByEncoder(700, 0.5, 0,false);
+            moveByEncoder(500, -1, -1,false);
+            DriveTrain.turn(baseMotorArray, 181, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            markerDropper.setPosition(0);
+            safeSleep(300);
+            moveByEncoder(1000, 1, 0,false);
+            moveByEncoder(800,0,-1,false);
+            moveByEncoder(100,0,1,false);
+            setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            DriveTrain.mecanum(baseMotorArray,1,-0.1,0,true);
+            safeSleep(1000);
+            DriveTrain.mecanum(baseMotorArray,1,-0.5,0,true);
+            safeSleep(2000);
+            DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+//            moveByEncoder(2000,1,0,false);
+//            moveByEncoder(1000,1,1,false);
+//            moveByEncoder(1000,1,-1, false);
+//            moveByEncoder(5000,1,-0.8,false);
+        }catch (Throwable e){
+            DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         }
-        moveByEncoder(3000,0,0.5);
-        moveByEncoder(500,0.5,0);
-        moveByEncoder(500,-0.5,-0.5);
-        DriveTrain.turn(baseMotorArray,90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-        markerDropper.setPosition(0);
-        sleep(1000);
-
-////        sample();
-//        // stuff to check gold detection with robot
-//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        BlobDetectorCandidate goldAtPos1 = lookForMineral(MineralType.Gold);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,1,true);
-////        DriveTrain.turn(baseMotorArray, 45, 5, 5);
-//        sleep(400);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
-//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold);
-////        DriveTrain.turn(baseMotorArray, -90, 5, 5);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
-//        sleep(700);
-//        DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
-//        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        BlobDetectorCandidate goldAtPos3 = lookForMineral(MineralType.Gold);
-//        telemetry.addData("goldAtPos1 "+ goldAtPos1[0] + " " + goldAtPos1[1] + " ", goldAtPos1[2]);
-//        telemetry.addData("goldAtPos2 "+ goldAtPos2[0] + " " + goldAtPos2[1] + " ", goldAtPos2[2]);
-//        telemetry.addData("goldAtPos3 "+ goldAtPos3[0] + " " + goldAtPos3[1] + " ", goldAtPos3[2]);
-//        telemetry.update();
-//        sleep(5000);
-
-
-////        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-//        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-//        parameters.cameraDirection = CAMERA_CHOICE;
-//        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
-//        targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
-//        blueRover = targetsRoverRuckus.get(0);
-//        blueRover.setName("Blue-Rover");
-//        redFootprint = targetsRoverRuckus.get(1);
-//        redFootprint.setName("Red-Footprint");
-//        frontCraters = targetsRoverRuckus.get(2);
-//        frontCraters.setName("Front-Craters");
-//        backSpace = targetsRoverRuckus.get(3);
-//        backSpace.setName("Back-Space");
-//
-//        allTrackables = new ArrayList<>();
-//        allTrackables.addAll(targetsRoverRuckus);
-//        waitForStart();
-//        getPos();
 
     }
 
-    private void centerOnGold() {
+    private void centerOnGold(double targetXValue) {
         // 6.5in for 5.5cm diameter wheels
         //101 pixels per 6 in at 2ft 10 in away
-        for (int i = 0; i < 5;i++) {
+        double previousXOffset = 1000;
+        double sleepReduceFactor = 1;
+        for (int i = 0; i < 3;i++) {
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
 //        setMotorRunMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            sleep(300);
-            BlobDetectorCandidate goldPos = lookForMineral(MineralType.Gold,1000);
 
-            double xPower;
-            if (FtcRobotControllerActivity.frameSize != null) {
-                xPower = (goldPos.getX() - FtcRobotControllerActivity.frameSize.width / 2) / 50;
-            }else{
-                xPower = (goldPos.getX() - 240 / 2) / 50;
+            BlobDetectorCandidate goldPos = lookForMineral(MineralType.Gold,
+                    FtcRobotControllerActivity.frameSize.height/2.8,0,0);
+            telemetry.update();
+            if (goldPos.getX() < 0 && goldPos.getY() < 0){
+                telemetry.addLine("can't find gold");
+                telemetry.update();
+                break;
             }
-            DriveTrain.mecanum(baseMotorArray, -xPower, 0, 0, true);
-            sleep((long) Math.abs(xPower * 60));
+            double xPower;
+//            if (FtcRobotControllerActivity.frameSize != null) {
+            xPower = (goldPos.getX() - targetXValue) / 40;
+            if (xPower > 0.5){
+                xPower = 0.5*Math.signum(xPower);
+            }
+//            }else{
+//                xPower = (goldPos.getX() - 240 / 2) / 50;
+//            }
+            DriveTrain.mecanum(baseMotorArray, xPower, 0, 0, true);
+            if (Math.abs(goldPos.getX() - targetXValue) > Math.abs(previousXOffset)){
+                sleepReduceFactor = sleepReduceFactor * 2 / 3;
+            }
+            previousXOffset = goldPos.getX() - targetXValue;
+            safeSleep((int)(Math.abs(xPower * 100)*sleepReduceFactor));
+
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+            safeSleep(100);
         }
     }
-
     private void moveForwardByDistance(double distance, double power) {
+//            distance is in cm and always positive
+        // for some reason dist*2/3 = actual dist
+        final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
+        final double DRIVE_GEAR_REDUCTION = 0.5;     // This is < 1.0 if geared UP
+        final double WHEEL_DIAMETER_MM = 100.0;     // For figuring circumference
+        final double COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+                (WHEEL_DIAMETER_MM * 3.1415);
+        for (int i = 0; i < baseMotorArray.size(); i++) {
+            DcMotor baseMotor = (DcMotor) baseMotorArray.get(i);
+            baseMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            baseMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//            baseMotor.setPower(power);
+            int directionMultiplier = (int) Math.signum(power);
+//            if (i % 2 == 0){
+//                directionMultiplier *= -1;
+//            }
+            baseMotor.setTargetPosition((int) (COUNTS_PER_MM * 10 * distance) * directionMultiplier);
+        }
+//        for(int t = 50; t < 100; t++){
+//            DriveTrain.mecanum(baseMotorArray, 0, Math.abs(power*t/100), 0, true);
+////            sleep(4);
+//        }
+        for (int t = 5; t < 10;t++){
+            DriveTrain.mecanum(baseMotorArray,0,Math.abs(power*t/10),0,true);
+            sleep(20);
+        }
+        DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
+        safeSleep(300);
+        int encoderChange = 1000;
+        int previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
+        int numLooped = 0;
+        while ((Math.abs(encoderChange) > 5 || numLooped < 3) && opModeIsActive()) {
+            numLooped++;
+            safeSleep(30);
+            encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
+            previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
+        }
+        safeSleep(100);
+//        while (COUNTS_PER_MM*10*distance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition())){
+//
+//        }
+        DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+        setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
+    }
+    private void moveForwardByDistanceWithoutRunToPosition(double distance, double power) {
 //            distance is in cm and always positive
         final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
         final double     DRIVE_GEAR_REDUCTION = 0.5 ;     // This is < 1.0 if geared UP
@@ -226,7 +286,6 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
     }
 
-
     private void setMotorRunMode(DcMotor.RunMode runMode) {
         for (Object baseMotorObject: baseMotorArray){
             DcMotor baseMotor = (DcMotor) baseMotorObject;
@@ -234,11 +293,11 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
         }
     }
 
-    private BlobDetectorCandidate lookForMineral(MineralType mineralType, double maxY){
-        sleep(500);
+    private BlobDetectorCandidate lookForMineral(MineralType mineralType, double maxY, double XBorderWidthLeft, double XBorderWidthRight){
+//        safeSleep(500);
         FtcRobotControllerActivity.shouldProcessImage = true;
-        while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
-            sleep(5);
+        while (FtcRobotControllerActivity.shouldProcessImage&& opModeIsActive()) { // should process image is turned to false after the image is processed
+            safeSleep(5);
         }
         ArrayList<BlobDetectorCandidate> frameOneCandidates;
         if (mineralType == MineralType.Gold) {
@@ -248,43 +307,34 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
         }
 
 
-        moveByEncoder(350, 0.4,0);
-        FtcRobotControllerActivity.shouldProcessImage = true;
-        while (FtcRobotControllerActivity.shouldProcessImage) { // should process image is turned to false after the image is processed
-            sleep(5);
-        }
-        ArrayList<BlobDetectorCandidate> frameTwoCandidates;
-        if (mineralType == MineralType.Gold) {
-            frameTwoCandidates = goldDetector.getCandidatesData(false);
-        }else {
-            frameTwoCandidates = silverDetector.getCandidatesData(false);
-        }
-        ArrayList<Pair<BlobDetectorCandidate,BlobDetectorCandidate>> pairs = findPairs(frameOneCandidates, frameTwoCandidates);
-        ArrayList<Pair<BlobDetectorCandidate, BlobDetectorCandidate>> acceptablePairs = new ArrayList<>();
+
+        ArrayList<BlobDetectorCandidate> blobs = frameOneCandidates;
+        ArrayList<BlobDetectorCandidate> acceptableBlobs = new ArrayList<>();
         double MIN_HORIZONTAL_CHANGE = 0;
-        for (Pair<BlobDetectorCandidate, BlobDetectorCandidate> pair: pairs){
-            double sizeOfFirst = pair.first.getWidth()*pair.first.getHeight();// size of bounding rect
-            double sizeOfSecond = pair.second.getWidth()*pair.second.getHeight();
-            if (sizeOfFirst > 600 && sizeOfSecond > 600 && sizeOfFirst < 2000 && sizeOfSecond < 2000 &&
+        for (BlobDetectorCandidate blob: blobs){
+            double sizeOfFirst = blob.getWidth()*blob.getHeight();// size of bounding rect
+            double sizeOfSecond = blob.getWidth()*blob.getHeight();
+            if (sizeOfFirst > 500 && sizeOfSecond > 500 && sizeOfFirst < 5000 && sizeOfSecond < 5000 &&
                     isAboutEqual(sizeOfFirst,sizeOfSecond, 1000) &&
-                    isAboutEqual(pair.first.getY(), pair.second.getY(), 10) && pair.first.getX() - MIN_HORIZONTAL_CHANGE > pair.second.getX() && pair.first.getY() <= maxY) {
-                acceptablePairs.add(pair);
+                    isAboutEqual(blob.getY(), blob.getY(), 10) &&
+                    blob.getY() <= maxY && blob.getX() > XBorderWidthLeft && blob.getX() < FtcRobotControllerActivity.frameSize.width - XBorderWidthRight) {
+                acceptableBlobs.add(blob);
             }
         }
-        telemetry.addData("length of acceptible size array", acceptablePairs.size());
-        moveByEncoder(350, -0.4,0);
+        telemetry.addData("length of acceptible size array", acceptableBlobs.size());
+//        moveByEncoder(200, -0.4,0);
         try {
-            Pair<BlobDetectorCandidate, BlobDetectorCandidate> farthestPairInXDirection = acceptablePairs.get(0);
-            for (Pair<BlobDetectorCandidate, BlobDetectorCandidate> pair: acceptablePairs){
-                if (Math.abs(pair.first.getX()-pair.second.getX()) >
-                        Math.abs(farthestPairInXDirection.first.getX()-farthestPairInXDirection.second.getX())){
-                    farthestPairInXDirection = pair;
+            BlobDetectorCandidate farthestBlobInXDirection = acceptableBlobs.get(0);
+            for (BlobDetectorCandidate blob: acceptableBlobs){
+                if (Math.abs(blob.getX()-blob.getX()) >
+                        Math.abs(farthestBlobInXDirection.getX()-farthestBlobInXDirection.getX())){
+                    farthestBlobInXDirection = blob;
                 }
             }
-            telemetry.addData("gold At y1: " + farthestPairInXDirection.first.getY() +" y2:" +farthestPairInXDirection.second.getY() + " size1: ", farthestPairInXDirection.first.getWidth()*farthestPairInXDirection.first.getHeight());
-            telemetry.addLine("x1: " + farthestPairInXDirection.first.getX() + " x2: " + farthestPairInXDirection.second.getX());
+            telemetry.addData("gold At y1: " + farthestBlobInXDirection.getY() +" y2:" +farthestBlobInXDirection.getY() + " size1: ", farthestBlobInXDirection.getWidth()*farthestBlobInXDirection.getHeight());
+            telemetry.addLine("x1: " + farthestBlobInXDirection.getX() + " x2: " + farthestBlobInXDirection.getX());
             telemetry.update();
-            return farthestPairInXDirection.first;
+            return farthestBlobInXDirection;
         }catch (IndexOutOfBoundsException e){
             telemetry.addLine("no gold");
             telemetry.update();
@@ -330,7 +380,18 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
         ((DcMotor) baseMotorArray.get(3)).setDirection(DcMotor.Direction.REVERSE);
         lift = hardwareMap.dcMotor.get("lift");
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftLock = hardwareMap.servo.get("liftLock");
         markerDropper = hardwareMap.servo.get("dropper");
+//        imu = hardwareMap.get(BNO055IMU.class,"imu");
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
+//        imu.initialize(parameters);
+//        imu.startAccelerationIntegration(new Position(),new Velocity(),10);
+
+        for(int i = 0; i < 4; i++){
+            ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
 //        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
@@ -338,7 +399,7 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
         Gold, Silver, None
     }
 
-    private void moveByEncoder(int encoderDistance, double x, double y){
+    private void moveByEncoder(int encoderDistance, double x, double y, boolean stopWithBumpDetection){
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         double power = clip(Math.sqrt((x * x) + (y * y)),-1.0,1.0);
 //        double radianAngle = 0;
@@ -347,28 +408,51 @@ public class DepotAutonomousNotToCrater extends LinearOpMode {
                 (Math.sin(radianAngle) * power), // frontRight
                 (Math.sin(radianAngle) * power),// backLeft
                 (Math.cos(radianAngle) * power)};
-        for (int i = 0; i < baseMotorArray.size(); i++) {
+        double totalPower = 0;
+        for(double motorPower:motorPowers){
+            totalPower += motorPower;
+        }
+        for(int i = 0; i < baseMotorArray.size(); i++) {
             DcMotor motor = ((DcMotor) baseMotorArray.get(i));
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             int sideMultiplier = i % 2 == 0 ? 1 : -1;
 
-            motor.setTargetPosition((int) (encoderDistance*motorPowers[i]));
+            motor.setTargetPosition((int) (encoderDistance*motorPowers[i]*2));
 //            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
         }
-        DriveTrain.mecanum(baseMotorArray,0,1,0,true);
-        sleep(300);
+        for(int t = 5; t < 10; t++){
+            DriveTrain.mecanum(baseMotorArray, 0, Math.abs(power)*t/10, 0, true);
+            sleep(20);
+        }
+        DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
+        safeSleep(300);
+//        imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;
-        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive()) {
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200){// && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
             numTimes_looped++;
-            sleep(30);
+            safeSleep(30);
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
             previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
         }
-        sleep(300);
+        safeSleep(80);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
     }
+    private void safeSleep(int sleepTime){
+        try {
+            Thread.sleep(sleepTime);
+        }catch (InterruptedException e){
+            throw new RuntimeException(e);
+        }
+    }
+//    void turnToAngle(double desiredAngle){
+//        // angle in degrees. clock-wise is positive
+//        // angle where the lander position is 45 degrees counterclockwise
+//        double angleToTurn = -imu.getAngularOrientation().thirdAngle+desiredAngle+45;
+//        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+//    }
 }
+
 

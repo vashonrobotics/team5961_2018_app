@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * Created by FTC on 10/21/2017.
  */
 
-@Autonomous(name = "Vashon 5961 test", group = "Vashon 5961")
+//@Autonomous(name = "Vashon 5961 test", group = "Vashon 5961")
 public class test extends LinearOpMode {
     private ArrayList baseMotorArray = new ArrayList();
     private VuforiaLocalizer vuforia;

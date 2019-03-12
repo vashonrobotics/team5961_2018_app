@@ -27,7 +27,7 @@ public class DepotAutonomous extends LinearOpMode {
     private DcMotor lift;
     private Servo markerDropper;
     private Servo liftLock;
-    private BNO055IMU imu;
+//    private BNO055IMU imu;
 //    VuforiaLocalizer vuforia;
 //    private final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final float mmPerInch        = 25.4f;
@@ -43,7 +43,7 @@ public class DepotAutonomous extends LinearOpMode {
 //    VuforiaTrackables targetsRoverRuckus;
     BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
     BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
-    IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
+//    IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
     double wheelWidthBetweenWheels = 395.44;//215;
@@ -86,7 +86,7 @@ public class DepotAutonomous extends LinearOpMode {
             markerDropper.setPosition(1);
             DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             lift.setPower(1);
-            safeSleep(1000);
+            safeSleep(1000); // could reduce and lower more when turning right for second gold pos
             DriveTrain.turn(baseMotorArray,32,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 
 //            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
@@ -118,7 +118,7 @@ public class DepotAutonomous extends LinearOpMode {
                     setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     DriveTrain.turn(baseMotorArray, -70, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
                     moveByEncoder(500, 1, 0,false);
-                    moveByEncoder(2000,0,1,false);
+                    moveByEncoder(2500,0,1,false);
 //                centerOnGold();
 //                DriveTrain.mecanum(baseMotorArray, 0, 1, 0, true);
 //                safeSleep(2000);
@@ -137,9 +137,9 @@ public class DepotAutonomous extends LinearOpMode {
 //                safeSleep(500);
                     centerOnGold(FtcRobotControllerActivity.frameSize.width * 2 / 3);
                     moveForwardByDistance(156.5, 1);
-//                    moveByEncoder(400,-1,-1,false);
+                    moveByEncoder(400,-1,-1,false);
                     DriveTrain.turn(baseMotorArray, -20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//                    moveByEncoder(130,0,1,false);
+                    moveByEncoder(500,0,1,false); // to make sure path is clear from gold block
 
 //                DriveTrain.mecanum(baseMotorArray,-0.5,0,0,true);
 //                safeSleep(1000);
@@ -159,9 +159,10 @@ public class DepotAutonomous extends LinearOpMode {
 //                }
                 }
             }
-
+            long beforeCameraTime = System.currentTimeMillis();
             FtcRobotControllerActivity.pauseCamera();
-            moveByEncoder(1000, 0, 1,false);
+            telemetry.addData("time to pause camera",System.currentTimeMillis()-beforeCameraTime);
+            telemetry.update();
 //            moveByEncoder(700, 0.5, 0,false);
             moveByEncoder(500, -1, -1,false);
             DriveTrain.turn(baseMotorArray, 181, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
@@ -385,12 +386,12 @@ public class DepotAutonomous extends LinearOpMode {
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftLock = hardwareMap.servo.get("liftLock");
         markerDropper = hardwareMap.servo.get("dropper");
-        imu = hardwareMap.get(BNO055IMU.class,"imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
-        imu.initialize(parameters);
-        imu.startAccelerationIntegration(new Position(),new Velocity(),10);
+        //imu = hardwareMap.get(BNO055IMU.class,"imu");
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
+//        imu.initialize(parameters);
+//        imu.startAccelerationIntegration(new Position(),new Velocity(),10);
 
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -430,11 +431,11 @@ public class DepotAutonomous extends LinearOpMode {
         }
         DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
         safeSleep(300);
-        imuWallImpactDetector.setImpact(false);
+        //imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;
-        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200 && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200){// && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
             numTimes_looped++;
             safeSleep(30);
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
@@ -450,11 +451,11 @@ public class DepotAutonomous extends LinearOpMode {
             throw new RuntimeException(e);
         }
     }
-    void turnToAngle(double desiredAngle){
-        // angle in degrees. clock-wise is positive
-        // angle where the lander position is 45 degrees counterclockwise
-        double angleToTurn = -imu.getAngularOrientation().thirdAngle+desiredAngle+45;
-        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-    }
+//    void turnToAngle(double desiredAngle){
+//        // angle in degrees. clock-wise is positive
+//        // angle where the lander position is 45 degrees counterclockwise
+//        double angleToTurn = -imu.getAngularOrientation().thirdAngle+desiredAngle+45;
+//        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+//    }
 }
 
