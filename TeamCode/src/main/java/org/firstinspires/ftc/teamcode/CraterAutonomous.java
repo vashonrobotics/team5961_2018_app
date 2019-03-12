@@ -145,7 +145,7 @@ public class CraterAutonomous extends LinearOpMode {
                 DriveTrain.turn(baseMotorArray, -45, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
 
             } else {
-                lift.setPower(0.9);
+                lift.setPower(0.8);
                 DriveTrain.turn(baseMotorArray, 30, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
                 lift.setPower(0);
 //            safeSleep(1000);
@@ -176,6 +176,7 @@ public class CraterAutonomous extends LinearOpMode {
 //                moveByEncoder();
                 }
             }
+            FtcRobotControllerActivity.pauseCamera();
             moveForwardByDistance(250,1);
 //            moveByEncoder(800,-1,0,false);
 //            turnToAngle(0, 10);
@@ -194,9 +195,15 @@ public class CraterAutonomous extends LinearOpMode {
 //            moveByEncoder(500, 1, 0,false);
 //            moveForwardByDistanceWithoutRunToPosition(180, -1);
 //            DriveTrain.turn(baseMotorArray, -10, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-            moveByEncoder(4000, 1, 0.2,false);
-            moveByEncoder(300,0,1,false);
-            moveByEncoder(3000,1,0.2,false);
+            moveByEncoder(100, 0, -1,false);
+            setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            DriveTrain.mecanum(baseMotorArray,1,0.1,0,true);
+            safeSleep(1000);
+            DriveTrain.mecanum(baseMotorArray,1,0.5,0,true);
+            safeSleep(6000);
+            DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+//            moveByEncoder(300,0,1,false);
+//            moveByEncoder(3000,1,0.2,false);
 //        moveForwardByDistanceWithoutRunToPosition(180,-0.5);
 //        safeSleep(50000);
         }catch (Throwable e){
@@ -265,7 +272,7 @@ public class CraterAutonomous extends LinearOpMode {
                 sleepReduceFactor = sleepReduceFactor * 2 / 3;
             }
             previousXOffset = goldPos.getX() - targetXValue;
-            safeSleep((int)(Math.abs(xPower * 60)*sleepReduceFactor));
+            safeSleep((int)(Math.abs(xPower * 100)*sleepReduceFactor));// was 60, not tested at *100
             DriveTrain.mecanum(baseMotorArray, 0, 0, 0, true);
             sleep(50);
         }

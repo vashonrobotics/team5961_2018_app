@@ -159,6 +159,8 @@ public class DepotAutonomous extends LinearOpMode {
 //                }
                 }
             }
+
+            FtcRobotControllerActivity.pauseCamera();
             moveByEncoder(1000, 0, 1,false);
 //            moveByEncoder(700, 0.5, 0,false);
             moveByEncoder(500, -1, -1,false);
@@ -168,11 +170,16 @@ public class DepotAutonomous extends LinearOpMode {
             moveByEncoder(1000, 1, 0,false);
             moveByEncoder(800,0,-1,false);
             moveByEncoder(100,0,1,false);
-            moveByEncoder(2000,1,0,false);
-            moveByEncoder(1000,1,1,false);
-            DriveTrain.turn(baseMotorArray,-360,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
-            moveByEncoder(1000,1,-1, false);
-            moveByEncoder(5000,1,-0.8,false);
+            setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            DriveTrain.mecanum(baseMotorArray,1,-0.1,0,true);
+            safeSleep(1000);
+            DriveTrain.mecanum(baseMotorArray,1,-0.5,0,true);
+            safeSleep(6000);
+            DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+//            moveByEncoder(2000,1,0,false);
+//            moveByEncoder(1000,1,1,false);
+//            moveByEncoder(1000,1,-1, false);
+//            moveByEncoder(5000,1,-0.8,false);
         }catch (Throwable e){
             DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         }
