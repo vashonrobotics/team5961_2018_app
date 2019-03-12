@@ -168,10 +168,10 @@ public class TeleOpMode extends OpMode{
             }
         }
         collector.setPower(gamepad2.right_trigger-gamepad2.left_trigger);
-         if (gamepad2.right_bumper || -gamepad2.left_stick_y < -0.7){
+         if (gamepad2.right_bumper || -gamepad2.left_stick_y < -0.5){
             collectorRotator.setPosition(collectorRotator.getPosition()-0.01);
         }
-        if (gamepad2.left_bumper || -gamepad2.left_stick_y > 0.7){
+        if (gamepad2.left_bumper || -gamepad2.left_stick_y > 0.5){
              collectorRotator.setPosition(collectorRotator.getPosition()+0.01);
          }
 
