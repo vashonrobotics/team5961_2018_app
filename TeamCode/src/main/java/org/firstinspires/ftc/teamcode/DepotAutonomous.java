@@ -172,8 +172,12 @@ public class DepotAutonomous extends LinearOpMode {
             moveByEncoder(800,0,-1,false);
             moveByEncoder(100,0,1,false);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            DriveTrain.mecanum(baseMotorArray,1,-0.1,0,true);
-            safeSleep(1000);
+
+            for (int i = 0; i <= 10; i++) {
+                DriveTrain.mecanum(baseMotorArray, i/10, -0.1*i/10, 0, true);
+                sleep(10);
+            }
+            safeSleep(900);
             DriveTrain.mecanum(baseMotorArray,1,-0.5,0,true);
             safeSleep(6000);
             DriveTrain.mecanum(baseMotorArray,0,0,0,true);
