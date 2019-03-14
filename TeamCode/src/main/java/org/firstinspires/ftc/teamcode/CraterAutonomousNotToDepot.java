@@ -138,9 +138,9 @@ public class CraterAutonomousNotToDepot extends LinearOpMode {
             if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0) {
                 // center on the gold
                 centerOnGold(FtcRobotControllerActivity.frameSize.width/2);
-                moveForwardByDistance(85, 1);
+                moveForwardByDistance(87, 1);
 //            safeSleep(100);
-                moveForwardByDistance(85, -1);
+//                moveForwardByDistance(85, -1);
 //                DriveTrain.turn(baseMotorArray, -63, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
                 DriveTrain.turn(baseMotorArray, -45, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
 
@@ -154,8 +154,8 @@ public class CraterAutonomousNotToDepot extends LinearOpMode {
                 // if gold is to the right
                 if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0) {
                     centerOnGold(FtcRobotControllerActivity.frameSize.width/3);
-                    moveForwardByDistance(105, 1);
-                    moveForwardByDistance(105, -1);
+                    moveForwardByDistance(107, 1);
+//                    moveForwardByDistance(105, -1);
 //                moveForwardByDistance(5,-0.5);
                     DriveTrain.turn(baseMotorArray, -90, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
@@ -166,9 +166,9 @@ public class CraterAutonomousNotToDepot extends LinearOpMode {
                     DriveTrain.turn(baseMotorArray, -60, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //                safeSleep(500);
                     centerOnGold(FtcRobotControllerActivity.frameSize.width*2/3);
-                    moveForwardByDistance(105, 1);
+                    moveForwardByDistance(107, 1);
 //                moveForwardByDistance(30, 0.5);
-                    moveForwardByDistance(105, -1);
+//                    moveForwardByDistance(105, -1);
 //                moveForwardByDistance(5,-0.5);
 //                setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     DriveTrain.turn(baseMotorArray, -25, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
@@ -176,32 +176,7 @@ public class CraterAutonomousNotToDepot extends LinearOpMode {
 //                moveByEncoder();
                 }
             }
-            FtcRobotControllerActivity.pauseCamera();
-            moveForwardByDistance(250,1);
-//            moveByEncoder(800,-1,0,false);
-//            turnToAngle(0, 10);
-//            moveForwardByDistance(180, 1);
-//            turnToAngle(0, 10);
-            moveByEncoder(3530, -1, 0,false);
-            moveByEncoder(1030, -0.5, 0.5,false);//possibly unnecessary
-//            moveByEncoder(500, 1, 0, false);
-            markerDropper.setPosition(0);
-            safeSleep(300);
-//            telemetry.addLine("start last move");
-//            telemetry.update();
-//            moveByEncoder(1000, 1, -.1,false);
-//            DriveTrain.turn(baseMotorArray, -100, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//        /moveForwardByDistance(20,-1);
-//            moveByEncoder(500, 1, 0,false);
-//            moveForwardByDistanceWithoutRunToPosition(180, -1);
-//            DriveTrain.turn(baseMotorArray, -10, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-            moveByEncoder(100, 0, -1,false);
-            setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            DriveTrain.mecanum(baseMotorArray,1,0.1,0,true);
-            safeSleep(1000);
-            DriveTrain.mecanum(baseMotorArray,1,0.5,0,true);
-            safeSleep(6000);
-            DriveTrain.mecanum(baseMotorArray,0,0,0,true);
+
 //            moveByEncoder(300,0,1,false);
 //            moveByEncoder(3000,1,0.2,false);
 //        moveForwardByDistanceWithoutRunToPosition(180,-0.5);
