@@ -38,6 +38,7 @@ public class TeleOpMode extends OpMode{
 
     private Boolean setMode = false;
     private int previousBaseMotorPos = -1;
+    private int loopNum = 0;
 
     private double collectorArmAngle = 0;
     private double INITAL_ARM_ANGLE = -10;
@@ -76,7 +77,7 @@ public class TeleOpMode extends OpMode{
         liftLock = hardwareMap.servo.get("liftLock");
         // collector init
         collectorArmRotator = hardwareMap.dcMotor.get("rotate");
-        collectorArmRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        collectorArmRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         collectorArmExtender = hardwareMap.dcMotor.get("extend");
         collectorArmExtender.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -94,12 +95,18 @@ public class TeleOpMode extends OpMode{
         collectorRotator.scaleRange(0.2,1);
         relativeCollectorPosition = collectorRotator.getPosition();
         FtcRobotControllerActivity.pauseCamera();
+        System.gc();
     }
 
     @Override
     public void loop() {
+        loopNum++;
+        if (loopNum % 5000 == 0){
+            System.gc();
+        }
+
 //        collectorArmAngle = collectorArmRotator.getCurrentPosition()*4/288 + INITAL_ARM_ANGLE; // 288 ticks per rev times 1/60 of a rotation per degree
-        double t1 = System.currentTimeMillis();
+//        double t1 = System.currentTimeMillis();
 //        telemetry.addData("servo pos", collectorRotator.getPosition());
 //        telemetry.addData("arm angle", collectorArmAngle);
 //        telemetry.addData("encoder val ",collectorArmRotator.getCurrentPosition());
@@ -144,6 +151,9 @@ public class TeleOpMode extends OpMode{
         collectorArmExtender.setPower(gamepad2.left_stick_x);
 ////        collectorArmRotator.setPower(Math.sqrt(gamepad2.left_stick_y));
         double armPower = Math.signum(-gamepad2.left_stick_y) * Math.pow(Math.abs(gamepad2.left_stick_y),2);
+        if (Math.abs(armPower) > 0.5){
+            armPower = (-gamepad2.left_stick_y-(Math.sqrt(0.5)-.5));//*1.2
+        }
         if (collectorRotationLimitSwitch.isPressed() && armPower < 0) {
                 collectorArmRotator.setPower(-0.1);
 
@@ -168,11 +178,11 @@ public class TeleOpMode extends OpMode{
             }
         }
         collector.setPower(gamepad2.right_trigger-gamepad2.left_trigger);
-         if (gamepad2.right_bumper || -gamepad2.left_stick_y < -0.5){
-            collectorRotator.setPosition(collectorRotator.getPosition()-0.01);
+         if (gamepad2.right_bumper || -gamepad2.left_stick_y < -0.3){
+            collectorRotator.setPosition(collectorRotator.getPosition()-0.009);
         }
-        if (gamepad2.left_bumper || -gamepad2.left_stick_y > 0.5){
-             collectorRotator.setPosition(collectorRotator.getPosition()+0.01);
+        if (gamepad2.left_bumper || -gamepad2.left_stick_y > 0.3){
+             collectorRotator.setPosition(collectorRotator.getPosition()+0.009);
          }
 
 //        if (collectorArmAngle > 60) {
@@ -210,11 +220,11 @@ public class TeleOpMode extends OpMode{
 //            collectorGrabber.setPosition(0.3);
 //        }
 //        collectorGrabberRotator.setPosition(clip(collectorGrabberRotator.getPosition()+gamepad2.right_trigger/16-gamepad2.left_trigger/16,0,1));
-        telemetry.addData("time:", System.currentTimeMillis()-t1);
+//        telemetry.addData("time:", System.currentTimeMillis()-t1);
 //        if (System.currentTimeMillis()-t1> 20){
 //            Thread.sleep((long)20-System.currentTimeMillis()-t1)
 //        }
-        telemetry.update();
+//        telemetry.update();
     }
 //    private void fixBump(double desiredAngle) {
 //        // angle in degrees. clock-wise is positive
