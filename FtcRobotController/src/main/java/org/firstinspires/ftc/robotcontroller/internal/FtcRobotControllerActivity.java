@@ -155,6 +155,11 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
           mOpenCvCameraView.disableView();
       }
   }
+  static public void unpauseCamera(){
+    if (mOpenCvCameraView != null){
+      mOpenCvCameraView.enableView();
+    }
+  }
   static {
     if (!OpenCVLoader.initDebug()) {
       Log.d("ERROR", "It didn't work");
@@ -500,6 +505,7 @@ public class FtcRobotControllerActivity extends Activity implements CameraBridge
     mOpenCvCameraView.setMaxFrameSize( 384,288);
     mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE); // INVISIBLE doesn't work
     mOpenCvCameraView.setCvCameraViewListener(this);
+    mOpenCvCameraView.disableFpsMeter();
   }
 
   protected UpdateUI createUpdateUI() {

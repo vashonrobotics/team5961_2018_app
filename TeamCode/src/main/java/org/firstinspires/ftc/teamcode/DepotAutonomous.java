@@ -27,7 +27,7 @@ public class DepotAutonomous extends LinearOpMode {
     private DcMotor lift;
     private Servo markerDropper;
     private Servo liftLock;
-//    private BNO055IMU imu;
+    private BNO055IMU imu;
 //    VuforiaLocalizer vuforia;
 //    private final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final float mmPerInch        = 25.4f;
@@ -43,7 +43,7 @@ public class DepotAutonomous extends LinearOpMode {
 //    VuforiaTrackables targetsRoverRuckus;
     BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
     BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
-//    IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
+    IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry, new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
     double wheelWidthBetweenWheels = 395.44;//215;
@@ -87,11 +87,13 @@ public class DepotAutonomous extends LinearOpMode {
             DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             lift.setPower(1);
             safeSleep(1000); // could reduce and lower more when turning right for second gold pos
+            FtcRobotControllerActivity.unpauseCamera();
             DriveTrain.turn(baseMotorArray,32,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 
 //            DriveTrain.turn(baseMotorArray,5,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //            DriveTrain.turn(baseMotorArray,37,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             lift.setPower(0);
+
             safeSleep(100);
 
 //        DriveTrain.turn(baseMotorArray,8,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
@@ -100,11 +102,15 @@ public class DepotAutonomous extends LinearOpMode {
             if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0) {
                 // center on the gold
                 centerOnGold(FtcRobotControllerActivity.frameSize.width / 2);
+
+                FtcRobotControllerActivity.pauseCamera();
+                System.gc();
                 moveForwardByDistance(200, 1);
+//                DriveTrain.turn(baseMotorArray,-90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
 //                moveByEncoder(500, 1, 0,false);
-                DriveTrain.turn(baseMotorArray, -47, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                DriveTrain.turn(baseMotorArray, -50, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
                 moveByEncoder(1000, 1, 0,false);
-//                moveByEncoder(1000,0,1,false);
+                moveByEncoder(800,0,1,false);
 
 
             } else {
@@ -113,8 +119,13 @@ public class DepotAutonomous extends LinearOpMode {
                 BlobDetectorCandidate goldAtPos2 = lookForMineral(MineralType.Gold, FtcRobotControllerActivity.frameSize.height / 2.5, 0, 0);
                 // if gold is to the right
                 if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0) {
+
                     centerOnGold(FtcRobotControllerActivity.frameSize.width / 3);
+
+                    FtcRobotControllerActivity.pauseCamera();
+                    System.gc();
                     moveForwardByDistance(156.5, 1);
+                    DriveTrain.turn(baseMotorArray,-90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
                     setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     DriveTrain.turn(baseMotorArray, -70, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
                     moveByEncoder(500, 1, 0,false);
@@ -130,21 +141,25 @@ public class DepotAutonomous extends LinearOpMode {
 
 
                 } else { // pos 3 (left)
+
 //                DriveTrain.mecanum(baseMotorArray, 0,0,-1,true);
 //                safeSleep(600);
 //                DriveTrain.mecanum(baseMotorArray, 0,0,0,true);
                     DriveTrain.turn(baseMotorArray, -60, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //                safeSleep(500);
                     centerOnGold(FtcRobotControllerActivity.frameSize.width * 2 / 3);
+                    FtcRobotControllerActivity.pauseCamera();
+                    System.gc();
                     moveForwardByDistance(156.5, 1);
+                    DriveTrain.turn(baseMotorArray,-90,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
                     moveByEncoder(400,-1,-1,false);
                     DriveTrain.turn(baseMotorArray, -20, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-                    moveByEncoder(500,0,1,false); // to make sure path is clear from gold block
+                    moveByEncoder(1000,0,1,false); // to make sure path is clear from gold block
 
 //                DriveTrain.mecanum(baseMotorArray,-0.5,0,0,true);
 //                safeSleep(1000);
 //                    setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    moveByEncoder(3000, 1, 0,false);
+                    moveByEncoder(2000, 1, 0,false);
 //                moveByEncoder(500,0.7,0);
 //                DriveTrain.mecanum(baseMotorArray, 1,0, 0,true);
 //                safeSleep(1500);
@@ -159,23 +174,24 @@ public class DepotAutonomous extends LinearOpMode {
 //                }
                 }
             }
-            long beforeCameraTime = System.currentTimeMillis();
-            FtcRobotControllerActivity.pauseCamera();
-            telemetry.addData("time to pause camera",System.currentTimeMillis()-beforeCameraTime);
-            telemetry.update();
+//            long beforeCameraTime = System.currentTimeMillis();
+//            FtcRobotControllerActivity.pauseCamera();
+//            telemetry.addData("time to pause camera",System.currentTimeMillis()-beforeCameraTime);
+//            telemetry.update();
 //            moveByEncoder(700, 0.5, 0,false);
-            moveByEncoder(500, -1, -1,false);
-            DriveTrain.turn(baseMotorArray, 181, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+            moveByEncoder(200, -1, -1,false);
+            DriveTrain.turn(baseMotorArray, 150, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             markerDropper.setPosition(0);
             safeSleep(300);
-            moveByEncoder(1000, 1, 0,false);
-            moveByEncoder(800,0,-1,false);
+            moveByEncoder(1100, 1, 0,false);
+            moveByEncoder(500,0,-1,false);
             moveByEncoder(100,0,1,false);
+            DriveTrain.turn(baseMotorArray,-15,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             for (int i = 0; i <= 10; i++) {
                 DriveTrain.mecanum(baseMotorArray, i/10, -0.1*i/10, 0, true);
-                sleep(10);
+                sleep(20);
             }
             safeSleep(900);
             DriveTrain.mecanum(baseMotorArray,1,-0.5,0,true);
@@ -236,6 +252,7 @@ public class DepotAutonomous extends LinearOpMode {
         final double WHEEL_DIAMETER_MM = 100.0;     // For figuring circumference
         final double COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                 (WHEEL_DIAMETER_MM * 3.1415);
+        DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         for (int i = 0; i < baseMotorArray.size(); i++) {
             DcMotor baseMotor = (DcMotor) baseMotorArray.get(i);
             baseMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -253,7 +270,7 @@ public class DepotAutonomous extends LinearOpMode {
 //        }
         for (int t = 5; t < 10;t++){
             DriveTrain.mecanum(baseMotorArray,0,Math.abs(power*t/10),0,true);
-            sleep(20);
+            sleep(40);
         }
         DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
         safeSleep(300);
@@ -266,7 +283,7 @@ public class DepotAutonomous extends LinearOpMode {
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
             previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
         }
-        safeSleep(100);
+        safeSleep(300);
 //        while (COUNTS_PER_MM*10*distance > Math.abs(((DcMotor)baseMotorArray.get(0)).getCurrentPosition())){
 //
 //        }
@@ -302,6 +319,8 @@ public class DepotAutonomous extends LinearOpMode {
     }
 
     private BlobDetectorCandidate lookForMineral(MineralType mineralType, double maxY, double XBorderWidthLeft, double XBorderWidthRight){
+
+//        FtcRobotControllerActivity.unpauseCamera();
 //        safeSleep(500);
         FtcRobotControllerActivity.shouldProcessImage = true;
         while (FtcRobotControllerActivity.shouldProcessImage&& opModeIsActive()) { // should process image is turned to false after the image is processed
@@ -313,7 +332,7 @@ public class DepotAutonomous extends LinearOpMode {
         }else {
             frameOneCandidates = silverDetector.getCandidatesData(false);
         }
-
+//        FtcRobotControllerActivity.pauseCamera();
 
 
         ArrayList<BlobDetectorCandidate> blobs = frameOneCandidates;
@@ -380,6 +399,7 @@ public class DepotAutonomous extends LinearOpMode {
     }
 
     private void initalizeRobot(){
+        FtcRobotControllerActivity.pauseCamera();
         baseMotorArray.add(hardwareMap.dcMotor.get("motorLF"));
         baseMotorArray.add(hardwareMap.dcMotor.get("motorRF"));
         baseMotorArray.add(hardwareMap.dcMotor.get("motorLB"));
@@ -390,18 +410,19 @@ public class DepotAutonomous extends LinearOpMode {
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftLock = hardwareMap.servo.get("liftLock");
         markerDropper = hardwareMap.servo.get("dropper");
-        //imu = hardwareMap.get(BNO055IMU.class,"imu");
-//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-//        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
-//        imu.initialize(parameters);
-//        imu.startAccelerationIntegration(new Position(),new Velocity(),10);
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
+        imu.initialize(parameters);
+        imu.startAccelerationIntegration(new Position(),new Velocity(),10);
 
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 //        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        System.gc();
     }
     private enum MineralType {
         Gold, Silver, None
@@ -427,25 +448,25 @@ public class DepotAutonomous extends LinearOpMode {
             int sideMultiplier = i % 2 == 0 ? 1 : -1;
 
             motor.setTargetPosition((int) (encoderDistance*motorPowers[i]*2));
-//            motor.setPower(0.4*sideMultiplier*Math.signum(angle));
+//            motor.setPowFer(0.4*sideMultiplier*Math.signum(angle));
         }
         for(int t = 5; t < 10; t++){
             DriveTrain.mecanum(baseMotorArray, 0, Math.abs(power)*t/10, 0, true);
-            sleep(20);
+            sleep(40);
         }
         DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
         safeSleep(300);
-        //imuWallImpactDetector.setImpact(false);
+        imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;
-        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200){// && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && numTimes_looped < 200 && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
             numTimes_looped++;
             safeSleep(30);
             encoderChange = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
             previousEncoderPosition = ((DcMotor) baseMotorArray.get(0)).getCurrentPosition();
         }
-        safeSleep(80);
+        safeSleep(300);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
     }
     private void safeSleep(int sleepTime){
@@ -455,11 +476,11 @@ public class DepotAutonomous extends LinearOpMode {
             throw new RuntimeException(e);
         }
     }
-//    void turnToAngle(double desiredAngle){
-//        // angle in degrees. clock-wise is positive
-//        // angle where the lander position is 45 degrees counterclockwise
-//        double angleToTurn = -imu.getAngularOrientation().thirdAngle+desiredAngle+45;
-//        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//    }
+    void turnToAngle(double desiredAngle){
+        // angle in degrees. clock-wise is positive
+        // angle where the lander position is 45 degrees counterclockwise
+        double angleToTurn = -imu.getAngularOrientation().thirdAngle+desiredAngle+45;
+        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+    }
 }
 

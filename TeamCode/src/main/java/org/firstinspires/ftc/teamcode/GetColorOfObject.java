@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-@Autonomous(group = "5961", name = "get object color")
+//@Autonomous(group = "5961", name = "get object color")
 public class GetColorOfObject extends LinearOpMode {
     @Override
     public void runOpMode() {

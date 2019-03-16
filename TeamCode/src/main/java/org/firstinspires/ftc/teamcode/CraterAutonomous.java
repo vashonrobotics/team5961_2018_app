@@ -24,7 +24,7 @@ import static com.qualcomm.robotcore.util.Range.clip;
 
 @Autonomous(group = "5961", name = "Full Crater Autonomous")
 public class CraterAutonomous extends LinearOpMode {
-//    private BNO055IMU imu;
+    private BNO055IMU imu;
     private ArrayList baseMotorArray = new ArrayList();
     private DcMotor lift;
     private Servo markerDropper;
@@ -44,7 +44,7 @@ public class CraterAutonomous extends LinearOpMode {
 //    VuforiaTrackables targetsRoverRuckus;
     private BlobDetector goldDetector = new BlobDetector(new Scalar(9, 100,50), new Scalar(38, 255,255));
     private BlobDetector silverDetector = new BlobDetector(new Scalar(0, 0,190), new Scalar(180, 40,255));
-//    private IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry,new JustLoggingAccelerationIntegrator());
+    private IMUWallImpactDetector imuWallImpactDetector = new IMUWallImpactDetector(telemetry,new JustLoggingAccelerationIntegrator());
     int NUM_FRAMES_CONSIDERED = 5;
     int NUM_TIME_RESAMPLED = 0;
     double wheelWidthBetweenWheels = 395.44;//215;
@@ -55,7 +55,7 @@ public class CraterAutonomous extends LinearOpMode {
     final double     WHEEL_DIAMETER_MM = 100.0 ;     // For figuring circumference
     final double     COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_MM * 3.1415);
-    
+
     @Override
     public void runOpMode(){
         try {
@@ -197,11 +197,8 @@ public class CraterAutonomous extends LinearOpMode {
 //            DriveTrain.turn(baseMotorArray, -10, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
             moveByEncoder(100, 0, -1,false);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            for (int i = 0; i <= 10; i++) {
-                DriveTrain.mecanum(baseMotorArray, i/10, 0.1*i/10, 0, true);
-                sleep(10);
-            }
-            safeSleep(900);
+            DriveTrain.mecanum(baseMotorArray,1,0.1,0,true);
+            safeSleep(1000);
             DriveTrain.mecanum(baseMotorArray,1,0.5,0,true);
             safeSleep(6000);
             DriveTrain.mecanum(baseMotorArray,0,0,0,true);
@@ -308,7 +305,7 @@ public class CraterAutonomous extends LinearOpMode {
 
 //        sleep(60);
         DriveTrain.mecanum(baseMotorArray,0,power,0,true);
-        //imuWallImpactDetector.setImpact(false);
+        imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numLooped = 0;
@@ -426,12 +423,12 @@ public class CraterAutonomous extends LinearOpMode {
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         markerDropper = hardwareMap.servo.get("dropper");
         liftLock = hardwareMap.servo.get("liftLock");
-        //imu = hardwareMap.get(BNO055IMU.class,"imu");
-//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-//        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
-//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-//        imu.initialize(parameters);
-//        imu.startAccelerationIntegration(new Position(), new Velocity(),100);
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.accelerationIntegrationAlgorithm = imuWallImpactDetector;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imu.initialize(parameters);
+        imu.startAccelerationIntegration(new Position(), new Velocity(),100);
         for(int i = 0; i < 4; i++){
             ((DcMotor)baseMotorArray.get(i)).setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
@@ -472,11 +469,11 @@ public class CraterAutonomous extends LinearOpMode {
             sleep(20);
         }
         DriveTrain.mecanum(baseMotorArray,0,Math.abs(power),0,true);
-        //imuWallImpactDetector.setImpact(false);
+        imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numTimes_looped = 0;
-        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive()){// && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
+        while ((Math.abs(encoderChange) > 5 || numTimes_looped < 3)&&opModeIsActive() && !(imuWallImpactDetector.isImpact()&&stopWithBumpDetection)) {
             checkForOpModeActivity();
             numTimes_looped++;
             sleep(30);
@@ -485,13 +482,13 @@ public class CraterAutonomous extends LinearOpMode {
         }
         sleep(100);
         DriveTrain.mecanum(baseMotorArray,0,0,0,true);
-//        if (y < 0.1 && y > -0.1) {
+        if (y < 0.1 && y > -0.1) {
 //            double angleToTurn = -(imu.getAngularOrientation().firstAngle * Math.signum(beginningAngle) + beginningAngle);
 //            double angleToTurn = beginningAngle - imu.getAngularOrientation().firstAngle;
 //            DriveTrain.turn(baseMotorArray, angleToTurn, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //            angleToTurn = -(imu.getAngularOrientation().firstAngle * Math.signum(beginningAngle) + beginningAngle);
 //            DriveTrain.turn(baseMotorArray, angleToTurn, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//        }
+        }
     }
     private void safeSleep(int sleepTime) {
 //        sleep(sleepTime);
@@ -530,29 +527,29 @@ public class CraterAutonomous extends LinearOpMode {
             throw new RuntimeException("opmode no longer active");
         }
     }
-//
-//    void turnToAngle(double desiredAngle, double turnLimit){
-////        telemetry.addData("angle before",imu.getAngularOrientation().firstAngle);
-////        telemetry.update();
-////        safeSleep(1000);
-////        telemetry.addData("angle after",imu.getAngularOrientation().firstAngle);
-////        telemetry.update();
-//        // angle in degrees. clock-wise is positive
-//        // angle where the lander position is 45 degrees clockwise
-//        double angleToTurn = imu.getAngularOrientation().firstAngle+desiredAngle-45;
-//        if (angleToTurn > turnLimit){
-//            angleToTurn = turnLimit;
-//        }else if (angleToTurn < -turnLimit){
-//            angleToTurn = -turnLimit;
-//        }
-//        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//        angleToTurn = imu.getAngularOrientation().firstAngle+desiredAngle-45;
-//        if (angleToTurn > turnLimit){
-//            angleToTurn = turnLimit;
-//        }else if (angleToTurn < -turnLimit){
-//            angleToTurn = -turnLimit;
-//        }
-//        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-//
-//    }
+
+    void turnToAngle(double desiredAngle, double turnLimit){
+//        telemetry.addData("angle before",imu.getAngularOrientation().firstAngle);
+//        telemetry.update();
+//        safeSleep(1000);
+//        telemetry.addData("angle after",imu.getAngularOrientation().firstAngle);
+//        telemetry.update();
+        // angle in degrees. clock-wise is positive
+        // angle where the lander position is 45 degrees clockwise
+        double angleToTurn = imu.getAngularOrientation().firstAngle+desiredAngle-45;
+        if (angleToTurn > turnLimit){
+            angleToTurn = turnLimit;
+        }else if (angleToTurn < -turnLimit){
+            angleToTurn = -turnLimit;
+        }
+        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+        angleToTurn = imu.getAngularOrientation().firstAngle+desiredAngle-45;
+        if (angleToTurn > turnLimit){
+            angleToTurn = turnLimit;
+        }else if (angleToTurn < -turnLimit){
+            angleToTurn = -turnLimit;
+        }
+        DriveTrain.turn(baseMotorArray,angleToTurn,wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+
+    }
 }

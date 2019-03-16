@@ -152,7 +152,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           android:visibility="gone"
           android:screenOrientation="portrait"
           android:id="@+id/tutorial1_activity_java_surface_view"
-          opencv:show_fps="true"
+          opencv:show_fps="false"
           opencv:camera_id="back"
           android:layout_below="@+id/top_bar" />
     </FrameLayout>

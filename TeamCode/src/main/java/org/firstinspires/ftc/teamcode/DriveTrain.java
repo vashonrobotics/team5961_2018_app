@@ -58,12 +58,14 @@ public class DriveTrain {
         // angle is in degrees
         // wheel distances are in mm
         // clockwise is positive
+        DriveTrain.mecanum(baseMotorArray,0,0,0,true);
         double distanceToTravel = 2*Math.PI*Math.sqrt(Math.pow(wheelHeightBetweenWheels/2,2)+Math.pow(wheelWidthBetweenWheels/2,2))*angle/360;
         final double     COUNTS_PER_MOTOR_REV = 1440 ;    // eg: TETRIX Motor Encoder
         final double     DRIVE_GEAR_REDUCTION = 1 ;     // This is < 1.0 if geared UP
         final double     WHEEL_DIAMETER_MM = 100.0 ;     // For figuring circumference
         final double     COUNTS_PER_MM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
                 (WHEEL_DIAMETER_MM * 3.1415);
+
         for (int i = 0; i < baseMotorArray.size(); i++) {
             DcMotor motor = ((DcMotor) baseMotorArray.get(i));
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
