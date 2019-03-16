@@ -84,6 +84,7 @@ public class CraterAutonomous extends LinearOpMode {
             safeSleep(1000);
             telemetry.addLine("slept 2000");
             telemetry.update();
+            FtcRobotControllerActivity.unpauseCamera();
             safeSleep(500);
             telemetry.addLine("slept 2500");
             telemetry.update();
@@ -91,15 +92,17 @@ public class CraterAutonomous extends LinearOpMode {
             telemetry.addLine("finished sleep for lower");
             telemetry.update();
             int craterHeight = (int) getCraterHeight();
+            FtcRobotControllerActivity.pauseCamera();
             telemetry.addData("done getting craterHeight took ", System.currentTimeMillis()-t1);
             telemetry.update();
-            lift.setPower(-0.6);
-            moveByEncoder(70,0,1,false);
-            lift.setPower(0);
+//            lift.setPower(-0.6);
+//            moveByEncoder(70,0,1,false);
+//            lift.setPower(0);
             markerDropper.setPosition(1);
             DriveTrain.turn(baseMotorArray,-30,wheelWidthBetweenWheels,wheelHeighBetweenWheels);
             lift.setPower(1);
-            safeSleep(1700);
+            safeSleep(500);
+            FtcRobotControllerActivity.unpauseCamera();
             lift.setPower(0);
             DriveTrain.turn(baseMotorArray,33,wheelWidthBetweenWheels,wheelHeighBetweenWheels);// was 30 with 5 degrees later
             moveByEncoder(100,0,1,false);
@@ -138,11 +141,13 @@ public class CraterAutonomous extends LinearOpMode {
             if (goldAtPos1.getX() >= 0 && goldAtPos1.getY() >= 0) {
                 // center on the gold
                 centerOnGold(FtcRobotControllerActivity.frameSize.width/2);
+                FtcRobotControllerActivity.pauseCamera();
+                System.gc();
                 moveForwardByDistance(85, 1);
 //            safeSleep(100);
                 moveForwardByDistance(85, -1);
 //                DriveTrain.turn(baseMotorArray, -63, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
-                DriveTrain.turn(baseMotorArray, -45, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
+                DriveTrain.turn(baseMotorArray, -43, wheelWidthBetweenWheels, wheelWidthBetweenWheels);
 
             } else {
                 lift.setPower(0.8);
@@ -154,6 +159,8 @@ public class CraterAutonomous extends LinearOpMode {
                 // if gold is to the right
                 if (goldAtPos2.getX() >= 0 && goldAtPos2.getY() >= 0) {
                     centerOnGold(FtcRobotControllerActivity.frameSize.width/3);
+                    FtcRobotControllerActivity.pauseCamera();
+                    System.gc();
                     moveForwardByDistance(105, 1);
                     moveForwardByDistance(105, -1);
 //                moveForwardByDistance(5,-0.5);
@@ -166,12 +173,14 @@ public class CraterAutonomous extends LinearOpMode {
                     DriveTrain.turn(baseMotorArray, -60, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 //                safeSleep(500);
                     centerOnGold(FtcRobotControllerActivity.frameSize.width*2/3);
+                    FtcRobotControllerActivity.pauseCamera();
+                    System.gc();
                     moveForwardByDistance(105, 1);
 //                moveForwardByDistance(30, 0.5);
                     moveForwardByDistance(105, -1);
 //                moveForwardByDistance(5,-0.5);
 //                setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    DriveTrain.turn(baseMotorArray, -25, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
+                    DriveTrain.turn(baseMotorArray, -22, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
 
 //                moveByEncoder();
                 }
@@ -183,10 +192,11 @@ public class CraterAutonomous extends LinearOpMode {
 //            moveForwardByDistance(180, 1);
 //            turnToAngle(0, 10);
             moveByEncoder(3530, -1, 0,false);
-            moveByEncoder(1030, -0.5, 0.5,false);//possibly unnecessary
-//            moveByEncoder(500, 1, 0, false);
             markerDropper.setPosition(0);
             safeSleep(300);
+            moveByEncoder(1030, 1, 1,false);//possibly unnecessary
+//            moveByEncoder(500, 1, 0, false);
+
 //            telemetry.addLine("start last move");
 //            telemetry.update();
 //            moveByEncoder(1000, 1, -.1,false);
@@ -195,11 +205,11 @@ public class CraterAutonomous extends LinearOpMode {
 //            moveByEncoder(500, 1, 0,false);
 //            moveForwardByDistanceWithoutRunToPosition(180, -1);
 //            DriveTrain.turn(baseMotorArray, -10, wheelWidthBetweenWheels, wheelHeighBetweenWheels);
-            moveByEncoder(100, 0, -1,false);
+//            moveByEncoder(100, 0, -1,false);
             setMotorRunMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            DriveTrain.mecanum(baseMotorArray,1,0.1,0,true);
+            DriveTrain.mecanum(baseMotorArray,1,0.2,0,true);
             safeSleep(1000);
-            DriveTrain.mecanum(baseMotorArray,1,0.5,0,true);
+            DriveTrain.mecanum(baseMotorArray,1,0.4,0,true);
             safeSleep(6000);
             DriveTrain.mecanum(baseMotorArray,0,0,0,true);
 //            moveByEncoder(300,0,1,false);
@@ -298,14 +308,13 @@ public class CraterAutonomous extends LinearOpMode {
             baseMotor.setTargetPosition((int) (COUNTS_PER_MM*10*distance)*directionMultiplier);
         }
 
-        for(int t = 50; t < 100; t++){
-            DriveTrain.mecanum(baseMotorArray, 0, power*t/100, 0, true);
-            sleep(4);
+        for(int t = 5; t < 10; t++){
+            DriveTrain.mecanum(baseMotorArray, 0, power*t/10, 0, true);
+            sleep(20);
         }
 
 //        sleep(60);
         DriveTrain.mecanum(baseMotorArray,0,power,0,true);
-        imuWallImpactDetector.setImpact(false);
         int encoderChange = 1000;
         int previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         int numLooped = 0;
@@ -413,6 +422,7 @@ public class CraterAutonomous extends LinearOpMode {
     }
 
     private void initalizeRobot(){
+        FtcRobotControllerActivity.pauseCamera();
         baseMotorArray.add(hardwareMap.dcMotor.get("motorLF"));
         baseMotorArray.add(hardwareMap.dcMotor.get("motorRF"));
         baseMotorArray.add(hardwareMap.dcMotor.get("motorLB"));

@@ -105,7 +105,7 @@ public class DriveTrain {
             encoderChange = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition() - previousEncoderPosition;
             previousEncoderPosition = ((DcMotor)baseMotorArray.get(0)).getCurrentPosition();
         }try {
-            sleep(100);
+            sleep(200);
         }catch (InterruptedException e){
             throw new RuntimeException(e);
 //            System.out.println(e);
